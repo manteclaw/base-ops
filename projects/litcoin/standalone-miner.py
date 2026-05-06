@@ -244,7 +244,19 @@ class LitcoiinResearchMiner:
             # Remove oldest (first inserted)
             oldest = next(iter(self.solution_cache))
             del self.solution_cache[oldest]
+
+    def _pick_smart_model(self, task_type):
         """Return the model with highest avg reward for this task type (min 2 samples)."""
+        tracker = self.model_tracker.get(task_type)
+        if not tracker:
+            return None
+        best = None
+        best_avg = -1
+        for model, stats in tracker.items():
+            if stats["count"] >= 2 and stats["avg"] > best_avg:
+                best_avg = stats["avg"]
+                best = model
+        return best
         models = self.model_tracker.get(task_type, {})
         candidates = [(m, s["avg"], s["count"]) for m, s in models.items() if s["count"] >= 2]
         if candidates:

@@ -1,7 +1,7 @@
 {
-  "round_count": 359,
+  "round_count": 363,
   "total_earned": 11691,
-  "last_task_type": "runescape_ta",
+  "last_task_type": "smart_contracts",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -49,8 +49,8 @@
     "smart_contracts": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 579,
-        "count": 3,
-        "avg": 193.0
+        "count": 7,
+        "avg": 82.71428571428571
       }
     },
     "algorithm": {
@@ -124,5 +124,14 @@
       }
     }
   },
-  "initial_balance": 0
+  "initial_balance": 0,
+  "provider_latency": {
+    "fireworks": [
+      10493.685245513916,
+      6598.365783691406,
+      7207.958698272705,
+      7925.994396209717
+    ]
+  },
+  "cache_hits": 0
 }
