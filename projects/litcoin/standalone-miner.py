@@ -105,13 +105,31 @@ def get_wallet():
 
 
 class LitcoiinResearchMiner:
+    # Tasks that are too hard for free models — skip entirely
     SKIP_TASK_TYPES = [
         "software_engineering",
-        "exploit_forensics",      # 0 avg (5 rounds)
-        "pattern_recognition",    # 0 avg (1 round)
-        "mathematics",            # 0 avg (3 rounds)
-        "compiler",               # 0 avg (1 round)
-        "compression",            # 0 avg (1 round)
+        "exploit_forensics",
+        "pattern_recognition",
+        "mathematics",
+        "compiler",
+        "compression",
+    ]
+    # Tasks that don't earn enough (< 50 avg) — skip to save rounds
+    LOW_VALUE_TASKS = [
+        "algorithm",           # 24.2 avg (22 rounds wasted)
+        "knowledge_synthesis", # 27.2 avg
+        "verification",        # 23.0 avg
+        "ai_safety",           # 30.0 avg
+        "runescape_insight",   # 42.6 avg
+    ]
+    # High-value tasks we want to prioritize (> 100 avg)
+    HIGH_VALUE_TASKS = [
+        "smart_contracts",      # 193.0 avg
+        "instruction_tuning",   # 166.3 avg
+        "adversarial_robustness", # 139.1 avg
+        "agentic_trace",        # 131.3 avg
+        "bioinformatics",       # 94.0 avg
+        "tcg_card_profile",     # 80.6 avg
     ]
 
     def __init__(self, account, openrouter_key, fireworks_key=None):
@@ -259,6 +277,38 @@ class LitcoiinResearchMiner:
                 log.warning(f"Balance check failed: {e}")
         return False
 
+    def _auto_claim(self):
+        """Attempt to claim rewards when balance hits 50,000 threshold."""
+        token = self.authenticate()
+        payload = {"miner": self.account.address}
+        r = self._api("POST", "/v1/research/claim", json=payload,
+                       headers={"Authorization": f"Bearer {token}"}, retries=1)
+        if r.status_code == 200:
+            result = r.json()
+            claimed = result.get("claimed", 0)
+            tx_hash = result.get("txHash", "N/A")
+            log.info(f"✅ AUTO-CLAIM SUCCESS: {claimed} LITCOIN claimed! TX: {tx_hash}")
+            # Reset earned counter since we claimed
+            self.total_earned = 0
+            self._persist()
+            return True
+        else:
+            log.warning(f"Auto-claim returned {r.status_code}: {r.text[:200]}")
+            return False
+        """Return True if miner should stop immediately."""
+        if self.consec_global_fails >= KILL_SWITCH_CONSECUTIVE_FAILS:
+            log.error(f"[KILL] {self.consec_global_fails} consecutive global failures — STOPPING")
+            return True
+        if self.initial_balance is not None:
+            try:
+                current = self._fetch_balance()
+                if current < self.initial_balance:
+                    log.error(f"[KILL] Balance dropped: {self.initial_balance} → {current} — STOPPING")
+                    return True
+            except Exception as e:
+                log.warning(f"Balance check failed: {e}")
+        return False
+
     def _fetch_balance(self):
         """Fetch on-chain ETH balance (proxy for LITCOIN balance check if API available)."""
         # We use the coordinator balance endpoint if it exists, otherwise ETH balance as proxy
@@ -324,7 +374,16 @@ class LitcoiinResearchMiner:
         return self.auth_token
 
     def should_skip_task(self, task_type):
-        return task_type in self.SKIP_TASK_TYPES
+        """Skip tasks that don't earn enough or are too hard."""
+        skip_reason = None
+        if task_type in self.SKIP_TASK_TYPES:
+            skip_reason = "too hard for free model"
+        elif task_type in getattr(self, 'LOW_VALUE_TASKS', []):
+            skip_reason = "low value (<50 avg)"
+        if skip_reason:
+            log.warning(f"Skipping {task_type} task ({skip_reason})")
+            return True
+        return False
 
     def fetch_task(self, task_type=None):
         """Fetch a suitable research task."""
@@ -592,6 +651,13 @@ class LitcoiinResearchMiner:
             self._persist()
             return None
         log.info(f"Solution length: {len(solution)} chars | Model: {actual_model or 'unknown'}")
+        
+        # ── Pre-submission validation ──
+        if self._validate_solution(solution):
+            log.info("✅ Solution passed validation")
+        else:
+            log.warning("⚠️ Solution validation failed — will submit anyway but flagging")
+        
         try:
             result = self.submit_solution(task_id, solution, actual_model)
             if result:
@@ -606,7 +672,26 @@ class LitcoiinResearchMiner:
             self._persist()
             return None
 
-    def run(self, rounds=10, delay=60):
+    def _validate_solution(self, solution):
+        """Quick validation: try to compile Python code, or check JSON validity."""
+        if not solution:
+            return False
+        try:
+            # Check if it's valid Python
+            compile(solution, '<solution>', 'exec')
+            return True
+        except SyntaxError:
+            # Not Python, might be JSON or text
+            try:
+                json.loads(solution)
+                return True
+            except (json.JSONDecodeError, ValueError):
+                # Plain text is fine too
+                return len(solution) > 50
+        except Exception:
+            return len(solution) > 50
+
+    def run(self, rounds=10, delay=3):
         log.info(f"Starting standalone RESEARCH miner — {rounds} rounds, {delay}s delay")
         log.info(f"Wallet: {self.account.address}")
         provider = "OpenRouter" if self.openrouter_key else "Fireworks" if self.fireworks_key else "NONE"
@@ -657,7 +742,15 @@ class LitcoiinResearchMiner:
             )
             self._persist()
 
-            # ── Delay with early-exit on kill switch ──
+            # ── Auto-claim check ──
+        if self.total_earned >= 50000:
+            log.info("🎉 BALANCE THRESHOLD HIT — 50,000 LITCOIN! Attempting auto-claim...")
+            try:
+                self._auto_claim()
+            except Exception as e:
+                log.warning(f"Auto-claim failed: {e}")
+        
+        # ── Delay with early-exit on kill switch ──
             if rounds == float('inf') or i < rounds - 1:
                 log.info(f"Waiting {delay}s before next round...")
                 for _ in range(delay):
@@ -692,7 +785,7 @@ if __name__ == "__main__":
         print(json.dumps(result, indent=2) if result else "Failed")
     else:
         rounds = int(sys.argv[1]) if len(sys.argv) > 1 else 50
-        delay = int(sys.argv[2]) if len(sys.argv) > 2 else 15
+        delay = int(sys.argv[2]) if len(sys.argv) > 2 else 3
         if rounds <= 0:
             rounds = float('inf')
         miner.run(rounds=rounds, delay=delay)
