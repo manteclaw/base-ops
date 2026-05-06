@@ -1,6 +1,6 @@
 {
-  "round_count": 343,
-  "total_earned": 10691,
+  "round_count": 347,
+  "total_earned": 10858,
   "last_task_type": "tcg_card_profile",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
@@ -14,15 +14,15 @@
     "adversarial_robustness": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 1948,
-        "count": 14,
-        "avg": 139.14285714285714
+        "count": 15,
+        "avg": 129.86666666666667
       }
     },
     "agentic_trace": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 3021,
-        "count": 23,
-        "avg": 131.34782608695653
+        "total": 3188,
+        "count": 24,
+        "avg": 132.83333333333334
       }
     },
     "knowledge_synthesis": {
@@ -84,8 +84,8 @@
     "tcg_card_profile": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 2066,
-        "count": 24,
-        "avg": 86.08333333333333
+        "count": 25,
+        "avg": 82.64
       }
     },
     "runescape_ta": {
