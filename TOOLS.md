@@ -6,7 +6,7 @@ Exposed keys (ALL must be revoked):
 - GitHub token (OLD), OpenRouter, Venice, Bankr, Zyfai, Alchemy, Dune, WorkProtocol, Mistral, SambaNova
 - Groq: ✅ DEACTIVATED — new key received
 
-**Current GitHub token:** `[REDACTED-GITHUB]` ✅ Active — pushed clean state to https://github.com/manteclaw/base-ops
+**Current GitHub token:** `[REDACTED-GITHUB]` ✅ **ACTIVE** — pushed clean state (force push, squashed history) to https://github.com/manteclaw/base-ops
 
 Files fixed: test-miner.py, hybrid-miner.py, claim-bot.py, botcoin/miner.py, zyfai/setup.js, zyfai/REPORT.md, dune_utils.py, TOOLS.md, USER.md, WALLET.md, LANES.md
 
