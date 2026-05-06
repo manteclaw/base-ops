@@ -38,6 +38,8 @@ FIREWORKS_URL = "https://api.fireworks.ai/inference/v1"
 WALLET_ADDRESS = "0xC4Cf88b691D9b820040d861954d32e0C5f4538b7"
 MODEL_PRIMARY = "inclusionai/ling-2.6-1t:free"
 MODEL_FALLBACK = "accounts/fireworks/models/llama-v3p3-70b-instruct"
+MODEL_OPENROUTER_BACKUP = "nvidia/nemotron-3-super-120b-a12b:free"  # Backup when primary rate-limited
+MODEL_FIREWORKS_BACKUP = "accounts/fireworks/models/qwen3-235b-a22b"  # Backup Fireworks model
 
 # Circuit-breaker constants
 CB_TRIGGER_FAILURES = 3      # consecutive failures before flipping provider
@@ -326,7 +328,7 @@ class LitcoiinResearchMiner:
 
     def fetch_task(self, task_type=None):
         """Fetch a suitable research task."""
-        for _ in range(5):
+        for _ in range(10):  # Increased from 5 to 10 attempts
             token = self.authenticate()
             payload = {"miner": self.account.address}
             if task_type:
@@ -396,7 +398,7 @@ class LitcoiinResearchMiner:
         return None, None
 
     def _call_openrouter(self, task_type, prompt, entry):
-        """Call OpenRouter API."""
+        """Call OpenRouter API with model rotation on rate limits."""
         log.info(f"Solving {task_type} task with OpenRouter...")
         system_msg = self._build_system_msg(task_type, entry)
         headers = {
@@ -407,36 +409,43 @@ class LitcoiinResearchMiner:
         }
         # Smart model override if we have enough data
         smart = self._pick_smart_model(task_type)
-        model = smart if smart and ":" in smart else MODEL_PRIMARY
-        payload = {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": prompt}
-            ],
-            "max_tokens": 2048,
-            "temperature": 0.1
-        }
-        try:
-            r = requests.post(f"{OPENROUTER_URL}/chat/completions",
-                             headers=headers, json=payload, timeout=60)
-            if r.status_code == 429:
-                log.warning("OpenRouter rate limited")
-                return None, None
-            if r.status_code != 200:
-                log.error(f"OpenRouter error: {r.status_code} {r.text[:200]}")
-                return None, None
-            result = r.json()
-            raw_code = result["choices"][0]["message"]["content"]
-            actual_model = result.get("model", model)
-            code = self._extract_code(raw_code)
-            return code, actual_model
-        except Exception as e:
-            log.error(f"OpenRouter call failed: {e}")
-            return None, None
+        models_to_try = []
+        if smart and ":" in smart:
+            models_to_try.append(smart)
+        models_to_try.extend([MODEL_PRIMARY, MODEL_OPENROUTER_BACKUP])
+        
+        for model in models_to_try:
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": 2048,
+                "temperature": 0.1
+            }
+            try:
+                r = requests.post(f"{OPENROUTER_URL}/chat/completions",
+                                 headers=headers, json=payload, timeout=60)
+                if r.status_code == 429:
+                    log.warning(f"OpenRouter rate limited on {model}, trying next...")
+                    continue
+                if r.status_code != 200:
+                    log.error(f"OpenRouter error: {r.status_code} {r.text[:200]}")
+                    continue
+                result = r.json()
+                raw_code = result["choices"][0]["message"]["content"]
+                actual_model = result.get("model", model)
+                code = self._extract_code(raw_code)
+                return code, actual_model
+            except Exception as e:
+                log.error(f"OpenRouter call failed for {model}: {e}")
+                continue
+        log.error("All OpenRouter models exhausted")
+        return None, None
 
     def _call_fireworks(self, task_type, prompt, entry):
-        """Call Fireworks AI API."""
+        """Call Fireworks AI API with model rotation."""
         log.info(f"Solving {task_type} task with Fireworks AI...")
         system_msg = self._build_system_msg(task_type, entry)
         headers = {
@@ -445,40 +454,47 @@ class LitcoiinResearchMiner:
         }
         # Smart model override
         smart = self._pick_smart_model(task_type)
-        model = smart if smart and "accounts/" in smart else MODEL_FALLBACK
-        payload = {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": prompt}
-            ],
-            "max_tokens": 2048,
-            "temperature": 0.1
-        }
-        try:
-            r = requests.post(f"{FIREWORKS_URL}/chat/completions",
-                             headers=headers, json=payload, timeout=60)
-            if r.status_code == 429:
-                log.warning("Fireworks rate limited")
-                return None, None
-            if r.status_code != 200:
-                log.error(f"Fireworks error: {r.status_code} {r.text[:200]}")
-                return None, None
-            result = r.json()
-            if not result.get("choices"):
-                log.error(f"Fireworks empty response: {result}")
-                return None, None
-            message = result["choices"][0].get("message", {})
-            raw_code = message.get("content", "")
-            if not raw_code:
-                log.error("Fireworks returned empty content")
-                return None, None
-            actual_model = result.get("model", model)
-            code = self._extract_code(raw_code)
-            return code, actual_model
-        except Exception as e:
-            log.error(f"Fireworks call failed: {e}")
-            return None, None
+        models_to_try = []
+        if smart and "accounts/" in smart:
+            models_to_try.append(smart)
+        models_to_try.extend([MODEL_FALLBACK, MODEL_FIREWORKS_BACKUP])
+        
+        for model in models_to_try:
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": 2048,
+                "temperature": 0.1
+            }
+            try:
+                r = requests.post(f"{FIREWORKS_URL}/chat/completions",
+                                 headers=headers, json=payload, timeout=60)
+                if r.status_code == 429:
+                    log.warning(f"Fireworks rate limited on {model}, trying next...")
+                    continue
+                if r.status_code != 200:
+                    log.error(f"Fireworks error: {r.status_code} {r.text[:200]}")
+                    continue
+                result = r.json()
+                if not result.get("choices"):
+                    log.error(f"Fireworks empty response: {result}")
+                    continue
+                message = result["choices"][0].get("message", {})
+                raw_code = message.get("content", "")
+                if not raw_code:
+                    log.error("Fireworks returned empty content")
+                    continue
+                actual_model = result.get("model", model)
+                code = self._extract_code(raw_code)
+                return code, actual_model
+            except Exception as e:
+                log.error(f"Fireworks call failed for {model}: {e}")
+                continue
+        log.error("All Fireworks models exhausted")
+        return None, None
 
     def _build_system_msg(self, task_type, entry):
         """Build system message based on task type."""
