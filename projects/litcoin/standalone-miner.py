@@ -37,7 +37,7 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1"
 FIREWORKS_URL = "https://api.fireworks.ai/inference/v1"
 WALLET_ADDRESS = "0xC4Cf88b691D9b820040d861954d32e0C5f4538b7"
 MODEL_PRIMARY = "inclusionai/ling-2.6-1t:free"
-MODEL_FALLBACK = "accounts/fireworks/models/llama-v3p1-70b-instruct"
+MODEL_FALLBACK = "accounts/fireworks/models/llama-v3p3-70b-instruct"
 
 # Circuit-breaker constants
 CB_TRIGGER_FAILURES = 3      # consecutive failures before flipping provider
@@ -597,7 +597,10 @@ class LitcoiinResearchMiner:
             except Exception as e:
                 log.warning(f"Could not snapshot balance: {e}")
 
-        for i in range(rounds):
+        i = 0
+        while True:
+            if rounds != float('inf') and i >= rounds:
+                break
             # ── Kill switch check ──
             if self._check_kill_switch():
                 log.error("Miner stopped by kill switch. Check logs above.")
@@ -632,7 +635,7 @@ class LitcoiinResearchMiner:
             self._persist()
 
             # ── Delay with early-exit on kill switch ──
-            if i < rounds - 1:
+            if rounds == float('inf') or i < rounds - 1:
                 log.info(f"Waiting {delay}s before next round...")
                 for _ in range(delay):
                     if self._check_kill_switch():
@@ -640,6 +643,8 @@ class LitcoiinResearchMiner:
                         self._persist()
                         return self.total_earned
                     time.sleep(1)
+
+            i += 1
 
         log.info("═" * 50)
         log.info(f"Mining complete. Total earned: {self.total_earned} LITCOIN across {self.round_count} rounds")
@@ -664,5 +669,8 @@ if __name__ == "__main__":
         print(json.dumps(result, indent=2) if result else "Failed")
     else:
         rounds = int(sys.argv[1]) if len(sys.argv) > 1 else 50
-        miner.run(rounds=rounds, delay=15)
+        delay = int(sys.argv[2]) if len(sys.argv) > 2 else 15
+        if rounds <= 0:
+            rounds = float('inf')
+        miner.run(rounds=rounds, delay=delay)
 
