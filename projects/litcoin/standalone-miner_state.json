@@ -1,28 +1,84 @@
 {
-  "round_count": 11,
-  "total_earned": 525,
+  "round_count": 52,
+  "total_earned": 4798,
   "last_task_type": "agentic_trace",
-  "best_model_overall": null,
+  "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 0,
-        "count": 1,
+        "count": 2,
         "avg": 0.0
       }
     },
     "adversarial_robustness": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 360,
-        "count": 1,
-        "avg": 360.0
+        "total": 1373,
+        "count": 4,
+        "avg": 343.25
       }
     },
     "agentic_trace": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 165,
+        "total": 1433,
+        "count": 7,
+        "avg": 204.71428571428572
+      }
+    },
+    "knowledge_synthesis": {
+      "accounts/fireworks/models/llama-v3p3-70b-instruct": {
+        "total": 61,
+        "count": 3,
+        "avg": 20.333333333333332
+      }
+    },
+    "verification": {
+      "accounts/fireworks/models/llama-v3p3-70b-instruct": {
+        "total": 23,
         "count": 1,
-        "avg": 165.0
+        "avg": 23.0
+      }
+    },
+    "instruction_tuning": {
+      "accounts/fireworks/models/llama-v3p3-70b-instruct": {
+        "total": 491,
+        "count": 2,
+        "avg": 245.5
+      }
+    },
+    "smart_contracts": {
+      "accounts/fireworks/models/llama-v3p3-70b-instruct": {
+        "total": 579,
+        "count": 2,
+        "avg": 289.5
+      }
+    },
+    "algorithm": {
+      "accounts/fireworks/models/llama-v3p3-70b-instruct": {
+        "total": 533,
+        "count": 3,
+        "avg": 177.66666666666666
+      }
+    },
+    "runescape_insight": {
+      "accounts/fireworks/models/llama-v3p3-70b-instruct": {
+        "total": 128,
+        "count": 3,
+        "avg": 42.666666666666664
+      }
+    },
+    "bioinformatics": {
+      "accounts/fireworks/models/llama-v3p3-70b-instruct": {
+        "total": 177,
+        "count": 1,
+        "avg": 177.0
+      }
+    },
+    "pattern_recognition": {
+      "accounts/fireworks/models/llama-v3p3-70b-instruct": {
+        "total": 0,
+        "count": 1,
+        "avg": 0.0
       }
     }
   },
