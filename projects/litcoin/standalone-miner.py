@@ -43,9 +43,9 @@ MODEL_FIREWORKS_BACKUP = "accounts/fireworks/models/qwen3-235b-a22b"  # Backup F
 
 # Circuit-breaker constants
 CB_TRIGGER_FAILURES = 3      # consecutive failures before flipping provider
-CB_LOCKOUT_ROUNDS = 5        # how many rounds to stay on the alt provider
-BACKOFF_BASE_SECONDS = 30    # base for 2^attempt * 30s
-BACKOFF_MAX_SECONDS = 300    # cap at 5 minutes
+CB_LOCKOUT_ROUNDS = 2       # how many rounds to stay on the alt provider (reduced from 5)
+BACKOFF_BASE_SECONDS = 15    # base for 2^attempt * 15s (reduced from 30)
+BACKOFF_MAX_SECONDS = 120    # cap at 2 minutes (reduced from 5 minutes)
 KILL_SWITCH_CONSECUTIVE_FAILS = 10
 
 try:
@@ -152,6 +152,11 @@ class LitcoiinResearchMiner:
         self.cb_forced_provider = None    # "openrouter" | "fireworks" | None
         # backoff
         self.backoff_attempt = 0          # resets on any success
+        # latency tracking
+        self.provider_latency = {}  # {provider: [times]}
+        # solution cache: {task_hash: solution}
+        self.solution_cache = {}
+        self.cache_hits = 0
         # kill switch
         self.consec_global_fails = 0
         self.initial_balance = self.state.get("initial_balance")
@@ -172,6 +177,8 @@ class LitcoiinResearchMiner:
             "best_model_overall": self.best_model_overall,
             "model_tracker": self.model_tracker,
             "initial_balance": self.initial_balance,
+            "provider_latency": self.provider_latency,
+            "cache_hits": self.cache_hits,
         }
         save_state(payload)
 
@@ -194,7 +201,49 @@ class LitcoiinResearchMiner:
                     best = m
         self.best_model_overall = best
 
-    def _pick_smart_model(self, task_type):
+    def _record_latency(self, provider, elapsed_ms):
+        """Track provider response times."""
+        if provider not in self.provider_latency:
+            self.provider_latency[provider] = []
+        self.provider_latency[provider].append(elapsed_ms)
+        # Keep last 20 measurements
+        self.provider_latency[provider] = self.provider_latency[provider][-20:]
+
+    def _get_fastest_provider(self):
+        """Return the provider with lowest average latency."""
+        avgs = {}
+        for provider, times in self.provider_latency.items():
+            if times:
+                avgs[provider] = sum(times) / len(times)
+        if not avgs:
+            return None
+        return min(avgs, key=avgs.get)
+
+    def _hash_task(self, task):
+        """Create a hash for task caching."""
+        import hashlib
+        prompt = task.get("prompt", task.get("description", ""))
+        task_type = task.get("type", "unknown")
+        return hashlib.md5(f"{task_type}:{prompt[:200]}".encode()).hexdigest()
+
+    def _get_cached_solution(self, task):
+        """Check if we have a cached solution for this task."""
+        task_hash = self._hash_task(task)
+        if task_hash in self.solution_cache:
+            self.cache_hits += 1
+            log.info(f"💾 Cache hit! (hits: {self.cache_hits})")
+            return self.solution_cache[task_hash]
+        return None
+
+    def _cache_solution(self, task, solution):
+        """Cache a successful solution."""
+        task_hash = self._hash_task(task)
+        self.solution_cache[task_hash] = solution
+        # Keep cache under 100 entries
+        if len(self.solution_cache) > 100:
+            # Remove oldest (first inserted)
+            oldest = next(iter(self.solution_cache))
+            del self.solution_cache[oldest]
         """Return the model with highest avg reward for this task type (min 2 samples)."""
         models = self.model_tracker.get(task_type, {})
         candidates = [(m, s["avg"], s["count"]) for m, s in models.items() if s["count"] >= 2]
@@ -212,7 +261,7 @@ class LitcoiinResearchMiner:
         return False
 
     def _select_provider(self, task_type):
-        """Pick provider respecting circuit breaker and smart model preferences."""
+        """Pick provider respecting circuit breaker, smart model preferences, and latency."""
         # 1. Circuit-breaker lockout overrides everything
         if self.cb_lockout_remaining > 0 and self.cb_forced_provider:
             self.cb_lockout_remaining -= 1
@@ -228,13 +277,21 @@ class LitcoiinResearchMiner:
             if self._provider_available("openrouter"):
                 return "openrouter"
 
-        # 3. Default: Fireworks first if healthy, then OpenRouter
+        # 3. Latency-based selection: use fastest provider when both healthy
+        if (self._provider_available("fireworks") and self.fw_fails < CB_TRIGGER_FAILURES and
+            self._provider_available("openrouter") and self.or_fails < CB_TRIGGER_FAILURES):
+            fastest = self._get_fastest_provider()
+            if fastest:
+                log.info(f"[LATENCY] Fastest provider: {fastest} ({self.provider_latency.get(fastest, [])[-3:]}) ms)")
+                return fastest
+
+        # 4. Default: Fireworks first if healthy, then OpenRouter
         if self._provider_available("fireworks") and self.fw_fails < CB_TRIGGER_FAILURES:
             return "fireworks"
         if self._provider_available("openrouter") and self.or_fails < CB_TRIGGER_FAILURES:
             return "openrouter"
 
-        # 4. Fallback to whoever is available regardless of failures
+        # 5. Fallback to whoever is available regardless of failures
         if self._provider_available("openrouter"):
             return "openrouter"
         if self._provider_available("fireworks"):
@@ -386,8 +443,30 @@ class LitcoiinResearchMiner:
         return False
 
     def fetch_task(self, task_type=None):
-        """Fetch a suitable research task."""
-        for _ in range(10):  # Increased from 5 to 10 attempts
+        """Fetch a suitable research task, prioritizing high-value types."""
+        # Try high-value task types first
+        if not task_type:
+            for preferred_type in self.HIGH_VALUE_TASKS:
+                for _ in range(3):
+                    token = self.authenticate()
+                    payload = {"miner": self.account.address, "type": preferred_type}
+                    r = self._api("POST", "/v1/research/task", json=payload,
+                                   headers={"Authorization": f"Bearer {token}"})
+                    if r.status_code == 401:
+                        self.auth_token = None
+                        continue
+                    if r.status_code != 200:
+                        continue
+                    data = r.json()
+                    task = data.get("task", data)
+                    ttype = task.get("type", "unknown")
+                    if self.should_skip_task(ttype):
+                        continue
+                    log.info(f"🎯 High-value task: {ttype}")
+                    return data
+        
+        # Fallback: any task
+        for _ in range(10):
             token = self.authenticate()
             payload = {"miner": self.account.address}
             if task_type:
@@ -484,8 +563,11 @@ class LitcoiinResearchMiner:
                 "temperature": 0.1
             }
             try:
+                start = time.time()
                 r = requests.post(f"{OPENROUTER_URL}/chat/completions",
                                  headers=headers, json=payload, timeout=60)
+                elapsed = (time.time() - start) * 1000
+                self._record_latency("openrouter", elapsed)
                 if r.status_code == 429:
                     log.warning(f"OpenRouter rate limited on {model}, trying next...")
                     continue
@@ -529,8 +611,11 @@ class LitcoiinResearchMiner:
                 "temperature": 0.1
             }
             try:
+                start = time.time()
                 r = requests.post(f"{FIREWORKS_URL}/chat/completions",
                                  headers=headers, json=payload, timeout=60)
+                elapsed = (time.time() - start) * 1000
+                self._record_latency("fireworks", elapsed)
                 if r.status_code == 429:
                     log.warning(f"Fireworks rate limited on {model}, trying next...")
                     continue
@@ -644,7 +729,16 @@ class LitcoiinResearchMiner:
         task_type = task.get("type", "unknown")
         self.last_task_type = task_type
         log.info(f"Task: {task_id} | Type: {task_type}")
-        solution, actual_model = self.solve_with_llm(task)
+        
+        # ── Check cache first ──
+        cached = self._get_cached_solution(task)
+        if cached:
+            solution = cached
+            actual_model = "cached"
+            log.info(f"💾 Using cached solution ({len(solution)} chars)")
+        else:
+            solution, actual_model = self.solve_with_llm(task)
+        
         if not solution:
             log.error("No solution generated, skipping")
             self.consec_global_fails += 1
@@ -662,6 +756,12 @@ class LitcoiinResearchMiner:
             result = self.submit_solution(task_id, solution, actual_model)
             if result:
                 self.consec_global_fails = 0
+                # Cache successful solutions
+                if actual_model != "cached":
+                    reward = result.get("reward", 0)
+                    if reward > 0:
+                        self._cache_solution(task, solution)
+                        log.info(f"💾 Cached solution for future use")
             else:
                 self.consec_global_fails += 1
             self._persist()

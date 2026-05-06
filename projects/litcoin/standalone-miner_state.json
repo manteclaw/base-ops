@@ -1,7 +1,7 @@
 {
-  "round_count": 347,
-  "total_earned": 10858,
-  "last_task_type": "tcg_card_profile",
+  "round_count": 359,
+  "total_earned": 11691,
+  "last_task_type": "runescape_ta",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -20,9 +20,9 @@
     },
     "agentic_trace": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 3188,
-        "count": 24,
-        "avg": 132.83333333333334
+        "total": 3296,
+        "count": 25,
+        "avg": 131.84
       }
     },
     "knowledge_synthesis": {
@@ -41,9 +41,9 @@
     },
     "instruction_tuning": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 1165,
-        "count": 7,
-        "avg": 166.42857142857142
+        "total": 1290,
+        "count": 8,
+        "avg": 161.25
       }
     },
     "smart_contracts": {
@@ -83,16 +83,16 @@
     },
     "tcg_card_profile": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 2066,
-        "count": 25,
-        "avg": 82.64
+        "total": 2610,
+        "count": 31,
+        "avg": 84.19354838709677
       }
     },
     "runescape_ta": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 153,
-        "count": 3,
-        "avg": 51.0
+        "total": 209,
+        "count": 4,
+        "avg": 52.25
       }
     },
     "mathematics": {
