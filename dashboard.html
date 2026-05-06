@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manteclaw — Earning Lanes Dashboard</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-2: #11111a;
+    --bg-3: #1a1a28;
+    --fg: #e2e8f0;
+    --fg-dim: #94a3b8;
+    --accent: #00d4aa;
+    --accent-2: #06b6d4;
+    --accent-glow: rgba(0,212,170,0.15);
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --font: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 14px; }
+  body { padding: 16px; }
+  header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+  h1 { margin: 0; font-size: 1.4rem; letter-spacing: -0.5px; }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--fg-dim); font-size: 0.8rem; margin-top: 2px; }
+  .actions { display: flex; gap: 8px; align-items: center; }
+  button {
+    background: var(--bg-3); border: 1px solid #2a2a3a; color: var(--fg);
+    padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: var(--font); font-size: 0.85rem;
+    transition: border-color .2s, background .2s;
+  }
+  button:hover { border-color: var(--accent); background: var(--bg-2); }
+  button.accent { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+  button.accent:hover { filter: brightness(1.1); }
+  button.danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+  button.danger:hover { filter: brightness(1.1); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .card {
+    background: var(--bg-2); border: 1px solid #1e1e2e; border-radius: 10px; padding: 16px;
+    position: relative; overflow: hidden; transition: border-color .2s;
+  }
+  .card:hover { border-color: #2a2a3e; }
+  .card::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2)); opacity: 0.6;
+  }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .card-title { font-weight: 600; font-size: 1rem; }
+  .badge {
+    font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; border: 1px solid;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge.live { color: var(--accent); border-color: var(--accent); background: var(--accent-glow); }
+  .badge.standby { color: var(--warn); border-color: var(--warn); background: rgba(245,158,11,0.08); }
+  .badge.blocked { color: var(--danger); border-color: var(--danger); background: rgba(239,68,68,0.08); }
+  .badge.idle { color: var(--fg-dim); border-color: var(--fg-dim); background: rgba(148,163,184,0.08); }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed #222; }
+  .row:last-child { border-bottom: none; }
+  .label { color: var(--fg-dim); font-size: 0.85rem; }
+  .value { font-weight: 600; font-size: 0.95rem; }
+  .value.accent { color: var(--accent); }
+  .value.warn { color: var(--warn); }
+  .value.danger { color: var(--danger); }
+  .value.success { color: var(--success); }
+
+  .progress-wrap { margin-top: 10px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--fg-dim); margin-bottom: 4px; }
+  .progress-track { background: #14141f; border-radius: 999px; height: 10px; overflow: hidden; }
+  .progress-fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    width: 0%; transition: width 0.6s ease;
+  }
+
+  .mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .mini { background: var(--bg-2); border: 1px solid #1e1e2e; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; }
+  .mini-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--bg-3); display: grid; place-items: center; font-size: 1.1rem; }
+  .mini-body { flex: 1; }
+  .mini-title { font-size: 0.75rem; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+  .mini-value { font-size: 1.1rem; font-weight: 700; margin-top: 2px; }
+
+  .mining-panel {
+    background: var(--bg-2); border: 1px solid #1e1e2e; border-radius: 10px; padding: 16px;
+    margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .mining-info { display: flex; gap: 20px; flex-wrap: wrap; }
+  .mining-stat { display: flex; flex-direction: column; }
+  .mining-stat .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .mining-stat .value { font-size: 1.1rem; font-weight: 700; }
+
+  .footer { color: var(--fg-dim); font-size: 0.75rem; text-align: center; margin-top: 10px; }
+  .pulse { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 6px; animation: pulse 2s infinite; }
+  .pulse.off { background: var(--fg-dim); animation: none; }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+  .muted { color: var(--fg-dim); }
+  .nowrap { white-space: nowrap; }
+  @media (max-width: 480px) {
+    h1 { font-size: 1.1rem; }
+    .grid { grid-template-columns: 1fr; }
+    .mini-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>⚡ <span>Manteclaw</span> Ops</h1>
+    <div class="sub">Base L2 · Automated Earning · Epoch Running</div>
+  </div>
+  <div class="actions">
+    <span id="countdown" class="muted nowrap">Auto in 30s</span>
+    <button id="btn-refresh" class="accent">⟳ Refresh</button>
+  </div>
+</header>
+
+<!-- Mining Control Panel -->
+<div class="mining-panel">
+  <div class="mining-info">
+    <div class="mining-stat">
+      <span class="label">Mining Status</span>
+      <span class="value" id="mining-status">
+        <span class="pulse off" id="mining-pulse"></span>
+        <span id="mining-status-text">Idle</span>
+      </span>
+    </div>
+    <div class="mining-stat">
+      <span class="label">Last Round</span>
+      <span class="value" id="mining-last-earnings">—</span>
+    </div>
+    <div class="mining-stat">
+      <span class="label">Provider</span>
+      <span class="value" id="mining-provider">—</span>
+    </div>
+  </div>
+  <div>
+    <button id="btn-start" class="accent">▶ Start Mining</button>
+    <button id="btn-stop" class="danger" style="display:none;">⏹ Stop Mining</button>
+  </div>
+</div>
+
+<!-- Top mini stats -->
+<div class="mini-grid">
+  <div class="mini">
+    <div class="mini-icon">⛏️</div>
+    <div class="mini-body">
+      <div class="mini-title">Litcoiin Balance</div>
+      <div class="mini-value" id="mini-lit">—</div>
+    </div>
+  </div>
+  <div class="mini">
+    <div class="mini-icon">🏦</div>
+    <div class="mini-body">
+      <div class="mini-title">Zyfai APY</div>
+      <div class="mini-value" id="mini-apy">—</div>
+    </div>
+  </div>
+  <div class="mini">
+    <div class="mini-icon">💰</div>
+    <div class="mini-body">
+      <div class="mini-title">Skills Listed</div>
+      <div class="mini-value" id="mini-skills">—</div>
+    </div>
+  </div>
+  <div class="mini">
+    <div class="mini-icon">📦</div>
+    <div class="mini-body">
+      <div class="mini-title">Git Commits</div>
+      <div class="mini-value" id="mini-git">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- Lane cards -->
+<div class="grid" id="lanes">
+  <!-- Populated by JS from revenue_report.json -->
+</div>
+
+<div class="footer">
+  <span class="pulse" id="footer-pulse"></span>
+  <span id="footer-status">Dashboard live · Waiting for data…</span>
+</div>
+
+<script>
+  // Embedded fallback data (served if JSON fetch fails)
+  const FALLBACK = {
+    timestamp: "2026-05-07T05:30:00Z",
+    total_usd: 0.00,
+    mining: { status: "idle", last_round_earnings: 0, provider: "none", start_time: null, stop_time: null },
+    lanes: {
+      litcoiin: { balance: 1423, pending: 0, status: "mining" },
+      nookplot: { credits: 998.75, status: "active" },
+      "0xwork": { earned: 0.0, status: "idle" },
+      zyfai: { apy: "5.10%", status: "deployed" },
+      moltlaunch: { status: "registered" },
+      daydreams: { status: "unfunded" },
+      openagent: { status: "configured" }
+    }
+  };
+
+  // Lane display metadata
+  const LANE_META = {
+    litcoiin: { name: "Litcoiin Mining", icon: "⛏️", unit: "LITCOIN", note: "Base L2 mining via Bankr SDK" },
+    nookplot: { name: "Nookplot Knowledge", icon: "🧠", unit: "NOOK", note: "Knowledge graph + bounties" },
+    "0xwork": { name: "0xWork Tasks", icon: "🔧", unit: "USDC", note: "Agent task marketplace" },
+    zyfai: { name: "Zyfai Yield", icon: "🏦", unit: "APY", note: "Safe yield on Base" },
+    moltlaunch: { name: "MoltLaunch", icon: "🚀", unit: "skills", note: "Agent skills marketplace" },
+    daydreams: { name: "Daydreams", icon: "💤", unit: "tasks", note: "x402 task marketplace" },
+    openagent: { name: "OpenAgent", icon: "🤖", unit: "tasks", note: "ERC-8004 agent market" }
+  };
+
+  let COUNT = 30;
+  let timer = null;
+  let data = null;
+
+  function el(id) { return document.getElementById(id); }
+
+  function fmt(n) {
+    if (typeof n === 'number') return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    return n;
+  }
+
+  function badgeClass(status) {
+    if (status === 'mining' || status === 'active' || status === 'live') return 'live';
+    if (status === 'deployed' || status === 'configured' || status === 'registered') return 'standby';
+    if (status === 'idle' || status === 'unfunded') return 'idle';
+    return 'blocked';
+  }
+
+  function updateMiningPanel() {
+    const m = (data && data.mining) || FALLBACK.mining;
+    const isRunning = m.status === 'running' || m.status === 'mining';
+
+    // Pulse
+    const pulse = el('mining-pulse');
+    const statusText = el('mining-status-text');
+    if (isRunning) {
+      pulse.classList.remove('off');
+      statusText.textContent = 'Running';
+      statusText.className = 'value success';
+    } else {
+      pulse.classList.add('off');
+      statusText.textContent = 'Idle';
+      statusText.className = 'value';
+    }
+
+    // Last round earnings
+    el('mining-last-earnings').textContent = m.last_round_earnings ? fmt(m.last_round_earnings) + ' LIT' : '—';
+
+    // Provider
+    el('mining-provider').textContent = m.provider && m.provider !== 'none' ? m.provider : '—';
+
+    // Buttons
+    const btnStart = el('btn-start');
+    const btnStop = el('btn-stop');
+    if (isRunning) {
+      btnStart.style.display = 'none';
+      btnStop.style.display = 'inline-block';
+    } else {
+      btnStart.style.display = 'inline-block';
+      btnStop.style.display = 'none';
+    }
+  }
+
+  function buildLanes() {
+    const lanes = (data && data.lanes) || FALLBACK.lanes;
+    const container = el('lanes');
+    container.innerHTML = '';
+
+    Object.entries(lanes).forEach(([key, lane]) => {
+      const meta = LANE_META[key] || { name: key, icon: "📦", unit: "", note: "" };
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      // Build rows based on available fields
+      let rows = '';
+      if (lane.balance !== undefined) {
+        rows += `<div class="row"><span class="label">Balance</span><span class="value accent">${fmt(lane.balance)} ${meta.unit}</span></div>`;
+      }
+      if (lane.pending !== undefined) {
+        rows += `<div class="row"><span class="label">Pending</span><span class="value warn">${fmt(lane.pending)} ${meta.unit}</span></div>`;
+      }
+      if (lane.credits !== undefined) {
+        rows += `<div class="row"><span class="label">Credits</span><span class="value accent">${fmt(lane.credits)} ${meta.unit}</span></div>`;
+      }
+      if (lane.earned !== undefined) {
+        rows += `<div class="row"><span class="label">Earned</span><span class="value accent">${fmt(lane.earned)} ${meta.unit}</span></div>`;
+      }
+      if (lane.apy !== undefined) {
+        rows += `<div class="row"><span class="label">APY</span><span class="value accent">${lane.apy}</span></div>`;
+      }
+      rows += `<div class="row"><span class="label">Note</span><span class="value" style="font-size:.8rem;max-width:60%;text-align:right">${meta.note}</span></div>`;
+
+      // Litcoiin progress bar
+      let extra = '';
+      if (key === 'litcoiin' && lane.balance !== undefined) {
+        const target = 50000;
+        const pct = Math.min(100, Math.max(0, (lane.balance / target) * 100));
+        extra = `
+          <div class="progress-wrap">
+            <div class="progress-label"><span>LITCOIN claim progress</span><span>${pct.toFixed(1)}%</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+          </div>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-title">${meta.icon} ${meta.name}</div>
+          <div class="badge ${badgeClass(lane.status)}">${lane.status}</div>
+        </div>
+        ${rows}
+        ${extra}
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function buildExtras() {
+    const lanes = (data && data.lanes) || FALLBACK.lanes;
+    const lit = lanes.litcoiin || {};
+    const zyf = lanes.zyfai || {};
+
+    // Litcoiin balance
+    el('mini-lit').innerHTML = lit.balance !== undefined
+      ? `${fmt(lit.balance)} <span class="muted">/ 50,000</span>`
+      : '—';
+
+    // APY
+    el('mini-apy').textContent = zyf.apy || '—';
+
+    // Skills listed (static for now — could come from JSON later)
+    el('mini-skills').textContent = '4';
+
+    // Git commits (static for now)
+    el('mini-git').textContent = '12';
+  }
+
+  async function loadData() {
+    try {
+      const res = await fetch('revenue_report.json?t=' + Date.now());
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      data = await res.json();
+      el('footer-status').textContent = 'Data loaded · ' + new Date().toLocaleTimeString();
+      el('footer-pulse').classList.remove('off');
+    } catch (e) {
+      data = null;
+      el('footer-status').textContent = 'Fallback data active · ' + new Date().toLocaleTimeString();
+      el('footer-pulse').classList.add('off');
+      console.warn('Failed to load revenue_report.json:', e.message);
+    }
+    updateMiningPanel();
+    buildLanes();
+    buildExtras();
+  }
+
+  function tick() {
+    COUNT--;
+    if (COUNT <= 0) { COUNT = 30; loadData(); }
+    el('countdown').textContent = `Auto in ${COUNT}s`;
+  }
+
+  // Button handlers (visual only — actual control needs backend integration)
+  el('btn-refresh').addEventListener('click', () => { COUNT = 30; loadData(); });
+
+  el('btn-start').addEventListener('click', () => {
+    // Visual toggle only
+    if (!data) data = JSON.parse(JSON.stringify(FALLBACK));
+    if (!data.mining) data.mining = {};
+    data.mining.status = 'running';
+    data.mining.start_time = new Date().toISOString();
+    data.mining.provider = data.mining.provider || 'inclusionai/ling-2.6-1t';
+    updateMiningPanel();
+    el('footer-status').textContent = 'Mining started (visual) · ' + new Date().toLocaleTimeString();
+  });
+
+  el('btn-stop').addEventListener('click', () => {
+    if (!data) data = JSON.parse(JSON.stringify(FALLBACK));
+    if (!data.mining) data.mining = {};
+    data.mining.status = 'idle';
+    data.mining.stop_time = new Date().toISOString();
+    updateMiningPanel();
+    el('footer-status').textContent = 'Mining stopped (visual) · ' + new Date().toLocaleTimeString();
+  });
+
+  // Initial load
+  loadData();
+  timer = setInterval(tick, 1000);
+</script>
+</body>
+</html>

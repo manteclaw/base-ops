@@ -1,0 +1,23 @@
+# Smithery.ai configuration for Base L2 Agent Kit MCP Server
+# Smithery auto-discovers MCP servers from GitHub repos by looking for smithery.yaml
+# Docs: https://smithery.ai/docs/build/project-config/smithery-yaml
+
+# Server metadata (auto-synced from README + package files)
+# name: base-l2-agent-kit
+# description: MCP server for Base L2 DeFi operations — contract audit, gas estimates, yield farming, token analysis, wallet health, mnemonics, price feeds, DEX quotes
+# icon: https://avatars.githubusercontent.com/u/manteclaw
+
+startCommand:
+  type: stdio
+  configSchema:
+    # No required configuration — the server connects to public x402 endpoints
+    type: object
+    properties: {}
+  commandFunction: |
+    (config) => ({ command: 'python3', args: ['base_agent_kit_mcp.py'] })
+  exampleConfig: {}
+
+# Container build for headless / remote usage
+build:
+  dockerfile: Dockerfile
+  dockerBuildPath: .

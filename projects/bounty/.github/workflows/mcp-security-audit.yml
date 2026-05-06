@@ -1,0 +1,89 @@
+name: MCP Security Audit Pipeline
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sundays
+  workflow_dispatch:
+    inputs:
+      target_repo:
+        description: 'GitHub repo to scan (owner/repo)'
+        required: false
+        default: 'awslabs/mcp'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install mcp-audit scanner
+        run: |
+          pip install mcp-audit-scanner semgrep
+          # Fix typer/click compatibility
+          pip install 'typer<0.13'
+
+      - name: Clone target repo
+        run: |
+          REPO="${{ github.event.inputs.target_repo || 'awslabs/mcp' }}"
+          git clone --depth 1 "https://github.com/$REPO.git" /tmp/target-repo
+
+      - name: Run SAST scan
+        run: |
+          mcp-audit sast /tmp/target-repo --format json > scan-results.json || true
+
+      - name: Analyze findings
+        run: |
+          python3 -c "
+          import json, sys
+          with open('scan-results.json') as f:
+              content = f.read()
+          lines = content.split('\n')
+          start = next(i for i, line in enumerate(lines) if line.strip().startswith('['))
+          data = json.loads('\n'.join(lines[start:]))
+          
+          critical = [r for r in data if r['severity'] == 'CRITICAL']
+          high = [r for r in data if r['severity'] == 'HIGH']
+          
+          print(f'Total findings: {len(data)}')
+          print(f'CRITICAL: {len(critical)}')
+          print(f'HIGH: {len(high)}')
+          
+          # Write summary for potential bounty reports
+          with open('bounty-summary.md', 'w') as out:
+              out.write('# Potential Bounty Findings\n\n')
+              out.write(f'Repo: {sys.argv[1] if len(sys.argv) > 1 else \"unknown\"}\n\n')
+              for item in critical + high[:20]:
+                  out.write(f'## {item[\"title\"]} ({item[\"severity\"]})\n')
+                  out.write(f'- File: `{item[\"finding_path\"]}`\n')
+                  out.write(f'- CWE: {item.get(\"cwe\", \"N/A\")}\n')
+                  out.write(f'- Description: {item[\"description\"]}\n')
+                  out.write(f'- Remediation: {item[\"remediation\"]}\n\n')
+          "
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-audit-results
+          path: |
+            scan-results.json
+            bounty-summary.md
+
+      - name: Comment on PR (if triggered by PR)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('bounty-summary.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🔒 MCP Security Audit Results\n\n${summary.substring(0, 65000)}`
+            });

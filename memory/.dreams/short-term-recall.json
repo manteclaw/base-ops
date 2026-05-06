@@ -1,0 +1,163 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-06T21:48:08.333Z",
+  "entries": {
+    "memory:memory/2026-05-05.md:63:84": {
+      "key": "memory:memory/2026-05-05.md:63:84",
+      "path": "memory/2026-05-05.md",
+      "startLine": 63,
+      "endLine": 84,
+      "source": "memory",
+      "snippet": "- ClawBank endpoints tested (~8 URLs): ALL 404 or empty (no auth even attempted) - OpenRouter `/api/v1/models` (public): Returns data (200) - OpenRouter `/api/v1/auth/key` (authed): 401 \"Missing Authentication header\" - The Claw Bay (`api.theclawbay.com`): 401 invalid_api_key - **Format mismatch:** ClawBank site shows `sk-cb-****4829` prefix. This key lacks that prefix. - **Theory:** Could be OpenRouter key resold/proxied through ClawBank's AI features? User referenced \"RSoft ClawBank\" powered by Groq/Llama via OpenRouter. - **OPEN QUESTION:** Where exactly on ClawBank's UI was this copied from? Need user to specify. **My mistake:** I called it OpenRouter too quickly. User corrected",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3718466073274612,
+      "maxScore": 0.3718466073274612,
+      "firstRecalledAt": "2026-05-05T01:39:06.313Z",
+      "lastRecalledAt": "2026-05-05T01:39:06.313Z",
+      "queryHashes": [
+        "ac4d4e193544"
+      ],
+      "recallDays": [
+        "2026-05-05"
+      ],
+      "conceptTags": [
+        "router",
+        "api/v1/models",
+        "api/v1/auth/key",
+        "api.theclawbay.com",
+        "invalid-api-key",
+        "sk-cb",
+        "resold/proxied",
+        "groq/llama"
+      ]
+    },
+    "memory:memory/2026-05-05.md:30:67": {
+      "key": "memory:memory/2026-05-05.md:30:67",
+      "path": "memory/2026-05-05.md",
+      "startLine": 30,
+      "endLine": 67,
+      "source": "memory",
+      "snippet": "- Treasury template built at `projects/clawbank/treasury.py` - **Waiting for:** API key starting with `sk-cb-` ### Pending: Nookplot - MCP not available in registry - Template built at `projects/nookplot/agent.py` - Status: Need to check if package exists or if API changed ### Pending: OpenRouter - User mentioned they have a key - Not yet provided during this session ### Workspace State - TOOLS.md, MEMORY.md, WALLET.md, PROJECTS.md all updated - Git repo initialized, 8 commits on post-wipe-rebuild branch - Projects: clawbank/treasury.py, litcoin/miner.py, nookplot/agent.py, skills/TEMPLATE-SKILL.md - Scripts: auto-backup.sh ### User Context - User is in full rebuild mode after system wip",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3576069414615631,
+      "maxScore": 0.3576069414615631,
+      "firstRecalledAt": "2026-05-05T01:39:06.313Z",
+      "lastRecalledAt": "2026-05-05T01:39:06.313Z",
+      "queryHashes": [
+        "ac4d4e193544"
+      ],
+      "recallDays": [
+        "2026-05-05"
+      ],
+      "conceptTags": [
+        "backup",
+        "router",
+        "projects/clawbank/treasury.py",
+        "sk-cb",
+        "projects/nookplot/agent.py",
+        "tools.md",
+        "memory.md",
+        "wallet.md"
+      ]
+    },
+    "memory:memory/2026-05-05.md:1:44": {
+      "key": "memory:memory/2026-05-05.md:1:44",
+      "path": "memory/2026-05-05.md",
+      "startLine": 1,
+      "endLine": 44,
+      "source": "memory",
+      "snippet": "--- # Nookplot ## Agent Setup — 2026-05-05 ### Agent Identity - **Name:** Mante - **Agent ID:** `0f6a7e9c-94cf-45b3-b4a8-d2fa2d474817` - **Base Address:** `0xEA0aaD6DFa33D6EA4aec842C24D2015E3A4B3175` - **Gateway:** v0.5.32 - **Status:** Active, connected ### SDK Issues - `nookplot-runtime` v0.5.98 has schema drift with API - `bounties.list()` fails: status field expects string, API returns int - `economy.get_balance()` fails: missing `revenue.claimable` and `revenue.totalEarned` fields - Workaround: Use REST API directly for full access ### REST API Findings - **Guilds:** 16 total guilds exist (endpoint: `/v1/guilds`) - **Bounties:** Mix of expired, claimed, and open. Bounty 10 (5000",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.7824283093214035,
+      "maxScore": 0.3972868591547012,
+      "firstRecalledAt": "2026-05-06T21:47:40.623Z",
+      "lastRecalledAt": "2026-05-06T21:48:08.333Z",
+      "queryHashes": [
+        "cfbcae80b48f",
+        "4084a12ea8ef"
+      ],
+      "recallDays": [
+        "2026-05-07"
+      ],
+      "conceptTags": [
+        "gateway",
+        "v0.5.32",
+        "nookplot-runtime",
+        "v0.5.98",
+        "bounties.list",
+        "economy.get-balance",
+        "revenue.claimable",
+        "revenue.totalearned"
+      ]
+    },
+    "memory:memory/2026-05-05.md:39:64": {
+      "key": "memory:memory/2026-05-05.md:39:64",
+      "path": "memory/2026-05-05.md",
+      "startLine": 39,
+      "endLine": 64,
+      "source": "memory",
+      "snippet": "- SDK test: ✅ WORKS! Agent created, +14 LITCOIN earned - But wallet is `0x6a5fcc...` — NOT the recovered `0xC4Cf...` - Old key `bk_usr_PKTbKztw_...` was discarded (user said \"use this one instead\") ### Action Items In Progress 1. **GitHub push** — Skill repo ready at `projects/litcoin/standalone-miner/` with SKILL.md, README, miner 2. **Guild join** — Guild 13 (Deep Research Collective) selected. Blocker: need Nookplot agent private key for meta-tx signing. Spawned subagent to find key via `nookplot register` CLI flow. 3. **Miner** — SDK miner running with new Bankr key. Standalone also available. ### Nookplot Agent Wallet Discovery - Agent `Mante` address: `0xEA0aaD6DFa33D6EA4aec842C24D20",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.7435753881931304,
+      "maxScore": 0.3719515413045883,
+      "firstRecalledAt": "2026-05-06T21:47:40.623Z",
+      "lastRecalledAt": "2026-05-06T21:48:08.333Z",
+      "queryHashes": [
+        "cfbcae80b48f",
+        "4084a12ea8ef"
+      ],
+      "recallDays": [
+        "2026-05-07"
+      ],
+      "conceptTags": [
+        "bk-usr-pktbkztw",
+        "skill.md",
+        "meta-tx",
+        "sdk",
+        "test",
+        "works",
+        "created",
+        "litcoin"
+      ]
+    },
+    "memory:memory/2026-05-07.md:20:55": {
+      "key": "memory:memory/2026-05-07.md:20:55",
+      "path": "memory/2026-05-07.md",
+      "startLine": 20,
+      "endLine": 55,
+      "source": "memory",
+      "snippet": "- Only 2 open tasks, both unclaimable: \"does not exist on-chain\" - Tasks: Get @jessepollak to follow/RT @Inner_Axiom ($50 each) - **Verdict:** 0xWork marketplace is thin — no actionable work ## Daydreams Activation - **Status:** Registered but unfunded (Agent #46867) - **Identity:** Likely FREE via `taskmarket init` (platform-sponsored) - **Need:** ~5 USDC to `0xBE251af5140A0CEfe629364190e1840D27632aED` (Base Mainnet) - **No free/promo paths found** — no faucets, airdrops, referral bonuses ## Dashboard - **Live at:** http://10.184.29.163:8080/dashboard.html - Server running in background (python3 -m http.server 8080) ## Nookplot Bounty #10 - **Applications:** 11 total (1 approved: Clover,",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3652678310871124,
+      "maxScore": 0.3652678310871124,
+      "firstRecalledAt": "2026-05-06T21:48:08.333Z",
+      "lastRecalledAt": "2026-05-06T21:48:08.333Z",
+      "queryHashes": [
+        "4084a12ea8ef"
+      ],
+      "recallDays": [
+        "2026-05-07"
+      ],
+      "conceptTags": [
+        "on-chain",
+        "follow/rt",
+        "inner-axiom",
+        "platform-sponsored",
+        "free/promo",
+        "10.184.29.163",
+        "8080/dashboard.html",
+        "http.server"
+      ]
+    }
+  }
+}

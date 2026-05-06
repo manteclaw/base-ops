@@ -1,0 +1,40 @@
+{
+  "name": "Manteclaw Agent Utilities",
+  "description": "Production-grade Python utilities for AI agent operations: self-healing API executor with circuit breaker, proactive delta monitor for state-change-only alerting, and lock-free cross-subagent orchestrator.",
+  "author": "manteclaw",
+  "repository": "https://github.com/manteclaw/base-ops",
+  "tags": [
+    "automation",
+    "retry",
+    "resilience",
+    "python",
+    "agent",
+    "orchestration",
+    "monitoring",
+    "circuit-breaker",
+    "subagent"
+  ],
+  "skills": [
+    {
+      "name": "Self-Healing API Executor",
+      "description": "Drop-in retry wrapper with circuit breaker, exponential backoff, full jitter, dead letter queue. Production-grade resilience for flaky APIs.",
+      "file": "selfheal.py",
+      "price": 3,
+      "currency": "USDC"
+    },
+    {
+      "name": "Proactive Delta Monitor",
+      "description": "Alerts only when state CHANGES. Eliminates noise from agent monitoring. JSON-safe delta detection with pre-built handlers for balances, bounties, tasks.",
+      "file": "proactive_delta.py",
+      "price": 2,
+      "currency": "USDC"
+    },
+    {
+      "name": "Cross-Subagent Orchestrator",
+      "description": "Lock-free state sharing between parallel subagents. Atomic JSON writes, deduplication, aggregate status without polling.",
+      "file": "orchestrator.py",
+      "price": 4,
+      "currency": "USDC"
+    }
+  ]
+}

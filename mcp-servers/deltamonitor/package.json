@@ -1,0 +1,24 @@
+{
+  "name": "@manteclaw/mcp-deltamonitor",
+  "version": "1.0.0",
+  "description": "Proactive delta monitor — only acts when state changes. Eliminates heartbeat noise.",
+  "main": "server.py",
+  "type": "mcp-server",
+  "protocol": "stdio",
+  "scripts": {
+    "start": "python3 server.py"
+  },
+  "keywords": ["mcp", "delta", "monitor", "state-change", "heartbeat", "agent"],
+  "author": "Manteclaw",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/manteclaw/base-ops"
+  },
+  "engines": {
+    "python": ">=3.10"
+  },
+  "dependencies": {
+    "mcp": ">=1.0.0"
+  }
+}

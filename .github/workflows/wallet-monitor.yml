@@ -1,0 +1,25 @@
+name: Wallet Monitor
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Check balances via Dune + Alchemy
+        env:
+          DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
+          ALCHEMY_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+        run: |
+          python3 scripts/dune-monitor.py balances
+          # Verify via Alchemy Base RPC
+          echo "--- Alchemy verification ---"
+          curl -s "https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_KEY"             -X POST -H "Content-Type: application/json"             -d '{"jsonrpc":"2.0","method":"eth_getBalance","params":["0x03b96a9b9d0ca690ecc44bd09662550b9d776219","latest"],"id":1}'

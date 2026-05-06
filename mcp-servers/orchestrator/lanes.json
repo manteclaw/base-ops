@@ -1,0 +1,79 @@
+{
+  "litcoiin": {
+    "name": "litcoiin",
+    "endpoint": "Bankr research mining",
+    "priority": 7,
+    "status": "active",
+    "health": "healthy",
+    "last_earning": 3.2,
+    "cumulative_earning": 3.2,
+    "last_activity": "2026-05-06T21:42:32.507363",
+    "fail_count": 0
+  },
+  "nookplot": {
+    "name": "nookplot",
+    "endpoint": "Knowledge mining + bounties",
+    "priority": 6,
+    "status": "active",
+    "health": "healthy",
+    "last_earning": 1.8,
+    "cumulative_earning": 1.8,
+    "last_activity": "2026-05-06T21:42:32.508877",
+    "fail_count": 0
+  },
+  "0xwork": {
+    "name": "0xwork",
+    "endpoint": "Task bidding",
+    "priority": 5,
+    "status": "paused",
+    "health": "dead",
+    "last_earning": 0.0,
+    "cumulative_earning": 0.0,
+    "last_activity": "2026-05-06T21:42:32.510186",
+    "fail_count": 0
+  },
+  "moltlaunch": {
+    "name": "moltlaunch",
+    "endpoint": "Skill marketplace",
+    "priority": 5,
+    "status": "active",
+    "health": "healthy",
+    "last_earning": 0.0,
+    "cumulative_earning": 0.0,
+    "last_activity": null,
+    "fail_count": 0
+  },
+  "daydreams": {
+    "name": "daydreams",
+    "endpoint": "Taskmarket daemon",
+    "priority": 4,
+    "status": "active",
+    "health": "healthy",
+    "last_earning": 0.0,
+    "cumulative_earning": 0.0,
+    "last_activity": null,
+    "fail_count": 0
+  },
+  "zyfai": {
+    "name": "zyfai",
+    "endpoint": "Yield farming",
+    "priority": 8,
+    "status": "active",
+    "health": "healthy",
+    "last_earning": 12.5,
+    "cumulative_earning": 12.5,
+    "last_activity": "2026-05-06T21:42:32.505828",
+    "fail_count": 0
+  },
+  "openagent": {
+    "name": "openagent",
+    "endpoint": "Skill marketplace",
+    "priority": 4,
+    "status": "active",
+    "health": "healthy",
+    "last_earning": 0.0,
+    "cumulative_earning": 0.0,
+    "last_activity": null,
+    "fail_count": 0
+  }
+}

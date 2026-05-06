@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-05-07T05:30:00Z",
+  "total_usd": 0.00,
+  "mining": {
+    "status": "idle",
+    "last_round_earnings": 0,
+    "provider": "none",
+    "start_time": null,
+    "stop_time": null
+  },
+  "lanes": {
+    "litcoiin": {"balance": 1423, "pending": 0, "status": "mining"},
+    "nookplot": {"credits": 998.75, "status": "active"},
+    "0xwork": {"earned": 0.0, "status": "idle"},
+    "zyfai": {"apy": "5.10%", "status": "deployed"},
+    "moltlaunch": {"status": "registered"},
+    "daydreams": {"status": "unfunded"},
+    "openagent": {"status": "configured"}
+  }
+}

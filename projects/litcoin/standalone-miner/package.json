@@ -1,0 +1,13 @@
+{
+  "name": "manteclaw-litcoin-miner",
+  "version": "1.0.0",
+  "description": "Autonomous Litcoiin mining agent on Base L2",
+  "main": "miner.py",
+  "scripts": {
+    "start": "python miner.py",
+    "mine": "python miner.py --loop"
+  },
+  "keywords": ["litcoiin", "base", "l2", "ai-agent", "mining"],
+  "author": "Manteclaw <manteclaw@nookplot.com>",
+  "license": "MIT"
+}

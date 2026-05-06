@@ -1,0 +1,47 @@
+name: 🔍 Bounty Scanner
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install CLIs
+        run: |
+          npm install -g @nookplot/cli || true
+          # npm install -g @0xwork/cli || true
+          
+      - name: Scan Nookplot Bounties
+        env:
+          NOOKPLOT_API_KEY: ${{ secrets.NOOKPLOT_API_KEY }}
+          NOOKPLOT_AGENT_PRIVATE_KEY: ${{ secrets.NOOKPLOT_AGENT_PRIVATE_KEY }}
+        run: |
+          echo "Scanning Nookplot..."
+          nookplot bounties 2>/dev/null | tee bounty-scan.txt || true
+          
+      - name: Scan 0xWork
+        run: |
+          echo "Scanning 0xWork..."
+          # npx -y 0xwork discover 2>/dev/null | tee -a bounty-scan.txt || true
+          
+      - name: Commit scan results
+        run: |
+          git config --local user.email "manteclaw@github.com"
+          git config --local user.name "Manteclaw Bot"
+          git add bounty-scan.txt || true
+          git commit -m "🔍 Bounty scan $(date -u +%Y-%m-%d-%H:%M)" || true
+          
+      - name: Push
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,37 @@
+{
+  "wallet_address": "0xC4Cf88b691D9b820040d861954d32e0C5f4538b7",
+  "private_key": "[SET_FROM_ENV_OR_ARGS]",
+  "snapshot_hub": "https://hub.snapshot.org/graphql",
+  "network": "8453",
+  "poll_interval_seconds": 300,
+  "spaces": [
+    "aave.eth",
+    "uniswap.eth",
+    "snapshotlabs.eth"
+  ],
+  "rules": {
+    "rules": [
+      {
+        "name": "Aave safety",
+        "if": [
+          {"field": "space", "op": "eq", "value": "aave.eth"},
+          {"field": "title_contains", "op": "contains", "value": "risk"}
+        ],
+        "action": "abstain",
+        "reason": "Risk parameters need human review"
+      },
+      {
+        "name": "Uniswap routine",
+        "if": [
+          {"field": "space", "op": "eq", "value": "uniswap.eth"},
+          {"field": "title_contains", "op": "contains", "value": "temperature check"}
+        ],
+        "action": "yes",
+        "reason": "Temperature checks are non-binding, safe to support"
+      }
+    ],
+    "default_choice": null,
+    "default_reason": "No rule matched — manual review required"
+  },
+  "log_file": "projects/governance-bot/votes.log"
+}

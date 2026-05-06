@@ -1,0 +1,42 @@
+{
+  "name": "selfhealing-api",
+  "version": "1.0.0",
+  "description": "Self-Healing API Executor MCP Server with circuit breaker, retry logic, and health monitoring",
+  "tools": [
+    {
+      "name": "call_api",
+      "description": "Make API call with automatic retry and circuit breaker",
+      "parameters": {
+        "url": "string - endpoint URL",
+        "method": "string - GET/POST/PUT/DELETE (default: GET)",
+        "body": "string - JSON body for POST/PUT",
+        "timeout": "number - timeout seconds (default: 10)",
+        "retries": "number - retry count (default: 3)",
+        "force": "boolean - bypass circuit breaker"
+      }
+    },
+    {
+      "name": "get_endpoint_status",
+      "description": "Get circuit breaker state for an endpoint",
+      "parameters": {
+        "url": "string - endpoint to check"
+      }
+    },
+    {
+      "name": "reset_breaker",
+      "description": "Manually reset circuit breaker",
+      "parameters": {
+        "url": "string - endpoint to reset"
+      }
+    },
+    {
+      "name": "list_all_endpoints",
+      "description": "List all monitored endpoints",
+      "parameters": {}
+    }
+  ],
+  "endpoints": {
+    "http": "http://localhost:8765",
+    "health": "http://localhost:8765/health"
+  }
+}

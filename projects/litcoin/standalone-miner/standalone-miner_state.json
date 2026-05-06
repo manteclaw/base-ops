@@ -1,0 +1,14 @@
+{
+  "rounds": 0,
+  "earned": 0,
+  "consecutive_failures": 6,
+  "provider": "fireworks",
+  "circuit_breaker_active": true,
+  "circuit_breaker_rounds_remaining": 2,
+  "provider_failures": {
+    "openrouter": 3,
+    "fireworks": 0
+  },
+  "model_stats": {},
+  "start_time": 1778104137.9535658
+}

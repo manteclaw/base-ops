@@ -1,0 +1,20 @@
+name: Nightly Workspace Sync
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Sync from workspace-backup
+        run: |
+          git remote add backup https://github.com/manteclaw/workspace-backup.git || true
+          git fetch backup
+          git merge backup/main --allow-unrelated-histories || true
+          git push origin main

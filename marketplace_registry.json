@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "last_updated": "2026-05-06T20:57:06.272788Z",
+  "skills": {
+    "01-self-healing-api:4a13f2f17676af08": {
+      "name": "Self-Healing API Executor",
+      "listings": {
+        "meshledger": "listed",
+        "nookplot": "missing",
+        "moltlaunch": "disabled",
+        "0xwork": "disabled",
+        "openagent": "missing",
+        "mcp_so": "error:404",
+        "glama": "listed"
+      }
+    },
+    "02-yield-scanner:795d5089b29dabfb": {
+      "name": "DeFi Yield Scanner \u2014 Base L2",
+      "listings": {
+        "meshledger": "missing",
+        "nookplot": "missing",
+        "moltlaunch": "disabled",
+        "0xwork": "disabled",
+        "openagent": "missing",
+        "mcp_so": "error:404",
+        "glama": "missing"
+      }
+    },
+    "03-mcp-security-audit:4b0e6ab6416ec211": {
+      "name": "MCP Security Audit Pipeline",
+      "listings": {
+        "meshledger": "missing",
+        "nookplot": "missing",
+        "moltlaunch": "disabled",
+        "0xwork": "disabled",
+        "openagent": "missing",
+        "mcp_so": "error:404",
+        "glama": "missing"
+      }
+    },
+    "04-base-l2-infrastructure:632ac384eeb95131": {
+      "name": "Base L2 Agent Infrastructure",
+      "listings": {
+        "meshledger": "missing",
+        "nookplot": "missing",
+        "moltlaunch": "disabled",
+        "0xwork": "disabled",
+        "openagent": "missing",
+        "mcp_so": "error:404",
+        "glama": "missing"
+      }
+    },
+    "05-x402-payment-server:e9bd039bbfdf6996": {
+      "name": "x402 Micropayment Server",
+      "listings": {
+        "meshledger": "missing",
+        "nookplot": "missing",
+        "moltlaunch": "disabled",
+        "0xwork": "disabled",
+        "openagent": "missing",
+        "mcp_so": "error:404",
+        "glama": "missing"
+      }
+    },
+    "06-nookplot-mining:a13aa42ed5c99ad9": {
+      "name": "Nookplot Knowledge Mining Agent",
+      "listings": {
+        "meshledger": "missing",
+        "nookplot": "missing",
+        "moltlaunch": "disabled",
+        "0xwork": "disabled",
+        "openagent": "missing",
+        "mcp_so": "error:404",
+        "glama": "missing"
+      }
+    },
+    "07-credential-manager:ac7ddcb70e273e11": {
+      "name": "Credential Lifecycle Manager",
+      "listings": {
+        "meshledger": "missing",
+        "nookplot": "missing",
+        "moltlaunch": "disabled",
+        "0xwork": "disabled",
+        "openagent": "missing",
+        "mcp_so": "error:404",
+        "glama": "missing"
+      }
+    },
+    "08-auto-backup:bca0c4078a0c5ba7": {
+      "name": "Auto-Backup & Checkpoint Daemon",
+      "listings": {
+        "meshledger": "missing",
+        "nookplot": "missing",
+        "moltlaunch": "disabled",
+        "0xwork": "disabled",
+        "openagent": "missing",
+        "mcp_so": "error:403",
+        "glama": "missing"
+      }
+    },
+    "09-orchestrator:36dfec3c268c662d": {
+      "name": "Cross-Subagent Orchestrator",
+      "listings": {
+        "meshledger": "missing",
+        "nookplot": "missing",
+        "moltlaunch": "disabled",
+        "0xwork": "disabled",
+        "openagent": "missing",
+        "mcp_so": "error:403",
+        "glama": "listed"
+      }
+    },
+    "10-0xwork-matcher:774b2b38a13acd26": {
+      "name": "0xWork Task Matcher",
+      "listings": {
+        "meshledger": "missing",
+        "nookplot": "missing",
+        "moltlaunch": "disabled",
+        "0xwork": "disabled",
+        "openagent": "missing",
+        "mcp_so": "error:403",
+        "glama": "missing"
+      }
+    },
+    "11-delta-monitor:5c09e8bb00ac6ef4": {
+      "name": "Proactive Delta Monitor",
+      "listings": {
+        "meshledger": "missing",
+        "nookplot": "missing",
+        "moltlaunch": "disabled",
+        "0xwork": "disabled",
+        "openagent": "missing",
+        "mcp_so": "error:403",
+        "glama": "listed"
+      }
+    },
+    "12-governance-bot:360b738e7a7cbacb": {
+      "name": "Governance Vote Bot",
+      "listings": {
+        "meshledger": "missing",
+        "nookplot": "missing",
+        "moltlaunch": "disabled",
+        "0xwork": "disabled",
+        "openagent": "missing",
+        "mcp_so": "error:403",
+        "glama": "missing"
+      }
+    }
+  }
+}

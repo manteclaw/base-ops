@@ -1,0 +1,71 @@
+name: selfhealing-api
+description: Self-Healing API Executor with circuit breaker, retry logic, and health monitoring
+version: 1.0.0
+license: MIT
+entrypoint: server.py
+install: |
+  pip install -r requirements.txt
+
+runtime:
+  type: python
+  dependencies:
+    - aiohttp>=3.9.0
+    - mcp>=1.0.0
+
+tools:
+  call_api:
+    description: Make API call with automatic retry and circuit breaker protection
+    parameters:
+      - name: url
+        type: string
+        required: true
+        description: The endpoint URL to call
+      - name: method
+        type: string
+        required: false
+        default: GET
+        description: HTTP method (GET, POST, PUT, DELETE)
+      - name: body
+        type: string
+        required: false
+        description: JSON body string for POST/PUT
+      - name: timeout
+        type: number
+        required: false
+        default: 10
+        description: Request timeout in seconds
+      - name: retries
+        type: number
+        required: false
+        default: 3
+        description: Number of retries on failure
+      - name: force
+        type: boolean
+        required: false
+        default: false
+        description: Bypass circuit breaker
+
+  get_endpoint_status:
+    description: Get circuit breaker state and health metrics for an endpoint
+    parameters:
+      - name: url
+        type: string
+        required: true
+        description: The endpoint URL to check
+
+  reset_breaker:
+    description: Manually reset the circuit breaker for an endpoint
+    parameters:
+      - name: url
+        type: string
+        required: true
+        description: The endpoint URL to reset
+
+  list_all_endpoints:
+    description: List all monitored endpoints and their circuit breaker states
+    parameters: []
+
+endpoints:
+  - path: /health
+    method: GET
+    description: Health check returning status of all monitored endpoints

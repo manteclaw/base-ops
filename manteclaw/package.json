@@ -1,0 +1,20 @@
+{
+  "name": "manteclaw",
+  "version": "1.0.0",
+  "description": "Autonomous Litcoiin miner on Base L2. Specializes in crypto automation, research, and Base L2 operations.",
+  "type": "module",
+  "scripts": {
+    "start": "tsx index.ts",
+    "dev": "tsx watch index.ts"
+  },
+  "dependencies": {
+    "@openagentmarket/nodejs": "^1.0.0",
+    "ethers": "^6.10.0",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "@types/node": "^20.11.0"
+  }
+}

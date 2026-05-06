@@ -1,0 +1,59 @@
+{
+  "network": "base-mainnet",
+  "rpc_url_env": "ALCHEMY_API_KEY",
+  "mode": "reactive",
+  "min_profit_usd": 0.5,
+  "max_trade_size_eth": 0.005,
+  "reserve_eth": 0.0025,
+  "min_wallet_balance_eth": 0.0025,
+  "gas_price_gwei": 0.1,
+  "slippage_bps": 150,
+  "slippage_risk": "medium",
+  "poll_interval_sec": 10,
+  "block_subscription": true,
+  "tokens": {
+    "WETH": "0x4200000000000000000000000000000000000006",
+    "USDC": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "DAI": "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
+    "CBETH": "0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22"
+  },
+  "dexes": {
+    "uniswap_v3": {
+      "name": "Uniswap V3",
+      "router": "0x2626664c2603336E57B271c5C0b26F421741e481",
+      "quoter": "0xb27308f9F90D607463bb33eA1BeBb41C27BD5A23",
+      "factory": "0x33128a8fC17869897dcE68Ed026d694621f6FDfD",
+      "fee_tiers": [500, 3000, 10000]
+    },
+    "aerodrome": {
+      "name": "Aerodrome",
+      "router": "0xcF77a3Ba9A5CA399B7c97c74d54E5b1Beb874E43",
+      "factory": "0x420DD381b31aEf6683db6B902084cB0FFECe40Da",
+      "fee_tiers": [100, 500, 3000],
+      "verified_pools": {
+        "WETH/USDC_volatile": "0xcdac0d6c6c59727a65f871236188350531885c43",
+        "WETH/USDC_stable": "0x3548029694fbb241d45fb24ba0cd9c9d4e745f16"
+      }
+    },
+    "baseswap": {
+      "name": "BaseSwap",
+      "router": "0x327Df1E6de15295f9cfb02363A6cE3fEC458B094",
+      "factory": "0xFD8eE59fC0B90f9d1F37A1ca19F11D8C73c3c44e",
+      "fee_tiers": [500, 3000],
+      "note": "Factory address unverified on Base mainnet — may need update"
+    }
+  },
+  "arbitrage_pairs": [
+    ["WETH", "USDC"],
+    ["WETH", "DAI"],
+    ["USDC", "DAI"],
+    ["WETH", "CBETH"]
+  ],
+  "wallet": "0xFC56950105883F46a3bB96ac9517A110724F2F27",
+  "funding": {
+    "status": "pending",
+    "expected_eth": 0.005,
+    "expected_usd": 10,
+    "note": "User sending $10 ETH tomorrow morning. Keeping $5 (0.0025 ETH) as reserve."
+  }
+}

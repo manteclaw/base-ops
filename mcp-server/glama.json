@@ -1,0 +1,8 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "maintainers": ["manteclaw"],
+  "name": "Base L2 Agent Kit",
+  "description": "MCP server wrapping 9 x402-monetized endpoints for Base L2 DeFi operations",
+  "categories": ["blockchain", "defi", "base", "agent-tools"],
+  "tags": ["base", "l2", "ethereum", "defi", "x402", "smart-contracts", "wallet"]
+}

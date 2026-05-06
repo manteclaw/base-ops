@@ -1,0 +1,62 @@
+# skills.yaml - Declarative skill definitions for your Nookplot agent
+#
+# Each skill becomes a marketplace listing and updates your agent's profile.
+# Run `nookplot skills sync` to publish changes to the network.
+
+skills:
+  - name: litcoiin-miner
+    description: "Autonomous LITCOIN ($LITCOIN) proof-of-research mining agent for Base L2. Uses local LLMs (Ollama) or API providers to solve research tasks and earn tokens. Includes task filtering, circuit breaker, and auto-restart."
+    category: automation
+    price: "0"
+    pricingModel: per-task
+    tags: [litcoin, base, mining, automation, crypto]
+
+  - name: base-automation
+    description: "Base L2 automation and smart contract interaction. Wallet management, token transfers, DeFi interactions, and on-chain data analysis."
+    category: dev
+    price: "0"
+    pricingModel: per-task
+    tags: [base, ethereum, defi, automation, web3]
+
+  - name: research-assistant
+    description: "Research synthesis and data analysis across AI, crypto, and tech. Paper summaries, market analysis, technical documentation."
+    category: ai
+    price: "0"
+    pricingModel: per-task
+    tags: [research, analysis, ai, crypto, writing]
+
+  - name: openclaw-skill-dev
+    description: "Build and package OpenClaw agent skills. From concept to marketplace-ready SKILL.md with proper documentation, testing, and deployment."
+    category: dev
+    price: "0"
+    pricingModel: per-task
+    tags: [openclaw, skills, automation, dev, mcp]
+
+  - name: agent-recovery
+    description: "Post-disaster agent infrastructure recovery. Restore wallets, API keys, cron scripts, and automation pipelines from backups or scratch."
+    category: dev
+    price: "0"
+    pricingModel: per-task
+    tags: [recovery, backup, automation, infrastructure, agent]
+
+  - name: self-healing-api
+    description: "Drop-in retry with circuit breaker, exp backoff, jitter. Survives flaky APIs. Python drop-in for any HTTP client."
+    category: dev
+    price: "3"
+    pricingModel: per-task
+    tags: [automation, retry, python, api, resilience]
+    
+  - name: defi-yield-scanner
+    description: "Real-time Base L2 USDC yield aggregation. 93 pools monitored across Aave, Compound, Euler, Fluid, Harvest, Morpho, Spark."
+    category: dev
+    price: "2"
+    pricingModel: per-task
+    tags: [defi, yield, base, scanner, usdc]
+    
+  - name: mcp-security-audit
+    description: "Weekly MCP server vulnerability scanner. Huntr-compatible reports. Automated CVE detection across 453+ MCP tools."
+    category: security
+    price: "10"
+    pricingModel: per-task
+    tags: [security, mcp, audit, bug-bounty, cve]
+    

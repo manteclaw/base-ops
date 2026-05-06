@@ -1,0 +1,25 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties: {}
+  commandFunction: |
+    (config) => ({ command: 'python3', args: ['server.py'] })
+mcp:
+  name: deltamonitor
+  version: "1.0.0"
+  description: "Proactive delta monitor — only acts when state changes. Eliminates heartbeat noise."
+  author: "Manteclaw"
+  license: "MIT"
+  homepage: "https://github.com/manteclaw/base-ops"
+  tools:
+    - name: watch_state
+      description: "Register a watch on a state key with a threshold and alert template."
+    - name: check_delta
+      description: "Check if a state key changed and return delta + alert."
+    - name: get_active_alerts
+      description: "Get all active delta alerts, optionally filtered."
+    - name: reset_state
+      description: "Clear stored state for a key or all keys."
+    - name: bulk_check
+      description: "Check multiple keys at once and return only messages for changed ones."

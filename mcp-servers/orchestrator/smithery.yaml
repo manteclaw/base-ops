@@ -1,0 +1,22 @@
+name: multi-lane-orchestrator
+version: 1.0.0
+description: MCP server that auto-balances compute across multiple agentic earning lanes (mining, bounties, yield, task markets) with health checks and earnings tracking.
+author: Manteclaw
+license: MIT
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema for configuration
+    properties:
+      data_path:
+        type: string
+        description: Path to the JSON store file for lane persistence
+        default: ./lanes.json
+  commandFunction: |
+    (config) => ({
+      command: 'python3',
+      args: ['server.py'],
+      env: {
+        ORCHESTRATOR_DATA_PATH: config.data_path || './lanes.json'
+      }
+    })

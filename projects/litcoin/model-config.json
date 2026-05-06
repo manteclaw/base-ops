@@ -1,0 +1,172 @@
+{
+  "version": 1,
+  "description": "Model routing configuration for Litcoiin mining and general agent tasks",
+  "primary_provider": "openrouter",
+  "providers": {
+    "openrouter": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "fallback_chain": ["groq", "gemini", "cerebras", "together", "fireworks", "clawbank", "venice"],
+      "models": {
+        "coding": {
+          "primary": "inclusionai/ling-2.6-1t:free",
+          "fallback": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+          "emergency": "deepseek/deepseek-v4-flash",
+          "free_tier": "inclusionai/ling-2.6-1t:free"
+        },
+        "reasoning": {
+          "primary": "inclusionai/ling-2.6-1t:free",
+          "fallback": "deepseek/deepseek-v4-flash",
+          "emergency": "x-ai/grok-4"
+        },
+        "cheap": {
+          "primary": "inclusionai/ling-2.6-1t:free",
+          "fallback": "deepseek/deepseek-v4-flash",
+          "free_tier": "inclusionai/ling-2.6-1t:free"
+        },
+        "safety": {
+          "primary": "inclusionai/ling-2.6-1t:free",
+          "fallback": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"
+        },
+        "tcg": {
+          "primary": "inclusionai/ling-2.6-1t:free",
+          "fallback": "qwen/qwen-2.5-7b-instruct"
+        }
+      }
+    },
+    "gemini": {
+      "base_url": "https://generativelanguage.googleapis.com/v1beta",
+      "api_key_env": "GEMINI_API_KEY",
+      "note": "Google Gemini — 1,500 requests/day free tier. 15 RPM. Great for coding tasks.",
+      "models": {
+        "coding": "gemini-1.5-flash",
+        "reasoning": "gemini-1.5-flash",
+        "cheap": "gemini-1.5-flash",
+        "safety": "gemini-1.5-flash",
+        "tcg": "gemini-1.5-flash"
+      }
+    },
+    "cerebras": {
+      "base_url": "https://api.cerebras.ai/v1",
+      "api_key_env": "CEREBRAS_API_KEY",
+      "note": "Cerebras — free tier, insanely fast inference on Wafer Scale Engine.",
+      "models": {
+        "coding": "llama-3.1-70b",
+        "reasoning": "llama-3.1-70b",
+        "cheap": "llama-3.1-70b",
+        "safety": "llama-3.1-70b",
+        "tcg": "llama-3.1-70b"
+      }
+    },
+    "together": {
+      "base_url": "https://api.together.xyz/v1",
+      "api_key_env": "TOGETHER_API_KEY",
+      "note": "Together AI — $5 starter credit. Good for Mixtral/Llama coding tasks.",
+      "models": {
+        "coding": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        "reasoning": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "cheap": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        "safety": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "tcg": "mistralai/Mixtral-8x7B-Instruct-v0.1"
+      }
+    },
+      "base_url": "https://api.clawbank.co/v1",
+      "api_key_env": "CLAWBANK_API_KEY",
+      "note": "ClawBank API not yet publicly accessible. Will use OpenRouter proxy when available.",
+      "models": {
+        "coding": "qwen/qwen3-coder",
+        "reasoning": "anthropic/claude-opus-4.1"
+      }
+    },
+    "venice": {
+      "base_url": "https://api.venice.ai/api/v1",
+      "api_key_env": "VENICE_API_KEY",
+      "note": "Zero credits remaining. Top up required.",
+      "models": {
+        "coding": "venice-qwen",
+        "reasoning": "venice-llama"
+      }
+    },
+    "groq": {
+      "base_url": "https://api.groq.com/openai/v1",
+      "api_key_env": "GROQ_API_KEY",
+      "note": "Groq LPU inference — 300+ tokens/sec. Free tier: 500K-1M tokens/day.",
+      "models": {
+        "coding": {
+          "primary": "llama-3.1-8b-instant",
+          "complex": "llama-3.3-70b-versatile",
+          "fast": "llama-3.1-8b-instant",
+          "fallback": "qwen/qwen3-32b"
+        },
+        "reasoning": {
+          "primary": "llama-3.1-8b-instant",
+          "complex": "llama-3.3-70b-versatile"
+        },
+        "cheap": {
+          "primary": "llama-3.1-8b-instant",
+          "fallback": "llama-3.3-70b-versatile"
+        },
+        "safety": {
+          "primary": "llama-3.1-8b-instant",
+          "complex": "llama-3.3-70b-versatile"
+        },
+        "tcg": {
+          "primary": "llama-3.1-8b-instant",
+          "complex": "llama-3.3-70b-versatile"
+        }
+      }
+    },
+    "fireworks": {
+      "base_url": "https://api.fireworks.ai/inference/v1",
+      "api_key_env": "FIREWORKS_API_KEY",
+      "note": "Fireworks AI — fast inference, competitive pricing. Good for Llama/Mixtral.",
+      "models": {
+        "coding": {
+          "primary": "accounts/fireworks/models/llama-v3p1-70b-instruct",
+          "fast": "accounts/fireworks/models/llama-v3p1-8b-instruct"
+        },
+        "reasoning": {
+          "primary": "accounts/fireworks/models/llama-v3p1-70b-instruct"
+        },
+        "cheap": {
+          "primary": "accounts/fireworks/models/llama-v3p1-8b-instruct"
+        },
+        "safety": {
+          "primary": "accounts/fireworks/models/llama-v3p1-70b-instruct"
+        },
+        "tcg": {
+          "primary": "accounts/fireworks/models/llama-v3p1-70b-instruct"
+        }
+      }
+    }
+  },
+  "routing_rules": {
+    "litcoiin_mining": {
+      "task_type_mapping": {
+        "tcg_card_profile": "tcg",
+        "ai_safety": "safety",
+        "smart_contracts": "coding",
+        "compression": "coding",
+        "data_structures": "coding",
+        "infrastructure": "coding",
+        "math": "reasoning",
+        "code_test": "coding",
+        "unknown": "cheap"
+      },
+      "parallel_solvers": 3,
+      "max_tokens_default": 2048,
+      "temperature_default": 0.3
+    },
+    "cost_optimization": {
+      "enable_free_tier_for_testing": true,
+      "free_tier_rate_limit": "10/min",
+      "auto_downgrade_on_quota_error": true,
+      "roi_threshold_usd_per_hour": 0.50
+    }
+  },
+  "circuit_breaker": {
+    "failure_threshold": 5,
+    "recovery_timeout_seconds": 300,
+    "half_open_requests": 2
+  }
+}

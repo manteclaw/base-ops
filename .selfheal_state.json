@@ -1,0 +1,28 @@
+{
+  "breakers": {
+    "mcps-audit": {
+      "failure_threshold": 5,
+      "recovery_timeout": 60.0,
+      "failures": 0,
+      "state": "closed",
+      "last_failure_time": null
+    },
+    "agent-audit": {
+      "failure_threshold": 5,
+      "recovery_timeout": 60.0,
+      "failures": 4,
+      "state": "closed",
+      "last_failure_time": 1778098638.9581046
+    }
+  },
+  "dead_letter": [
+    {
+      "service": "agent-audit",
+      "function": "run_agent_audit",
+      "error": "agent-audit failed: \u274c Failed to parse config: Error: Cannot read config file at /root/.openclaw/workspace/projects: Error: EISDIR: illegal operation on a directory, read\n",
+      "timestamp": "2026-05-06T20:17:18.958139",
+      "args": "('/root/.openclaw/workspace/projects',)"
+    }
+  ],
+  "saved_at": "2026-05-06T20:17:18.958174"
+}

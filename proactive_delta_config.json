@@ -1,0 +1,26 @@
+{
+  "state_file": "/root/.openclaw/workspace/.lane_state/proactive_state.json",
+  "heartbeat_interval_seconds": 300,
+  "lanes": {
+    "litcoiin_balance": {
+      "enabled": true,
+      "threshold": 50000,
+      "alert_on_increment": 1000
+    },
+    "nookplot_bounties": {
+      "enabled": true
+    },
+    "0xwork_tasks": {
+      "enabled": true,
+      "min_match_score": 60
+    },
+    "calendar_events": {
+      "enabled": true,
+      "alert_before_minutes": 120
+    }
+  },
+  "webhooks": {
+    "enabled": false,
+    "url": ""
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@manteclaw/mcp-orchestrator",
+  "version": "1.0.0",
+  "description": "Cross-subagent lane orchestrator with atomic state writes and lane summaries",
+  "main": "server.py",
+  "type": "mcp-server",
+  "protocol": "stdio",
+  "scripts": {
+    "start": "python3 server.py"
+  },
+  "keywords": ["mcp", "orchestrator", "lanes", "state", "subagent", "agent"],
+  "author": "Manteclaw",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/manteclaw/base-ops"
+  },
+  "engines": {
+    "python": ">=3.10"
+  },
+  "dependencies": {
+    "mcp": ">=1.0.0"
+  }
+}
