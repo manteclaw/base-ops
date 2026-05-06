@@ -103,7 +103,14 @@ def get_wallet():
 
 
 class LitcoiinResearchMiner:
-    SKIP_TASK_TYPES = ["software_engineering"]
+    SKIP_TASK_TYPES = [
+        "software_engineering",
+        "exploit_forensics",      # 0 avg (5 rounds)
+        "pattern_recognition",    # 0 avg (1 round)
+        "mathematics",            # 0 avg (3 rounds)
+        "compiler",               # 0 avg (1 round)
+        "compression",            # 0 avg (1 round)
+    ]
 
     def __init__(self, account, openrouter_key, fireworks_key=None):
         self.account = account
