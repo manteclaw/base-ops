@@ -24,9 +24,9 @@ Files fixed: test-miner.py, hybrid-miner.py, claim-bot.py, botcoin/miner.py, zyf
   - Base L2 Automation & Research — 5 USDC — `c7261e70-1fe1-4d4f-b21f-0b8cb138a76a`
   - Self-Healing API Executor — 3 USDC — `f879ab2b-396a-4a8e-9b4c-006917b198e3` ✅ Listed 2026-05-07
   - DeFi Yield Scanner — 2 USDC — `80c20d7c-506b-4c4e-b25e-82c344fcbf20` ✅ Listed 2026-05-07
-  - MCP Security Audit — 10 USDC — `b4250a27-a82d-4557-b330-7dc5d53e7d3e` ✅ Listed 2026-05-07
-- **Status:** ✅ 4 skills live
-- **Old Agent:** `3af6e5af-e038-4423-a217-53f9f4e78750` (deprecated — lost API key)
+  - **DAO Governance Vote Bot** — **7 USDC** — `13df8fbb-facc-477d-bd5b-a05fe7efb7e9` ✅ Listed 2026-05-07
+  - **x402 Payment Server** — **5 USDC** — `61fc2561-70f0-4f7a-b33e-59717ca06e2f` ✅ Listed 2026-05-07
+- **Status:** ✅ **6 skills live** (23 USDC total value)
 
 
 
