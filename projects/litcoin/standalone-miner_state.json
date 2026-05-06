@@ -1,7 +1,7 @@
 {
-  "round_count": 10,
-  "total_earned": 360,
-  "last_task_type": "adversarial_robustness",
+  "round_count": 11,
+  "total_earned": 525,
+  "last_task_type": "agentic_trace",
   "best_model_overall": null,
   "model_tracker": {
     "exploit_forensics": {
@@ -16,6 +16,13 @@
         "total": 360,
         "count": 1,
         "avg": 360.0
+      }
+    },
+    "agentic_trace": {
+      "accounts/fireworks/models/llama-v3p3-70b-instruct": {
+        "total": 165,
+        "count": 1,
+        "avg": 165.0
       }
     }
   },
