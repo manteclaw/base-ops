@@ -355,74 +355,64 @@ class LitcoiinResearchMiner:
         return min(avgs, key=avgs.get)
 
     def _hash_task(self, task):
-        """Create a hash for task caching."""
+        """Create a fuzzy hash for task caching — catches reworded prompts."""
         import hashlib
         prompt = task.get("prompt", task.get("description", ""))
         task_type = task.get("type", "unknown")
-        return hashlib.md5(f"{task_type}:{prompt[:200]}".encode()).hexdigest()
+        # Normalize: lowercase, collapse whitespace, take first 200 chars
+        normalized = re.sub(r'\s+', ' ', prompt.lower().strip())[:200]
+        return hashlib.md5(f"{task_type}:{normalized}".encode()).hexdigest()
 
-    def _get_cached_solution(self, task):
-        """Check if we have a cached solution for this task."""
-        task_hash = self._hash_task(task)
-        if task_hash in self.solution_cache:
-            self.cache_hits += 1
-            log.info(f"💾 Cache hit! (hits: {self.cache_hits})")
-            return self.solution_cache[task_hash]
-        return None
-
-    def _cache_solution(self, task, solution):
-        """Cache a successful solution."""
-        task_hash = self._hash_task(task)
-        self.solution_cache[task_hash] = solution
-        if len(self.solution_cache) > 100:
-            oldest = next(iter(self.solution_cache))
-            del self.solution_cache[oldest]
-
-    def _pick_smart_model(self, task_type):
-        """UCB1 bandit: balance exploration vs exploitation for model selection."""
+    def _predict_difficulty(self, task):
+        """Predict expected reward for a task based on prompt characteristics.
+        Returns estimated score (0-100). If <30, skip to save API calls."""
+        task_type = task.get("type", "unknown")
+        prompt = task.get("prompt", task.get("description", ""))
+        
+        # Base score from historical data
         tracker = self.model_tracker.get(task_type, {})
-        if not tracker:
-            return None
+        if tracker:
+            total_count = sum(s["count"] for s in tracker.values())
+            historical_avg = sum(s["avg"] * s["count"] for s in tracker.values()) / max(total_count, 1)
+        else:
+            historical_avg = 50  # default assumption
         
-        total_pulls = sum(s["count"] for s in tracker.values())
-        best_score = -1
-        best_model = None
+        # Difficulty modifiers
+        prompt_len = len(prompt)
+        modifiers = 0
         
-        for model, stats in tracker.items():
-            if stats["count"] == 0:
-                return model  # unexplored model gets priority
-            avg_reward = stats["avg"]
-            # UCB1 formula: avg + sqrt(2 * ln(total) / count)
-            exploration = math.sqrt(2 * math.log(total_pulls) / stats["count"])
-            ucb_score = avg_reward + exploration
-            if ucb_score > best_score:
-                best_score = ucb_score
-                best_model = model
+        # Longer prompts tend to be harder (but also higher value)
+        if prompt_len > 2000:
+            modifiers += 10
+        elif prompt_len > 1000:
+            modifiers += 5
+        elif prompt_len < 200:
+            modifiers -= 10  # short prompts usually low value
         
-        return best_model
-        """Track provider response times."""
-        if provider not in self.provider_latency:
-            self.provider_latency[provider] = []
-        self.provider_latency[provider].append(elapsed_ms)
-        # Keep last 20 measurements
-        self.provider_latency[provider] = self.provider_latency[provider][-20:]
-
-    def _get_fastest_provider(self):
-        """Return the provider with lowest average latency."""
-        avgs = {}
-        for provider, times in self.provider_latency.items():
-            if times:
-                avgs[provider] = sum(times) / len(times)
-        if not avgs:
-            return None
-        return min(avgs, key=avgs.get)
-
-    def _hash_task(self, task):
-        """Create a hash for task caching."""
-        import hashlib
-        prompt = task.get("prompt", task.get("description", ""))
-        task_type = task.get("type", "unknown")
-        return hashlib.md5(f"{task_type}:{prompt[:200]}".encode()).hexdigest()
+        # Keywords that indicate high-value tasks
+        high_value_keywords = ["smart contract", "vulnerability", "security", "optimize", "complex", "algorithm"]
+        low_value_keywords = ["hello", "simple", "basic", "example", "test", "trivial"]
+        
+        prompt_lower = prompt.lower()
+        for kw in high_value_keywords:
+            if kw in prompt_lower:
+                modifiers += 8
+        for kw in low_value_keywords:
+            if kw in prompt_lower:
+                modifiers -= 15
+        
+        # Task type modifiers (learned from historical)
+        type_modifier = {
+            "tcg_card_profile": 15,
+            "smart_contracts": 10,
+            "adversarial_robustness": 8,
+            "instruction_tuning": 5,
+            "agentic_trace": -5,
+            "bioinformatics": -10,
+        }.get(task_type, 0)
+        
+        predicted = historical_avg + modifiers + type_modifier
+        return max(0, min(100, predicted))
 
     def _get_cached_solution(self, task):
         """Check if we have a cached solution for this task."""
@@ -691,11 +681,15 @@ class LitcoiinResearchMiner:
             return data
         raise Exception("Could not find a suitable task after 5 attempts")
 
-    def solve_with_llm(self, task):
-        """Solve a research task using provider selection + circuit breaker."""
+    def solve_with_llm(self, task, attempt=1, max_attempts=3, temperature=None):
+        """Solve a research task using provider selection + circuit breaker + adaptive temp."""
         task_type = task.get("type", "code_optimization")
         prompt = task.get("prompt", task.get("description", ""))
         entry = task.get("constraints", {}).get("entry_function", "solve")
+
+        # Adaptive temperature: start low, increase on retry
+        if temperature is None:
+            temperature = min(0.1 + (attempt - 1) * 0.2, 0.5)
 
         provider = self._select_provider(task_type)
         if not provider:
@@ -703,16 +697,15 @@ class LitcoiinResearchMiner:
             return None, None
 
         if provider == "fireworks":
-            code, model = self._call_fireworks(task_type, prompt, entry)
+            code, model = self._call_fireworks(task_type, prompt, entry, temperature=temperature)
             success = code is not None
             self._record_provider_result("fireworks", success)
             if success:
                 self.last_model_used = model or MODEL_FALLBACK
                 return code, self.last_model_used
-            # Fallback to OpenRouter if Fireworks failed and we aren't already locked
             if self._provider_available("openrouter") and self.cb_forced_provider != "fireworks":
                 log.info("Fireworks failed, trying OpenRouter fallback...")
-                code, model = self._call_openrouter(task_type, prompt, entry)
+                code, model = self._call_openrouter(task_type, prompt, entry, temperature=temperature)
                 success2 = code is not None
                 self._record_provider_result("openrouter", success2)
                 if success2:
@@ -720,16 +713,15 @@ class LitcoiinResearchMiner:
                     return code, self.last_model_used
 
         elif provider == "openrouter":
-            code, model = self._call_openrouter(task_type, prompt, entry)
+            code, model = self._call_openrouter(task_type, prompt, entry, temperature=temperature)
             success = code is not None
             self._record_provider_result("openrouter", success)
             if success:
                 self.last_model_used = model or MODEL_PRIMARY
                 return code, self.last_model_used
-            # Fallback to Fireworks
             if self._provider_available("fireworks") and self.cb_forced_provider != "openrouter":
                 log.info("OpenRouter failed, trying Fireworks fallback...")
-                code, model = self._call_fireworks(task_type, prompt, entry)
+                code, model = self._call_fireworks(task_type, prompt, entry, temperature=temperature)
                 success2 = code is not None
                 self._record_provider_result("fireworks", success2)
                 if success2:
@@ -739,9 +731,41 @@ class LitcoiinResearchMiner:
         log.error("Both providers failed to produce a solution.")
         return None, None
 
-    def _call_openrouter(self, task_type, prompt, entry):
-        """Call OpenRouter API with model rotation on rate limits."""
-        log.info(f"Solving {task_type} task with OpenRouter...")
+    def _ensemble_solve(self, task):
+        """Multi-model ensemble: call both providers, return best solution by quality score."""
+        task_type = task.get("type", "unknown")
+        prompt = task.get("prompt", task.get("description", ""))
+        entry = task.get("constraints", {}).get("entry_function", "solve")
+        
+        solutions = []
+        
+        # Try OpenRouter
+        if self._provider_available("openrouter"):
+            code, model = self._call_openrouter(task_type, prompt, entry, temperature=0.15)
+            if code:
+                q = self._score_solution(code, task_type)
+                solutions.append((code, model, q, "openrouter"))
+                log.info(f"🎭 Ensemble: OpenRouter scored {q}")
+        
+        # Try Fireworks
+        if self._provider_available("fireworks"):
+            code, model = self._call_fireworks(task_type, prompt, entry, temperature=0.15)
+            if code:
+                q = self._score_solution(code, task_type)
+                solutions.append((code, model, q, "fireworks"))
+                log.info(f"🎭 Ensemble: Fireworks scored {q}")
+        
+        if not solutions:
+            return None, None
+        
+        # Pick best by quality score
+        best = max(solutions, key=lambda x: x[2])
+        log.info(f"🎭 Ensemble winner: {best[1]} (score={best[2]}, from {best[3]})")
+        return best[0], best[1]
+
+    def _call_openrouter(self, task_type, prompt, entry, temperature=0.1):
+        """Call OpenRouter API with model rotation and adaptive temperature."""
+        log.info(f"Solving {task_type} task with OpenRouter (temp={temperature})...")
         system_msg = self._build_system_msg(task_type, entry)
         headers = {
             "Authorization": f"Bearer {self.openrouter_key}",
@@ -749,7 +773,6 @@ class LitcoiinResearchMiner:
             "HTTP-Referer": "https://litcoin-miner.local",
             "X-Title": "Litcoin Standalone Miner"
         }
-        # Smart model override if we have enough data
         smart = self._pick_smart_model(task_type)
         models_to_try = []
         if smart and ":" in smart:
@@ -764,7 +787,7 @@ class LitcoiinResearchMiner:
                     {"role": "user", "content": prompt}
                 ],
                 "max_tokens": 2048,
-                "temperature": 0.1
+                "temperature": temperature
             }
             try:
                 start = time.time()
@@ -789,9 +812,9 @@ class LitcoiinResearchMiner:
         log.error("All OpenRouter models exhausted")
         return None, None
 
-    def _call_fireworks(self, task_type, prompt, entry):
-        """Call Fireworks AI API with model rotation."""
-        log.info(f"Solving {task_type} task with Fireworks AI...")
+    def _call_fireworks(self, task_type, prompt, entry, temperature=0.1):
+        """Call Fireworks AI API with model rotation and adaptive temperature."""
+        log.info(f"Solving {task_type} task with Fireworks AI (temp={temperature})...")
         system_msg = self._build_system_msg(task_type, entry)
         headers = {
             "Authorization": f"Bearer {self.fireworks_key}",
@@ -812,7 +835,7 @@ class LitcoiinResearchMiner:
                     {"role": "user", "content": prompt}
                 ],
                 "max_tokens": 2048,
-                "temperature": 0.1
+                "temperature": temperature
             }
             try:
                 start = time.time()
@@ -935,6 +958,15 @@ class LitcoiinResearchMiner:
         self._record_task_type(task_type)
         log.info(f"Task: {task_id} | Type: {task_type}")
         
+        # ── Predictive difficulty scoring (skip low-value tasks) ──
+        predicted = self._predict_difficulty(task)
+        if predicted < 30:
+            log.warning(f"🚫 Predicted low value ({predicted:.0f}/100), skipping task to save API calls")
+            self.consec_global_fails += 1
+            self._persist()
+            return None
+        log.info(f"🔮 Predicted value: {predicted:.0f}/100")
+        
         # ── Check cache first ──
         cached = self._get_cached_solution(task)
         if cached:
@@ -942,7 +974,12 @@ class LitcoiinResearchMiner:
             actual_model = "cached"
             log.info(f"💾 Using cached solution ({len(solution)} chars)")
         else:
-            solution, actual_model = self.solve_with_llm(task)
+            # ── Ensemble mode for high-value tasks ──
+            if task_type in self.HIGH_VALUE_TASKS and self._provider_available("openrouter") and self._provider_available("fireworks"):
+                log.info("🎭 High-value task — using ensemble mode (both providers)")
+                solution, actual_model = self._ensemble_solve(task)
+            else:
+                solution, actual_model = self.solve_with_llm(task)
         
         if not solution:
             log.error("No solution generated, skipping")
@@ -956,30 +993,50 @@ class LitcoiinResearchMiner:
         if valid:
             log.info(f"✅ Solution passed validation ({reason})")
         else:
-            log.warning(f"⚠️ Solution validation failed: {reason} — regenerating...")
-            solution2, actual_model2 = self.solve_with_llm(task)
+            log.warning(f"⚠️ Solution validation failed: {reason} — regenerating with higher temp...")
+            solution2, actual_model2 = self.solve_with_llm(task, attempt=2, temperature=0.3)
             if solution2:
                 valid2, reason2 = self._validate_solution(solution2, task_type)
                 if valid2:
                     solution = solution2
                     actual_model = actual_model2
-                    log.info(f"🔄 Regenerated with valid solution ({reason2})")
+                    log.info(f"🔄 Regenerated with valid solution ({reason2}) at temp=0.3")
                 else:
-                    log.warning(f"⚠️ Regenerated solution also failed: {reason2} — submitting original anyway")
+                    # One more try at temp=0.5
+                    solution3, actual_model3 = self.solve_with_llm(task, attempt=3, temperature=0.5)
+                    if solution3:
+                        valid3, reason3 = self._validate_solution(solution3, task_type)
+                        if valid3:
+                            solution = solution3
+                            actual_model = actual_model3
+                            log.info(f"🔄 Regenerated with valid solution ({reason3}) at temp=0.5")
+                        else:
+                            log.warning(f"⚠️ All regeneration attempts failed — submitting original anyway")
+                    else:
+                        log.warning("⚠️ Regeneration failed — submitting original anyway")
             else:
                 log.warning("⚠️ Regeneration failed — submitting original anyway")
         
         # ── Solution quality scoring ──
         quality = self._score_solution(solution, task_type)
         if quality < 40:
-            log.warning(f"⚠️ Low quality score ({quality}), regenerating...")
-            solution2, actual_model2 = self.solve_with_llm(task)
+            log.warning(f"⚠️ Low quality score ({quality}), regenerating with higher temp...")
+            solution2, actual_model2 = self.solve_with_llm(task, attempt=2, temperature=0.3)
             if solution2:
                 quality2 = self._score_solution(solution2, task_type)
                 if quality2 > quality:
                     solution = solution2
                     actual_model = actual_model2
-                    log.info(f"🔄 Regenerated with better quality: {quality2}")
+                    log.info(f"🔄 Regenerated with better quality: {quality2} at temp=0.3")
+                else:
+                    # Try once more at temp=0.5
+                    solution3, actual_model3 = self.solve_with_llm(task, attempt=3, temperature=0.5)
+                    if solution3:
+                        quality3 = self._score_solution(solution3, task_type)
+                        if quality3 > quality:
+                            solution = solution3
+                            actual_model = actual_model3
+                            log.info(f"🔄 Regenerated with better quality: {quality3} at temp=0.5")
         
         # ── Batch or immediate submit ──
         if self.BATCH_SIZE > 1:

@@ -1,7 +1,7 @@
 {
-  "round_count": 516,
-  "total_earned": 12638,
-  "last_task_type": "agentic_trace",
+  "round_count": 712,
+  "total_earned": 15140,
+  "last_task_type": "instruction_tuning",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -16,6 +16,11 @@
         "total": 1948,
         "count": 15,
         "avg": 129.86666666666667
+      },
+      "inclusionai/ling-2.6-1t-20260423:free": {
+        "total": 161,
+        "count": 1,
+        "avg": 161.0
       }
     },
     "agentic_trace": {
@@ -23,6 +28,11 @@
         "total": 3467,
         "count": 28,
         "avg": 123.82142857142857
+      },
+      "inclusionai/ling-2.6-1t-20260423:free": {
+        "total": 663,
+        "count": 20,
+        "avg": 33.15
       }
     },
     "knowledge_synthesis": {
@@ -44,6 +54,11 @@
         "total": 1632,
         "count": 11,
         "avg": 148.36363636363637
+      },
+      "inclusionai/ling-2.6-1t-20260423:free": {
+        "total": 816,
+        "count": 31,
+        "avg": 26.322580645161292
       }
     },
     "smart_contracts": {
@@ -51,6 +66,11 @@
         "total": 874,
         "count": 80,
         "avg": 10.925
+      },
+      "inclusionai/ling-2.6-1t-20260423:free": {
+        "total": 0,
+        "count": 24,
+        "avg": 0.0
       }
     },
     "algorithm": {
@@ -72,6 +92,11 @@
         "total": 548,
         "count": 6,
         "avg": 91.33333333333333
+      },
+      "inclusionai/ling-2.6-1t-20260423:free": {
+        "total": 0,
+        "count": 3,
+        "avg": 0.0
       }
     },
     "pattern_recognition": {
@@ -86,6 +111,11 @@
         "total": 2749,
         "count": 33,
         "avg": 83.3030303030303
+      },
+      "inclusionai/ling-2.6-1t-20260423:free": {
+        "total": 862,
+        "count": 26,
+        "avg": 33.15384615384615
       }
     },
     "runescape_ta": {
@@ -126,33 +156,45 @@
   },
   "initial_balance": 0,
   "provider_latency": {
-    "fireworks": [
-      7729.26926612854,
-      4948.6565589904785,
-      5236.926794052124,
-      9605.499982833862,
-      5007.558107376099,
-      12125.654697418213,
-      3496.5667724609375,
-      5489.7050857543945,
-      8511.343479156494,
-      4450.742244720459,
-      7053.783178329468,
-      5273.740768432617
+    "openrouter": [
+      800.21071434021,
+      2069.902181625366,
+      838.6480808258057,
+      783.4501266479492,
+      812.2894763946533,
+      696.326494216919,
+      808.8150024414062,
+      815.7210350036621,
+      1165.006399154663,
+      675.8887767791748,
+      860.3544235229492,
+      804.9144744873047,
+      1038.205862045288,
+      944.695234298706,
+      1189.8229122161865,
+      824.2781162261963,
+      843.2376384735107,
+      1232.0284843444824,
+      893.8450813293457,
+      750.4968643188477
     ]
   },
-  "cache_hits": 4,
+  "cache_hits": 112,
   "recent_task_types": [
+    "agentic_trace",
+    "bioinformatics",
     "tcg_card_profile",
     "smart_contracts",
-    "instruction_tuning",
-    "adversarial_robustness",
-    "agentic_trace"
+    "instruction_tuning"
   ],
   "hourly_stats": {
     "08": {
-      "count": 10,
-      "total": 652
+      "count": 47,
+      "total": 2649
+    },
+    "09": {
+      "count": 68,
+      "total": 505
     }
   },
   "quality_scores": {}
