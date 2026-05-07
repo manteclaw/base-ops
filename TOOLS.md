@@ -50,13 +50,17 @@
 | 4 | Earnings Analytics Dashboard | ✅ Active |
 | 5 | Adaptive Temperature Scheduling | ✅ Active (0.1→0.3→0.5) |
 | 6 | Fuzzy Solution Caching | ✅ Active |
-| 7 | Multi-Model Ensemble | ✅ Active (Fireworks+OpenRouter) |
+| 7 | Multi-Model Ensemble | ✅ Active (NVIDIA+Fireworks+OpenRouter) |
 | 8 | Predictive Difficulty Scoring | ✅ Active (skips <30/100) |
 
 **Provider Status:**
-- Fireworks: `fw_***` — ✅ Working, primary
+- **NVIDIA NIM**: `nvapi-***` — ✅ **PRIMARY PROVIDER**, wired v5.4
+  - Primary: `meta/llama-3.1-8b-instruct` (~24s, 95/100 quality)
+  - Backup: `meta/llama-3.1-70b-instruct` (~60s+ timeout, fallback only)
+  - 136 models available on account, 120s timeout, circuit breaker wired
+- Fireworks: `fw_***` — ✅ Working, secondary
 - OpenRouter: `sk-or-v1-***` — 🔴 Rate limited on ALL models
-- Kimi: `sk-kimi-***` — ✅ Available (not wired to miner)
+- Kimi: `sk-kimi-***` — 🔴 Invalid auth (401)
 
 **Controls:**
 ```bash
