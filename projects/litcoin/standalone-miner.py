@@ -137,13 +137,14 @@ class LitcoiinResearchMiner:
     # Min solutions to queue before batch submit
     BATCH_SIZE = 1  # set to 3+ to enable batching (coordinator may not support)
 
-    def __init__(self, account, openrouter_key, fireworks_key=None):
+    def __init__(self, account, openrouter_key, fireworks_key=None, kimi_key=None):
         self.account = account
         self.openrouter_key = openrouter_key
         self.fireworks_key = fireworks_key
+        self.kimi_key = kimi_key
         self.session = requests.Session()
         self.session.headers["Content-Type"] = "application/json"
-        self.session.headers["X-Litcoin-SDK"] = "standalone-research-4.14.3"
+        self.session.headers["X-Litcoin-SDK"] = "standalone-research-5.4.0"
         self.auth_token = None
         self.auth_expiry = 0
         self.last_model_used = MODEL_PRIMARY
@@ -153,10 +154,15 @@ class LitcoiinResearchMiner:
         # circuit breaker counters
         self.or_fails = 0                 # consecutive OpenRouter failures
         self.fw_fails = 0                 # consecutive Fireworks failures
+        self.kimi_fails = 0               # consecutive Kimi failures
         self.cb_lockout_remaining = 0     # rounds left on forced-alt provider
-        self.cb_forced_provider = None    # "openrouter" | "fireworks" | None
+        self.cb_forced_provider = None    # "openrouter" | "fireworks" | "kimi" | None
         # backoff
         self.backoff_attempt = 0          # resets on any success
+        # dynamic delay scaling
+        self.base_delay = 3
+        self.current_delay = self.base_delay
+        self.consec_round_fails = 0
         # task rotation state
         self.recent_task_types = self.state.get("recent_task_types", [])
         # time-of-day tracking: {hour: {"count": 0, "total": 0}}
@@ -461,6 +467,8 @@ class LitcoiinResearchMiner:
             return bool(self.openrouter_key)
         if name == "fireworks":
             return bool(self.fireworks_key)
+        if name == "kimi":
+            return bool(self.kimi_key)
         return False
 
     def _select_provider(self, task_type):
@@ -474,53 +482,91 @@ class LitcoiinResearchMiner:
         # 2. Smart model preference: if a model dominates for this task_type, use its provider
         smart = self._pick_smart_model(task_type)
         if smart:
-            if "fireworks" in smart.lower() or "llama" in smart.lower():
-                if self._provider_available("fireworks"):
+            if "fireworks" in smart.lower() or "llama" in smart.lower() or "accounts/" in smart:
+                if self._provider_available("fireworks") and self.fw_fails < CB_TRIGGER_FAILURES:
                     return "fireworks"
-            if self._provider_available("openrouter"):
+            if "kimi" in smart.lower() or "moonshot" in smart.lower():
+                if self._provider_available("kimi") and self.kimi_fails < CB_TRIGGER_FAILURES:
+                    return "kimi"
+            if self._provider_available("openrouter") and self.or_fails < CB_TRIGGER_FAILURES:
                 return "openrouter"
 
-        # 3. Latency-based selection: use fastest provider when both healthy
-        if (self._provider_available("fireworks") and self.fw_fails < CB_TRIGGER_FAILURES and
-            self._provider_available("openrouter") and self.or_fails < CB_TRIGGER_FAILURES):
+        # 3. Latency-based selection: use fastest provider when all healthy
+        healthy = []
+        if self._provider_available("fireworks") and self.fw_fails < CB_TRIGGER_FAILURES:
+            healthy.append("fireworks")
+        if self._provider_available("kimi") and self.kimi_fails < CB_TRIGGER_FAILURES:
+            healthy.append("kimi")
+        if self._provider_available("openrouter") and self.or_fails < CB_TRIGGER_FAILURES:
+            healthy.append("openrouter")
+        
+        if len(healthy) > 1:
             fastest = self._get_fastest_provider()
-            if fastest:
-                log.info(f"[LATENCY] Fastest provider: {fastest} ({self.provider_latency.get(fastest, [])[-3:]}) ms)")
+            if fastest and fastest in healthy:
+                log.info(f"[LATENCY] Fastest provider: {fastest}")
                 return fastest
 
-        # 4. Default: Fireworks first if healthy, then OpenRouter
+        # 4. Default priority: Kimi > Fireworks > OpenRouter (OpenRouter is dead)
+        if self._provider_available("kimi") and self.kimi_fails < CB_TRIGGER_FAILURES:
+            return "kimi"
         if self._provider_available("fireworks") and self.fw_fails < CB_TRIGGER_FAILURES:
             return "fireworks"
         if self._provider_available("openrouter") and self.or_fails < CB_TRIGGER_FAILURES:
             return "openrouter"
 
         # 5. Fallback to whoever is available regardless of failures
-        if self._provider_available("openrouter"):
-            return "openrouter"
-        if self._provider_available("fireworks"):
-            return "fireworks"
+        for p in ["kimi", "fireworks", "openrouter"]:
+            if self._provider_available(p):
+                return p
         return None
 
     def _record_provider_result(self, provider, success):
-        """Update circuit breaker counters."""
+        """Update circuit breaker counters with auto-failover chain."""
         if provider == "openrouter":
             if success:
                 self.or_fails = 0
             else:
                 self.or_fails += 1
-                if self.or_fails >= CB_TRIGGER_FAILURES and self._provider_available("fireworks"):
-                    log.warning(f"[CB] OpenRouter failed {self.or_fails}x → locking to Fireworks for {CB_LOCKOUT_ROUNDS} rounds")
-                    self.cb_forced_provider = "fireworks"
-                    self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                if self.or_fails >= CB_TRIGGER_FAILURES:
+                    # OpenRouter dead → try Kimi, then Fireworks
+                    if self._provider_available("kimi"):
+                        log.warning(f"[CB] OpenRouter failed {self.or_fails}x → locking to Kimi for {CB_LOCKOUT_ROUNDS} rounds")
+                        self.cb_forced_provider = "kimi"
+                        self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                    elif self._provider_available("fireworks"):
+                        log.warning(f"[CB] OpenRouter failed {self.or_fails}x → locking to Fireworks for {CB_LOCKOUT_ROUNDS} rounds")
+                        self.cb_forced_provider = "fireworks"
+                        self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
         elif provider == "fireworks":
             if success:
                 self.fw_fails = 0
             else:
                 self.fw_fails += 1
-                if self.fw_fails >= CB_TRIGGER_FAILURES and self._provider_available("openrouter"):
-                    log.warning(f"[CB] Fireworks failed {self.fw_fails}x → locking to OpenRouter for {CB_LOCKOUT_ROUNDS} rounds")
-                    self.cb_forced_provider = "openrouter"
-                    self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                if self.fw_fails >= CB_TRIGGER_FAILURES:
+                    # Fireworks dead → try Kimi, then OpenRouter
+                    if self._provider_available("kimi"):
+                        log.warning(f"[CB] Fireworks failed {self.fw_fails}x → locking to Kimi for {CB_LOCKOUT_ROUNDS} rounds")
+                        self.cb_forced_provider = "kimi"
+                        self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                    elif self._provider_available("openrouter"):
+                        log.warning(f"[CB] Fireworks failed {self.fw_fails}x → locking to OpenRouter for {CB_LOCKOUT_ROUNDS} rounds")
+                        self.cb_forced_provider = "openrouter"
+                        self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+        elif provider == "kimi":
+            if success:
+                self.kimi_fails = 0
+            else:
+                self.kimi_fails += 1
+                if self.kimi_fails >= CB_TRIGGER_FAILURES:
+                    # Kimi dead → try Fireworks, then OpenRouter
+                    if self._provider_available("fireworks"):
+                        log.warning(f"[CB] Kimi failed {self.kimi_fails}x → locking to Fireworks for {CB_LOCKOUT_ROUNDS} rounds")
+                        self.cb_forced_provider = "fireworks"
+                        self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                    elif self._provider_available("openrouter"):
+                        log.warning(f"[CB] Kimi failed {self.kimi_fails}x → locking to OpenRouter for {CB_LOCKOUT_ROUNDS} rounds")
+                        self.cb_forced_provider = "openrouter"
+                        self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
 
     def _check_kill_switch(self):
         """Return True if miner should stop immediately."""
@@ -716,67 +762,61 @@ class LitcoiinResearchMiner:
 
         provider = self._select_provider(task_type)
         if not provider:
-            log.error("No LLM provider available. Set OPENROUTER_API_KEY or FIREWORKS_API_KEY.")
+            log.error("No LLM provider available. Set OPENROUTER_API_KEY, FIREWORKS_API_KEY, or KIMI_API_KEY.")
             return None, None
 
-        if provider == "fireworks":
-            code, model = self._call_fireworks(task_type, prompt, entry, temperature=temperature)
-            success = code is not None
-            self._record_provider_result("fireworks", success)
-            if success:
-                self.last_model_used = model or MODEL_FALLBACK
-                return code, self.last_model_used
-            if self._provider_available("openrouter") and self.cb_forced_provider != "fireworks":
-                log.info("Fireworks failed, trying OpenRouter fallback...")
-                code, model = self._call_openrouter(task_type, prompt, entry, temperature=temperature)
-                success2 = code is not None
-                self._record_provider_result("openrouter", success2)
-                if success2:
-                    self.last_model_used = model or MODEL_PRIMARY
+        # Helper: try all remaining providers in priority order
+        def try_providers(primary):
+            order = []
+            if primary == "kimi":
+                order = ["kimi", "fireworks", "openrouter"]
+            elif primary == "fireworks":
+                order = ["fireworks", "kimi", "openrouter"]
+            else:
+                order = ["openrouter", "kimi", "fireworks"]
+            for p in order:
+                if not self._provider_available(p):
+                    continue
+                if p == self.cb_forced_provider and p != primary:
+                    continue  # skip if circuit-breaker locked us away from this
+                if p == "kimi":
+                    code, model = self._call_kimi(task_type, prompt, entry, temperature=temperature)
+                elif p == "fireworks":
+                    code, model = self._call_fireworks(task_type, prompt, entry, temperature=temperature)
+                else:
+                    code, model = self._call_openrouter(task_type, prompt, entry, temperature=temperature)
+                success = code is not None
+                self._record_provider_result(p, success)
+                if success:
+                    self.last_model_used = model or (MODEL_FALLBACK if p == "fireworks" else MODEL_PRIMARY)
                     return code, self.last_model_used
+                log.info(f"{p} failed, trying next provider...")
+            return None, None
 
-        elif provider == "openrouter":
-            code, model = self._call_openrouter(task_type, prompt, entry, temperature=temperature)
-            success = code is not None
-            self._record_provider_result("openrouter", success)
-            if success:
-                self.last_model_used = model or MODEL_PRIMARY
-                return code, self.last_model_used
-            if self._provider_available("fireworks") and self.cb_forced_provider != "openrouter":
-                log.info("OpenRouter failed, trying Fireworks fallback...")
-                code, model = self._call_fireworks(task_type, prompt, entry, temperature=temperature)
-                success2 = code is not None
-                self._record_provider_result("fireworks", success2)
-                if success2:
-                    self.last_model_used = model or MODEL_FALLBACK
-                    return code, self.last_model_used
-
-        log.error("Both providers failed to produce a solution.")
-        return None, None
+        return try_providers(provider)
 
     def _ensemble_solve(self, task):
-        """Multi-model ensemble: call both providers, return best solution by quality score."""
+        """Multi-model ensemble: call all providers, return best solution by quality score."""
         task_type = task.get("type", "unknown")
         prompt = task.get("prompt", task.get("description", ""))
         entry = task.get("constraints", {}).get("entry_function", "solve")
         
         solutions = []
         
-        # Try OpenRouter
-        if self._provider_available("openrouter"):
-            code, model = self._call_openrouter(task_type, prompt, entry, temperature=0.15)
+        # Try all available providers
+        for p in ["kimi", "openrouter", "fireworks"]:
+            if not self._provider_available(p):
+                continue
+            if p == "kimi":
+                code, model = self._call_kimi(task_type, prompt, entry, temperature=0.15)
+            elif p == "openrouter":
+                code, model = self._call_openrouter(task_type, prompt, entry, temperature=0.15)
+            else:
+                code, model = self._call_fireworks(task_type, prompt, entry, temperature=0.15)
             if code:
                 q = self._score_solution(code, task_type)
-                solutions.append((code, model, q, "openrouter"))
-                log.info(f"🎭 Ensemble: OpenRouter scored {q}")
-        
-        # Try Fireworks
-        if self._provider_available("fireworks"):
-            code, model = self._call_fireworks(task_type, prompt, entry, temperature=0.15)
-            if code:
-                q = self._score_solution(code, task_type)
-                solutions.append((code, model, q, "fireworks"))
-                log.info(f"🎭 Ensemble: Fireworks scored {q}")
+                solutions.append((code, model, q, p))
+                log.info(f"🎭 Ensemble: {p} scored {q}")
         
         if not solutions:
             return None, None
@@ -890,6 +930,56 @@ class LitcoiinResearchMiner:
         log.error("All Fireworks models exhausted")
         return None, None
 
+    def _call_kimi(self, task_type, prompt, entry, temperature=0.1):
+        """Call Kimi (Moonshot) API — OpenAI-compatible endpoint."""
+        log.info(f"Solving {task_type} task with Kimi AI (temp={temperature})...")
+        system_msg = self._build_system_msg(task_type, entry)
+        headers = {
+            "Authorization": f"Bearer {self.kimi_key}",
+            "Content-Type": "application/json"
+        }
+        models_to_try = ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"]
+        
+        for model in models_to_try:
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": 2048,
+                "temperature": temperature
+            }
+            try:
+                start = time.time()
+                r = requests.post("https://api.moonshot.cn/v1/chat/completions",
+                                 headers=headers, json=payload, timeout=60)
+                elapsed = (time.time() - start) * 1000
+                self._record_latency("kimi", elapsed)
+                if r.status_code == 429:
+                    log.warning(f"Kimi rate limited on {model}, trying next...")
+                    continue
+                if r.status_code != 200:
+                    log.error(f"Kimi error: {r.status_code} {r.text[:200]}")
+                    continue
+                result = r.json()
+                if not result.get("choices"):
+                    log.error(f"Kimi empty response: {result}")
+                    continue
+                message = result["choices"][0].get("message", {})
+                raw_code = message.get("content", "")
+                if not raw_code:
+                    log.error("Kimi returned empty content")
+                    continue
+                actual_model = result.get("model", model)
+                code = self._extract_code(raw_code)
+                return code, actual_model
+            except Exception as e:
+                log.error(f"Kimi call failed for {model}: {e}")
+                continue
+        log.error("All Kimi models exhausted")
+        return None, None
+
     def _build_system_msg(self, task_type, entry):
         """Build system message based on task type."""
         if entry == "analyze":
@@ -934,6 +1024,29 @@ class LitcoiinResearchMiner:
             return code_match.group(1).strip()
         return raw_code.strip()
 
+    def _extract_reward(self, result):
+        """Extract reward from submission response — checks multiple possible field paths."""
+        if not result or not isinstance(result, dict):
+            return 0
+        # Direct fields
+        for key in ["reward", "amount", "payout", "value", "earned", "litCoin", "litcoin"]:
+            if key in result:
+                try:
+                    return float(result[key])
+                except (ValueError, TypeError):
+                    continue
+        # Nested paths
+        for nested in ["data", "result", "payload", "response"]:
+            if nested in result and isinstance(result[nested], dict):
+                obj = result[nested]
+                for key in ["reward", "amount", "payout", "value", "earned", "litCoin", "litcoin"]:
+                    if key in obj:
+                        try:
+                            return float(obj[key])
+                        except (ValueError, TypeError):
+                            continue
+        return 0
+
     def submit_solution(self, task_id, code, actual_model=None):
         token = self.authenticate()
         payload = {
@@ -949,7 +1062,9 @@ class LitcoiinResearchMiner:
             log.error(f"Submit failed: {r.status_code} {r.text[:200]}")
             return None
         result = r.json()
-        log.info(f"Submitted! Status: {result.get('status', 'unknown')}, Reward: {result.get('reward', 'N/A')}")
+        reward = self._extract_reward(result)
+        status = result.get('status', 'unknown')
+        log.info(f"Submitted! Status: {status}, Reward: {reward}")
         return result
 
     def _poll_submission(self, sub_id, max_wait=600):
@@ -983,8 +1098,10 @@ class LitcoiinResearchMiner:
         
         # ── Predictive difficulty scoring (skip low-value tasks) ──
         predicted = self._predict_difficulty(task)
-        if predicted < 30:
-            log.warning(f"🚫 Predicted low value ({predicted:.0f}/100), skipping task to save API calls")
+        # Exploration override: if we've skipped 3+ in a row, try anyway
+        skip_threshold = 15 if self.consec_round_fails >= 3 else 30
+        if predicted < skip_threshold:
+            log.warning(f"🚫 Predicted low value ({predicted:.0f}/100 < {skip_threshold}), skipping task to save API calls")
             self.consec_global_fails += 1
             self._persist()
             return None
@@ -1159,8 +1276,8 @@ class LitcoiinResearchMiner:
     def run(self, rounds=10, delay=3):
         log.info(f"Starting standalone RESEARCH miner — {rounds} rounds, {delay}s delay")
         log.info(f"Wallet: {self.account.address}")
-        provider = "OpenRouter" if self.openrouter_key else "Fireworks" if self.fireworks_key else "NONE"
-        log.info(f"Provider: Fireworks PRIMARY / OpenRouter fallback | Primary model: {MODEL_FALLBACK} | Fallback: {MODEL_PRIMARY}")
+        provider = "Kimi" if self.kimi_key else "Fireworks" if self.fireworks_key else "OpenRouter" if self.openrouter_key else "NONE"
+        log.info(f"Provider priority: Kimi > Fireworks > OpenRouter | Available: {provider}")
 
         # Seed initial balance for kill-switch monitoring
         if self.initial_balance is None:
@@ -1188,23 +1305,38 @@ class LitcoiinResearchMiner:
             try:
                 result = self.mine_once()
                 if result:
-                    reward = result.get("reward", 0)
+                    reward = self._extract_reward(result)
                     status = result.get("status", "unknown")
                     self.total_earned += reward
                     self.round_count += 1
                     # Track model performance
                     self._update_model_tracker(self.last_task_type, self.last_model_used, reward)
+                    # Success: reset delay and fail counter
+                    if reward > 0 or status in ["completed", "accepted", "success"]:
+                        self.consec_round_fails = 0
+                        self.current_delay = self.base_delay
+                        log.info(f"✅ Round success — delay reset to {self.current_delay}s")
+                    else:
+                        # Submission succeeded but no reward — mild backoff
+                        self.consec_round_fails += 1
+                        self.current_delay = min(self.base_delay * (2 ** self.consec_round_fails), 30)
+                        log.info(f"⚠️ No reward — delay scaled to {self.current_delay}s")
                 else:
                     self.round_count += 1
+                    self.consec_round_fails += 1
+                    self.current_delay = min(self.base_delay * (2 ** self.consec_round_fails), 30)
+                    log.info(f"❌ Round failed — delay scaled to {self.current_delay}s")
             except Exception as e:
                 log.error(f"Round error: {e}")
                 self.round_count += 1
+                self.consec_round_fails += 1
+                self.current_delay = min(self.base_delay * (2 ** self.consec_round_fails), 30)
                 restart_count += 1
                 if restart_count > max_restarts:
                     log.error(f"Too many consecutive errors ({restart_count}). Stopping.")
                     break
-                log.info(f"🔄 Auto-restart {restart_count}/{max_restarts} in 5s...")
-                time.sleep(5)
+                log.info(f"🔄 Auto-restart {restart_count}/{max_restarts} in {self.current_delay}s...")
+                time.sleep(self.current_delay)
                 continue
             else:
                 restart_count = 0  # Reset on success
@@ -1240,8 +1372,8 @@ class LitcoiinResearchMiner:
             
             # ── Delay with early-exit on kill switch ──
             if rounds == float('inf') or i < rounds - 1:
-                log.info(f"Waiting {delay}s before next round...")
-                for _ in range(delay):
+                log.info(f"Waiting {self.current_delay}s before next round...")
+                for _ in range(self.current_delay):
                     if self._check_kill_switch():
                         log.error("Kill switch triggered during delay. Stopping.")
                         self._persist()
@@ -1259,15 +1391,16 @@ class LitcoiinResearchMiner:
 if __name__ == "__main__":
     openrouter_key = os.environ.get("OPENROUTER_API_KEY", "")
     fireworks_key = os.environ.get("FIREWORKS_API_KEY", "")
-    if not openrouter_key and not fireworks_key:
-        log.error("Set OPENROUTER_API_KEY or FIREWORKS_API_KEY environment variable")
+    kimi_key = os.environ.get("KIMI_API_KEY", "")
+    if not openrouter_key and not fireworks_key and not kimi_key:
+        log.error("Set OPENROUTER_API_KEY, FIREWORKS_API_KEY, or KIMI_API_KEY environment variable")
         sys.exit(1)
     try:
         account = get_wallet()
     except Exception as e:
         log.error(f"Wallet load failed: {e}")
         sys.exit(1)
-    miner = LitcoiinResearchMiner(account, openrouter_key, fireworks_key)
+    miner = LitcoiinResearchMiner(account, openrouter_key, fireworks_key, kimi_key)
     if len(sys.argv) > 1 and sys.argv[1] == "--test":
         result = miner.mine_once()
         print(json.dumps(result, indent=2) if result else "Failed")

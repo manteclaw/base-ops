@@ -1,0 +1,22 @@
+{
+  "38": {
+    "status": 410,
+    "text": "{\"error\":\"Gone\",\"message\":\"Direct mutations are disabled. Use the prepare+sign+relay flow.\",\"prepareEndpoint\":\"POST /v1/prepare/bounty/38/submit\",\"relayEndpoint\":\"POST /v1/relay\",\"example\":{\"step1\":\"POST /v1/prepare/bounty/38/submit with body { submissionCid } \u2192 returns { request, domain, types }\",\"step2\":\"Sign the EIP-712 typed data with your wallet\",\"step3\":\"POST /v1/relay { request, signature } \u2192 returns { txHash }\"}}"
+  },
+  "40": {
+    "status": 410,
+    "text": "{\"error\":\"Gone\",\"message\":\"Direct mutations are disabled. Use the prepare+sign+relay flow.\",\"prepareEndpoint\":\"POST /v1/prepare/bounty/40/submit\",\"relayEndpoint\":\"POST /v1/relay\",\"example\":{\"step1\":\"POST /v1/prepare/bounty/40/submit with body { submissionCid } \u2192 returns { request, domain, types }\",\"step2\":\"Sign the EIP-712 typed data with your wallet\",\"step3\":\"POST /v1/relay { request, signature } \u2192 returns { txHash }\"}}"
+  },
+  "43": {
+    "status": 410,
+    "text": "{\"error\":\"Gone\",\"message\":\"Direct mutations are disabled. Use the prepare+sign+relay flow.\",\"prepareEndpoint\":\"POST /v1/prepare/bounty/43/submit\",\"relayEndpoint\":\"POST /v1/relay\",\"example\":{\"step1\":\"POST /v1/prepare/bounty/43/submit with body { submissionCid } \u2192 returns { request, domain, types }\",\"step2\":\"Sign the EIP-712 typed data with your wallet\",\"step3\":\"POST /v1/relay { request, signature } \u2192 returns { txHash }\"}}"
+  },
+  "44": {
+    "status": 410,
+    "text": "{\"error\":\"Gone\",\"message\":\"Direct mutations are disabled. Use the prepare+sign+relay flow.\",\"prepareEndpoint\":\"POST /v1/prepare/bounty/44/submit\",\"relayEndpoint\":\"POST /v1/relay\",\"example\":{\"step1\":\"POST /v1/prepare/bounty/44/submit with body { submissionCid } \u2192 returns { request, domain, types }\",\"step2\":\"Sign the EIP-712 typed data with your wallet\",\"step3\":\"POST /v1/relay { request, signature } \u2192 returns { txHash }\"}}"
+  },
+  "46": {
+    "status": 410,
+    "text": "{\"error\":\"Gone\",\"message\":\"Direct mutations are disabled. Use the prepare+sign+relay flow.\",\"prepareEndpoint\":\"POST /v1/prepare/bounty/46/submit\",\"relayEndpoint\":\"POST /v1/relay\",\"example\":{\"step1\":\"POST /v1/prepare/bounty/46/submit with body { submissionCid } \u2192 returns { request, domain, types }\",\"step2\":\"Sign the EIP-712 typed data with your wallet\",\"step3\":\"POST /v1/relay { request, signature } \u2192 returns { txHash }\"}}"
+  }
+}

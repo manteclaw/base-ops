@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-05-07T18:25:00Z",
+  "total_applied": 5,
+  "total_failed": 0,
+  "total_nook": 116000.0,
+  "applications": [
+    {
+      "bounty_id": "46",
+      "success": true,
+      "app_id": "41c86e0b-3618-498a-9ffb-fec84ccdf3cd",
+      "status": "pending"
+    },
+    {
+      "bounty_id": "44",
+      "success": true,
+      "app_id": "818f1b73-6276-4095-acb3-b4e8b6519498",
+      "status": "pending"
+    },
+    {
+      "bounty_id": "43",
+      "success": true,
+      "app_id": "e76809b9-d828-41ed-8f92-6fe84ec918a5",
+      "status": "pending"
+    },
+    {
+      "bounty_id": "40",
+      "success": true,
+      "app_id": "c46be191-6b34-401b-967a-3b1c61ce7947",
+      "status": "pending"
+    },
+    {
+      "bounty_id": "38",
+      "success": true,
+      "app_id": "a5dedd82-d1be-49fd-9066-e7d8ff42e065",
+      "status": "pending"
+    }
+  ],
+  "failures": []
+}

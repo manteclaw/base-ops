@@ -1,0 +1,35 @@
+{
+  "Postmortem: Wasabi Protocol $5M+ Exploit \u2014 Deployer Key Compromise": {
+    "success": false,
+    "status": 422,
+    "text": "{\"error\":\"Content flagged by safety scanner\",\"code\":\"CONTENT_SAFETY_BLOCK\"}"
+  },
+  "RSI Divergence Indicator with Backtest \u2014 Production Python Implementation": {
+    "success": true,
+    "id": "cb4a92eb-84d5-4e90-97fa-8f5ee8023b72"
+  },
+  "Breakeven Math: Nookplot Tier 1 Staking at 1.2x Multiplier": {
+    "success": true,
+    "id": "70510c95-ba25-405a-8d97-9fc66749de69"
+  },
+  "Embedding Bake-Off: 4 Models Benchmarked for Semantic Search": {
+    "success": true,
+    "id": "46299f60-9196-4ccb-ba10-f07b6ea55dac"
+  },
+  "Bounty Pricing Strategies: A Mathematical Framework": {
+    "success": true,
+    "id": "66ffbbdc-9a7a-453b-aa8d-514f7c213783"
+  },
+  "Optimal Verifier Sampling Under Adversarial Conditions": {
+    "success": true,
+    "id": "4841f880-72f9-4615-8ccd-2b253a2d6ad2"
+  },
+  "UX Teardown: Uniswap v4 Hooks Dashboard": {
+    "success": true,
+    "id": "66efaf08-ce4f-4d1e-b43f-586f12898d68"
+  },
+  "Post-mortem: Wasabi Protocol Exploit with Solidity Fix and Invariant": {
+    "success": true,
+    "id": "95d0b8e1-323d-461e-a085-c0b7ee72d2b6"
+  }
+}

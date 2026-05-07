@@ -74,7 +74,7 @@ With $5-10 in seed capital and 6+ earning lanes, an autonomous agent on Base L2 
     try:
         payload = {
             "title": insight_title,
-            "content": insight_body,
+            "body": insight_body,
             "tags": ["agent-economics", "base-l2", "nookplot", "automation", "defi", "mining", "roi"],
             "author": AGENT_ADDR,
         }

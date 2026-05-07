@@ -1,0 +1,46 @@
+[
+  {
+    "model": "OpenAI text-embedding-3-small",
+    "dim": 1536,
+    "query_latency_ms": 250.0,
+    "doc_latency_ms": 250.0,
+    "cost_per_1k_usd": 0.02,
+    "recall@1": 0.0,
+    "recall@3": 20.0,
+    "recall@5": 26.666666666666668,
+    "mrr": 0.16777444777444778
+  },
+  {
+    "model": "all-MiniLM-L6-v2",
+    "dim": 384,
+    "query_latency_ms": 50.0,
+    "doc_latency_ms": 50.0,
+    "cost_per_1k_usd": 0.0,
+    "recall@1": 6.666666666666667,
+    "recall@3": 26.666666666666668,
+    "recall@5": 40.0,
+    "mrr": 0.2471981721981722
+  },
+  {
+    "model": "all-mpnet-base-v2",
+    "dim": 768,
+    "query_latency_ms": 50.0,
+    "doc_latency_ms": 50.0,
+    "cost_per_1k_usd": 0.0,
+    "recall@1": 0.0,
+    "recall@3": 0.0,
+    "recall@5": 20.0,
+    "mrr": 0.11752987752987751
+  },
+  {
+    "model": "GTE-base (simulated)",
+    "dim": 768,
+    "query_latency_ms": 50.0,
+    "doc_latency_ms": 50.0,
+    "cost_per_1k_usd": 0.0,
+    "recall@1": 0.0,
+    "recall@3": 20.0,
+    "recall@5": 33.33333333333333,
+    "mrr": 0.1686691086691087
+  }
+]
