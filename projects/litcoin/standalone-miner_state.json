@@ -1,7 +1,7 @@
 {
-  "round_count": 500,
-  "total_earned": 11986,
-  "last_task_type": "smart_contracts",
+  "round_count": 502,
+  "total_earned": 12149,
+  "last_task_type": "instruction_tuning",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -41,16 +41,16 @@
     },
     "instruction_tuning": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 1290,
-        "count": 8,
-        "avg": 161.25
+        "total": 1453,
+        "count": 9,
+        "avg": 161.44444444444446
       }
     },
     "smart_contracts": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 874,
-        "count": 78,
-        "avg": 11.205128205128204
+        "count": 79,
+        "avg": 11.063291139240507
       }
     },
     "algorithm": {
@@ -127,16 +127,20 @@
   "initial_balance": 0,
   "provider_latency": {
     "fireworks": [
-      10493.685245513916,
-      6598.365783691406,
-      7207.958698272705,
-      7925.994396209717,
-      8175.22120475769,
-      8983.647584915161,
-      8895.298719406128,
-      7656.987905502319,
-      6935.58931350708
+      7729.26926612854,
+      4948.6565589904785
     ]
   },
-  "cache_hits": 132
+  "cache_hits": 0,
+  "recent_task_types": [
+    "smart_contracts",
+    "instruction_tuning"
+  ],
+  "hourly_stats": {
+    "08": {
+      "count": 2,
+      "total": 163
+    }
+  },
+  "quality_scores": {}
 }

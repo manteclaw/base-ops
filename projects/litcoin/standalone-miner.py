@@ -290,6 +290,60 @@ class LitcoiinResearchMiner:
                 results.append(None)
         self.batch_queue = []
         return results
+
+    def _record_latency(self, provider, elapsed_ms):
+        """Track provider response times."""
+        if provider not in self.provider_latency:
+            self.provider_latency[provider] = []
+        self.provider_latency[provider].append(elapsed_ms)
+        self.provider_latency[provider] = self.provider_latency[provider][-20:]
+
+    def _get_fastest_provider(self):
+        """Return the provider with lowest average latency."""
+        avgs = {}
+        for provider, times in self.provider_latency.items():
+            if times:
+                avgs[provider] = sum(times) / len(times)
+        if not avgs:
+            return None
+        return min(avgs, key=avgs.get)
+
+    def _hash_task(self, task):
+        """Create a hash for task caching."""
+        import hashlib
+        prompt = task.get("prompt", task.get("description", ""))
+        task_type = task.get("type", "unknown")
+        return hashlib.md5(f"{task_type}:{prompt[:200]}".encode()).hexdigest()
+
+    def _get_cached_solution(self, task):
+        """Check if we have a cached solution for this task."""
+        task_hash = self._hash_task(task)
+        if task_hash in self.solution_cache:
+            self.cache_hits += 1
+            log.info(f"💾 Cache hit! (hits: {self.cache_hits})")
+            return self.solution_cache[task_hash]
+        return None
+
+    def _cache_solution(self, task, solution):
+        """Cache a successful solution."""
+        task_hash = self._hash_task(task)
+        self.solution_cache[task_hash] = solution
+        if len(self.solution_cache) > 100:
+            oldest = next(iter(self.solution_cache))
+            del self.solution_cache[oldest]
+
+    def _pick_smart_model(self, task_type):
+        """Return the model with highest avg reward for this task type (min 2 samples)."""
+        tracker = self.model_tracker.get(task_type)
+        if not tracker:
+            return None
+        best = None
+        best_avg = -1
+        for model, stats in tracker.items():
+            if stats["count"] >= 2 and stats["avg"] > best_avg:
+                best_avg = stats["avg"]
+                best = model
+        return best
         """Track provider response times."""
         if provider not in self.provider_latency:
             self.provider_latency[provider] = []
