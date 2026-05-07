@@ -39,7 +39,9 @@ FIREWORKS_URL = "https://api.fireworks.ai/inference/v1"
 WALLET_ADDRESS = "0xC4Cf88b691D9b820040d861954d32e0C5f4538b7"
 MODEL_PRIMARY = "inclusionai/ling-2.6-1t:free"
 MODEL_FALLBACK = "accounts/fireworks/models/llama-v3p3-70b-instruct"
-MODEL_OPENROUTER_BACKUP = "nvidia/nemotron-3-super-120b-a12b:free"  # Backup when primary rate-limited
+NVIDIA_URL = "https://integrate.api.nvidia.com/v1"
+MODEL_NVIDIA_PRIMARY = "meta/llama-3.1-8b-instruct"
+MODEL_NVIDIA_BACKUP = "meta/llama-3.1-70b-instruct"
 MODEL_FIREWORKS_BACKUP = "accounts/fireworks/models/qwen3-235b-a22b"  # Backup Fireworks model
 
 # Circuit-breaker constants
@@ -137,11 +139,12 @@ class LitcoiinResearchMiner:
     # Min solutions to queue before batch submit
     BATCH_SIZE = 3  # TESTING: coordinator batch support
 
-    def __init__(self, account, openrouter_key, fireworks_key=None, kimi_key=None):
+    def __init__(self, account, openrouter_key, fireworks_key=None, kimi_key=None, nvidia_key=None):
         self.account = account
         self.openrouter_key = openrouter_key
         self.fireworks_key = fireworks_key
         self.kimi_key = kimi_key
+        self.nvidia_key = nvidia_key
         self.session = requests.Session()
         self.session.headers["Content-Type"] = "application/json"
         self.session.headers["X-Litcoin-SDK"] = "standalone-research-5.4.0"
@@ -155,6 +158,7 @@ class LitcoiinResearchMiner:
         self.or_fails = 0                 # consecutive OpenRouter failures
         self.fw_fails = 0                 # consecutive Fireworks failures
         self.kimi_fails = 0               # consecutive Kimi failures
+        self.nvidia_fails = 0             # consecutive NVIDIA failures
         self.cb_lockout_remaining = 0     # rounds left on forced-alt provider
         self.cb_forced_provider = None    # "openrouter" | "fireworks" | "kimi" | None
         # backoff
@@ -471,6 +475,8 @@ class LitcoiinResearchMiner:
             return bool(self.fireworks_key)
         if name == "kimi":
             return bool(self.kimi_key)
+        if name == "nvidia":
+            return bool(self.nvidia_key)
         return False
 
     def _select_provider(self, task_type):
@@ -481,6 +487,11 @@ class LitcoiinResearchMiner:
             log.info(f"[CB] Locked to {self.cb_forced_provider} ({self.cb_lockout_remaining+1} rounds left)")
             return self.cb_forced_provider
 
+        # 1.5 ABSOLUTE PRIORITY: NVIDIA NIM when available (fastest + cheapest)
+        if self._provider_available("nvidia") and self.nvidia_fails < CB_TRIGGER_FAILURES:
+            log.info("[PRIORITY] NVIDIA NIM selected (absolute priority)")
+            return "nvidia"
+
         # 2. Smart model preference: if a model dominates for this task_type, use its provider
         smart = self._pick_smart_model(task_type)
         if smart:
@@ -490,11 +501,16 @@ class LitcoiinResearchMiner:
             if "kimi" in smart.lower() or "moonshot" in smart.lower():
                 if self._provider_available("kimi") and self.kimi_fails < CB_TRIGGER_FAILURES:
                     return "kimi"
+            if "nvidia" in smart.lower() or "nemotron" in smart.lower():
+                if self._provider_available("nvidia") and self.nvidia_fails < CB_TRIGGER_FAILURES:
+                    return "nvidia"
             if self._provider_available("openrouter") and self.or_fails < CB_TRIGGER_FAILURES:
                 return "openrouter"
 
         # 3. Latency-based selection: use fastest provider when all healthy
         healthy = []
+        if self._provider_available("nvidia") and self.nvidia_fails < CB_TRIGGER_FAILURES:
+            healthy.append("nvidia")
         if self._provider_available("fireworks") and self.fw_fails < CB_TRIGGER_FAILURES:
             healthy.append("fireworks")
         if self._provider_available("kimi") and self.kimi_fails < CB_TRIGGER_FAILURES:
@@ -508,7 +524,9 @@ class LitcoiinResearchMiner:
                 log.info(f"[LATENCY] Fastest provider: {fastest}")
                 return fastest
 
-        # 4. Default priority: Kimi > Fireworks > OpenRouter (OpenRouter is dead)
+        # 4. Default priority: NVIDIA > Kimi > Fireworks > OpenRouter
+        if self._provider_available("nvidia") and self.nvidia_fails < CB_TRIGGER_FAILURES:
+            return "nvidia"
         if self._provider_available("kimi") and self.kimi_fails < CB_TRIGGER_FAILURES:
             return "kimi"
         if self._provider_available("fireworks") and self.fw_fails < CB_TRIGGER_FAILURES:
@@ -517,7 +535,7 @@ class LitcoiinResearchMiner:
             return "openrouter"
 
         # 5. Fallback to whoever is available regardless of failures
-        for p in ["kimi", "fireworks", "openrouter"]:
+        for p in ["nvidia", "kimi", "fireworks", "openrouter"]:
             if self._provider_available(p):
                 return p
         return None
@@ -568,6 +586,22 @@ class LitcoiinResearchMiner:
                     elif self._provider_available("openrouter"):
                         log.warning(f"[CB] Kimi failed {self.kimi_fails}x → locking to OpenRouter for {CB_LOCKOUT_ROUNDS} rounds")
                         self.cb_forced_provider = "openrouter"
+                        self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+
+        elif provider == "nvidia":
+            if success:
+                self.nvidia_fails = 0
+            else:
+                self.nvidia_fails += 1
+                if self.nvidia_fails >= CB_TRIGGER_FAILURES:
+                    # NVIDIA dead → try Kimi, then Fireworks
+                    if self._provider_available("kimi"):
+                        log.warning(f"[CB] NVIDIA failed {self.nvidia_fails}x → locking to Kimi for {CB_LOCKOUT_ROUNDS} rounds")
+                        self.cb_forced_provider = "kimi"
+                        self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                    elif self._provider_available("fireworks"):
+                        log.warning(f"[CB] NVIDIA failed {self.nvidia_fails}x → locking to Fireworks for {CB_LOCKOUT_ROUNDS} rounds")
+                        self.cb_forced_provider = "fireworks"
                         self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
 
     def _check_kill_switch(self):
@@ -770,18 +804,22 @@ class LitcoiinResearchMiner:
         # Helper: try all remaining providers in priority order
         def try_providers(primary):
             order = []
-            if primary == "kimi":
-                order = ["kimi", "fireworks", "openrouter"]
+            if primary == "nvidia":
+                order = ["nvidia", "kimi", "fireworks", "openrouter"]
+            elif primary == "kimi":
+                order = ["kimi", "nvidia", "fireworks", "openrouter"]
             elif primary == "fireworks":
-                order = ["fireworks", "kimi", "openrouter"]
+                order = ["fireworks", "nvidia", "kimi", "openrouter"]
             else:
-                order = ["openrouter", "kimi", "fireworks"]
+                order = ["openrouter", "nvidia", "kimi", "fireworks"]
             for p in order:
                 if not self._provider_available(p):
                     continue
                 if p == self.cb_forced_provider and p != primary:
                     continue  # skip if circuit-breaker locked us away from this
-                if p == "kimi":
+                if p == "nvidia":
+                    code, model = self._call_nvidia(task_type, prompt, temperature=temperature)
+                elif p == "kimi":
                     code, model = self._call_kimi(task_type, prompt, entry, temperature=temperature)
                 elif p == "fireworks":
                     code, model = self._call_fireworks(task_type, prompt, entry, temperature=temperature)
@@ -806,10 +844,12 @@ class LitcoiinResearchMiner:
         solutions = []
         
         # Try all available providers
-        for p in ["kimi", "openrouter", "fireworks"]:
+        for p in ["nvidia", "kimi", "openrouter", "fireworks"]:
             if not self._provider_available(p):
                 continue
-            if p == "kimi":
+            if p == "nvidia":
+                code, model = self._call_nvidia(task_type, prompt, entry, temperature=0.15)
+            elif p == "kimi":
                 code, model = self._call_kimi(task_type, prompt, entry, temperature=0.15)
             elif p == "openrouter":
                 code, model = self._call_openrouter(task_type, prompt, entry, temperature=0.15)
@@ -980,6 +1020,50 @@ class LitcoiinResearchMiner:
                 log.error(f"Kimi call failed for {model}: {e}")
                 continue
         log.error("All Kimi models exhausted")
+        return None, None
+
+    # ── NVIDIA NIM API ──
+    def _call_nvidia(self, task_type, prompt, temperature=0.1):
+        """Call NVIDIA NIM API with model rotation."""
+        log.info(f"Solving {task_type} task with NVIDIA NIM (temp={temperature})...")
+        system_msg = self._build_system_msg(task_type, None)
+        headers = {
+            "Authorization": f"Bearer {self.nvidia_key}",
+            "Content-Type": "application/json"
+        }
+        models_to_try = [MODEL_NVIDIA_PRIMARY, MODEL_NVIDIA_BACKUP]
+        
+        for model in models_to_try:
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": 2048,
+                "temperature": temperature
+            }
+            try:
+                start = time.time()
+                r = requests.post(f"{NVIDIA_URL}/chat/completions",
+                                 headers=headers, json=payload, timeout=120)
+                elapsed = (time.time() - start) * 1000
+                self._record_latency("nvidia", elapsed)
+                if r.status_code == 429:
+                    log.warning(f"NVIDIA rate limited on {model}, trying next...")
+                    continue
+                if r.status_code != 200:
+                    log.error(f"NVIDIA error: {r.status_code} {r.text[:200]}")
+                    continue
+                result = r.json()
+                raw_code = result["choices"][0]["message"]["content"]
+                actual_model = result.get("model", model)
+                code = self._extract_code(raw_code)
+                return code, actual_model
+            except Exception as e:
+                log.error(f"NVIDIA call failed for {model}: {e}")
+                continue
+        log.error("All NVIDIA models exhausted")
         return None, None
 
     def _build_system_msg(self, task_type, entry):
@@ -1394,15 +1478,16 @@ if __name__ == "__main__":
     openrouter_key = os.environ.get("OPENROUTER_API_KEY", "")
     fireworks_key = os.environ.get("FIREWORKS_API_KEY", "")
     kimi_key = os.environ.get("KIMI_API_KEY", "")
-    if not openrouter_key and not fireworks_key and not kimi_key:
-        log.error("Set OPENROUTER_API_KEY, FIREWORKS_API_KEY, or KIMI_API_KEY environment variable")
+    nvidia_key = os.environ.get("NVIDIA_API_KEY", "")
+    if not openrouter_key and not fireworks_key and not kimi_key and not nvidia_key:
+        log.error("Set OPENROUTER_API_KEY, FIREWORKS_API_KEY, KIMI_API_KEY, or NVIDIA_API_KEY environment variable")
         sys.exit(1)
     try:
         account = get_wallet()
     except Exception as e:
         log.error(f"Wallet load failed: {e}")
         sys.exit(1)
-    miner = LitcoiinResearchMiner(account, openrouter_key, fireworks_key, kimi_key)
+    miner = LitcoiinResearchMiner(account, openrouter_key, fireworks_key, kimi_key, nvidia_key)
     if len(sys.argv) > 1 and sys.argv[1] == "--test":
         result = miner.mine_once()
         print(json.dumps(result, indent=2) if result else "Failed")

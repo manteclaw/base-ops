@@ -1,7 +1,7 @@
 {
-  "round_count": 10107,
-  "total_earned": 30841.0,
-  "last_task_type": "tcg_card_profile",
+  "round_count": 10143,
+  "total_earned": 30862.0,
+  "last_task_type": "smart_contracts",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -68,9 +68,9 @@
     },
     "smart_contracts": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 3280.0,
-        "count": 1171,
-        "avg": 2.8010247651579845
+        "total": 3301.0,
+        "count": 1173,
+        "avg": 2.814151747655584
       },
       "inclusionai/ling-2.6-1t-20260423:free": {
         "total": 0,
@@ -161,22 +161,18 @@
   },
   "initial_balance": 0,
   "provider_latency": {
-    "kimi": [
-      956.7162990570068,
-      1158.005952835083,
-      951.9102573394775
-    ],
-    "fireworks": [
-      7118.8671588897705
+    "nvidia": [
+      2695.0528621673584,
+      24680.846452713013
     ]
   },
   "cache_hits": 0,
   "recent_task_types": [
-    "smart_contracts",
-    "adversarial_robustness",
     "agentic_trace",
     "bioinformatics",
-    "tcg_card_profile"
+    "tcg_card_profile",
+    "instruction_tuning",
+    "smart_contracts"
   ],
   "hourly_stats": {
     "08": {
@@ -260,8 +256,8 @@
       "total": 3362
     },
     "04": {
-      "count": 22,
-      "total": 273
+      "count": 28,
+      "total": 314
     }
   },
   "quality_scores": {}
