@@ -20,6 +20,7 @@ import json
 import logging
 import re
 import math
+import random
 from pathlib import Path
 
 # ── Miner state file (survives restarts) ──
@@ -267,6 +268,51 @@ class LitcoiinResearchMiner:
         hours.sort(key=lambda x: x[1], reverse=True)
         return hours
 
+    def print_analytics(self):
+        """Print earnings analytics: best hours, models, task types."""
+        log.info("=" * 60)
+        log.info("📊 EARNINGS ANALYTICS REPORT")
+        log.info("=" * 60)
+        
+        # Best hours
+        best_hours = self._get_best_hours()
+        if best_hours:
+            log.info("🏆 Best earning hours (avg LITCOIN/round):")
+            for h, avg in best_hours[:5]:
+                stats = self.hourly_stats.get(h, {})
+                log.info(f"   {h}:00 — {avg:.1f} avg ({stats.get('count', 0)} rounds)")
+        
+        # Best models per task type
+        log.info("🎯 Best models by task type (UCB1 ranked):")
+        for task_type, models in sorted(self.model_tracker.items(), key=lambda x: -max(s["avg"] for s in x[1].values())):
+            if models:
+                best_model = self._pick_smart_model(task_type)
+                best_stats = models.get(best_model, {})
+                log.info(f"   {task_type}: {best_model} (avg {best_stats.get('avg', 0):.1f}, {best_stats.get('count', 0)} samples)")
+        
+        # Overall best model
+        if self.best_model_overall:
+            log.info(f"🥇 Overall best model: {self.best_model_overall}")
+        
+        # Task type ROI
+        log.info("💰 Task type performance:")
+        task_totals = {}
+        for tt, models in self.model_tracker.items():
+            total = sum(s["total"] for s in models.values())
+            count = sum(s["count"] for s in models.values())
+            if count > 0:
+                task_totals[tt] = {"total": total, "count": count, "avg": total/count}
+        for tt, stats in sorted(task_totals.items(), key=lambda x: -x[1]["avg"])[:8]:
+            log.info(f"   {tt}: {stats['avg']:.1f} avg | {stats['count']} rounds | {stats['total']:.0f} total")
+        
+        # Summary
+        rounds = self.round_count
+        total = self.total_earned
+        avg = total / max(rounds, 1)
+        log.info(f"📈 Total: {total:.0f} LITCOIN | {rounds} rounds | {avg:.1f} avg/round")
+        log.info(f"💾 Cache hits: {self.cache_hits}")
+        log.info("=" * 60)
+
     def _add_to_batch(self, task_id, solution, model):
         """Queue solution for batch submission."""
         self.batch_queue.append({"task_id": task_id, "solution": solution, "model": model})
@@ -333,17 +379,27 @@ class LitcoiinResearchMiner:
             del self.solution_cache[oldest]
 
     def _pick_smart_model(self, task_type):
-        """Return the model with highest avg reward for this task type (min 2 samples)."""
-        tracker = self.model_tracker.get(task_type)
+        """UCB1 bandit: balance exploration vs exploitation for model selection."""
+        tracker = self.model_tracker.get(task_type, {})
         if not tracker:
             return None
-        best = None
-        best_avg = -1
+        
+        total_pulls = sum(s["count"] for s in tracker.values())
+        best_score = -1
+        best_model = None
+        
         for model, stats in tracker.items():
-            if stats["count"] >= 2 and stats["avg"] > best_avg:
-                best_avg = stats["avg"]
-                best = model
-        return best
+            if stats["count"] == 0:
+                return model  # unexplored model gets priority
+            avg_reward = stats["avg"]
+            # UCB1 formula: avg + sqrt(2 * ln(total) / count)
+            exploration = math.sqrt(2 * math.log(total_pulls) / stats["count"])
+            ucb_score = avg_reward + exploration
+            if ucb_score > best_score:
+                best_score = ucb_score
+                best_model = model
+        
+        return best_model
         """Track provider response times."""
         if provider not in self.provider_latency:
             self.provider_latency[provider] = []
@@ -387,26 +443,6 @@ class LitcoiinResearchMiner:
             oldest = next(iter(self.solution_cache))
             del self.solution_cache[oldest]
 
-    def _pick_smart_model(self, task_type):
-        """Return the model with highest avg reward for this task type (min 2 samples)."""
-        tracker = self.model_tracker.get(task_type)
-        if not tracker:
-            return None
-        best = None
-        best_avg = -1
-        for model, stats in tracker.items():
-            if stats["count"] >= 2 and stats["avg"] > best_avg:
-                best_avg = stats["avg"]
-                best = model
-        return best
-        models = self.model_tracker.get(task_type, {})
-        candidates = [(m, s["avg"], s["count"]) for m, s in models.items() if s["count"] >= 2]
-        if candidates:
-            candidates.sort(key=lambda x: x[1], reverse=True)
-            return candidates[0][0]
-        return None
-
-    # ── Provider helpers ──
     def _provider_available(self, name):
         if name == "openrouter":
             return bool(self.openrouter_key)
@@ -540,23 +576,28 @@ class LitcoiinResearchMiner:
             try:
                 r = self.session.request(method, url, timeout=30, **kwargs)
                 if r.status_code == 429:
-                    wait = min(BACKOFF_MAX_SECONDS, BACKOFF_BASE_SECONDS * (2 ** self.backoff_attempt))
-                    log.warning(f"Rate limited, exponential backoff: {wait}s (attempt {self.backoff_attempt})")
+                    base_wait = min(BACKOFF_MAX_SECONDS, BACKOFF_BASE_SECONDS * (2 ** self.backoff_attempt))
+                    jitter = random.uniform(0, base_wait * 0.3)
+                    wait = base_wait + jitter
+                    log.warning(f"Rate limited, smart backoff: {wait:.1f}s (attempt {self.backoff_attempt}, jitter {jitter:.1f}s)")
                     time.sleep(wait)
                     self.backoff_attempt += 1
                     continue
                 if r.status_code >= 500:
-                    wait = min(BACKOFF_MAX_SECONDS, BACKOFF_BASE_SECONDS * (2 ** attempt))
-                    log.warning(f"Server error {r.status_code}, retry in {wait}s")
+                    base_wait = min(BACKOFF_MAX_SECONDS, BACKOFF_BASE_SECONDS * (2 ** attempt))
+                    jitter = random.uniform(0, base_wait * 0.2)
+                    wait = base_wait + jitter
+                    log.warning(f"Server error {r.status_code}, retry in {wait:.1f}s")
                     time.sleep(wait)
                     continue
-                # Success → reset backoff
                 self.backoff_attempt = 0
                 return r
             except Exception as e:
                 if attempt < retries - 1:
-                    wait = min(BACKOFF_MAX_SECONDS, BACKOFF_BASE_SECONDS * (2 ** attempt))
-                    log.warning(f"Request failed ({e}), retry in {wait}s")
+                    base_wait = min(BACKOFF_MAX_SECONDS, BACKOFF_BASE_SECONDS * (2 ** attempt))
+                    jitter = random.uniform(0, base_wait * 0.2)
+                    wait = base_wait + jitter
+                    log.warning(f"Request failed ({e}), retry in {wait:.1f}s")
                     time.sleep(wait)
                 else:
                     raise
@@ -911,10 +952,22 @@ class LitcoiinResearchMiner:
         log.info(f"Solution length: {len(solution)} chars | Model: {actual_model or 'unknown'}")
         
         # ── Pre-submission validation ──
-        if self._validate_solution(solution):
-            log.info("✅ Solution passed validation")
+        valid, reason = self._validate_solution(solution, task_type)
+        if valid:
+            log.info(f"✅ Solution passed validation ({reason})")
         else:
-            log.warning("⚠️ Solution validation failed — will submit anyway but flagging")
+            log.warning(f"⚠️ Solution validation failed: {reason} — regenerating...")
+            solution2, actual_model2 = self.solve_with_llm(task)
+            if solution2:
+                valid2, reason2 = self._validate_solution(solution2, task_type)
+                if valid2:
+                    solution = solution2
+                    actual_model = actual_model2
+                    log.info(f"🔄 Regenerated with valid solution ({reason2})")
+                else:
+                    log.warning(f"⚠️ Regenerated solution also failed: {reason2} — submitting original anyway")
+            else:
+                log.warning("⚠️ Regeneration failed — submitting original anyway")
         
         # ── Solution quality scoring ──
         quality = self._score_solution(solution, task_type)
@@ -966,24 +1019,62 @@ class LitcoiinResearchMiner:
                 self._persist()
                 return None
 
-    def _validate_solution(self, solution):
-        """Quick validation: try to compile Python code, or check JSON validity."""
+    def _validate_solution(self, solution, task_type="unknown"):
+        """Task-specific validation: check solutions against rubrics before submission."""
         if not solution:
-            return False
+            return False, "empty solution"
+        
+        # Generic: must compile as Python
         try:
-            # Check if it's valid Python
             compile(solution, '<solution>', 'exec')
-            return True
         except SyntaxError:
-            # Not Python, might be JSON or text
             try:
                 json.loads(solution)
-                return True
             except (json.JSONDecodeError, ValueError):
-                # Plain text is fine too
-                return len(solution) > 50
-        except Exception:
-            return len(solution) > 50
+                if len(solution) < 50:
+                    return False, "too short and not valid code"
+        
+        # Task-specific checks
+        checks_passed = 0
+        checks_total = 1
+        
+        if task_type == "smart_contracts":
+            checks_total = 2
+            if "function" in solution.lower() or "contract" in solution.lower():
+                checks_passed += 1
+            if len(solution) > 200:
+                checks_passed += 1
+            if checks_passed < 1:
+                return False, f"smart_contracts missing function/contract keyword ({checks_passed}/{checks_total})"
+                
+        elif task_type == "tcg_card_profile":
+            checks_total = 2
+            if len(solution) > 300:
+                checks_passed += 1
+            if any(kw in solution.lower() for kw in ["card", "deck", "rarity", "type", "attack", "hp"]):
+                checks_passed += 1
+            if checks_passed < 1:
+                return False, f"tcg_card_profile missing card keywords ({checks_passed}/{checks_total})"
+                
+        elif task_type == "ai_safety":
+            checks_total = 2
+            if len(solution) > 150:
+                checks_passed += 1
+            if any(kw in solution.lower() for kw in ["safety", "alignment", "harm", "risk", "ethical"]):
+                checks_passed += 1
+            if checks_passed < 1:
+                return False, f"ai_safety missing safety keywords ({checks_passed}/{checks_total})"
+                
+        elif task_type == "instruction_tuning":
+            checks_total = 2
+            if len(solution) > 200:
+                checks_passed += 1
+            if "instruction" in solution.lower() or "prompt" in solution.lower() or "{" in solution:
+                checks_passed += 1
+            if checks_passed < 1:
+                return False, f"instruction_tuning missing structure ({checks_passed}/{checks_total})"
+        
+        return True, f"passed ({checks_passed}/{checks_total} task checks)"
 
     def run(self, rounds=10, delay=3):
         log.info(f"Starting standalone RESEARCH miner — {rounds} rounds, {delay}s delay")
@@ -1052,6 +1143,10 @@ class LitcoiinResearchMiner:
                 if best_hours:
                     top = best_hours[:3]
                     log.info(f"📈 Best hours: {', '.join(f'{h}h={a:.1f}' for h,a in top)}")
+            
+            # ── Full analytics every 20 rounds ──
+            if self.round_count % 20 == 0 and self.round_count > 0:
+                self.print_analytics()
             
             self._persist()
 
