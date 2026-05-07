@@ -328,7 +328,7 @@ class LitcoiinResearchMiner:
         return None
 
     def _flush_batch(self):
-        """Submit all queued solutions."""
+        """Submit all queued solutions — each item isolated, don't let one failure kill the batch."""
         if not self.batch_queue:
             return []
         results = []
@@ -340,6 +340,8 @@ class LitcoiinResearchMiner:
             except Exception as e:
                 log.error(f"Batch item failed: {e}")
                 results.append(None)
+                # Continue with next item — don't let one failure kill the batch
+                continue
         self.batch_queue = []
         return results
 
@@ -1057,7 +1059,7 @@ class LitcoiinResearchMiner:
             "signature": "standalone-miner"
         }
         r = self._api("POST", "/v1/research/submit", json=payload,
-                       headers={"Authorization": f"Bearer {token}"}, retries=1)
+                       headers={"Authorization": f"Bearer {token}"}, retries=5)
         if r.status_code != 200:
             log.error(f"Submit failed: {r.status_code} {r.text[:200]}")
             return None
