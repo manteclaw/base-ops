@@ -1,0 +1,18 @@
+[Unit]
+Description=Manteclaw Litcoiin Standalone Miner
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/.openclaw/workspace/projects/litcoin
+Environment="LITCOIN_SEED=state insane tooth rain scan march liberty man sick category noble divorce"
+Environment="FIREWORKS_API_KEY=fw_26tRWzW5noUbJBbF9PGd6y"
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/root/.openclaw/workspace/projects/litcoin/venv/bin/python3 /root/.openclaw/workspace/projects/litcoin/standalone-miner.py 0 3
+Restart=always
+RestartSec=10
+StandardOutput=append:/root/.openclaw/workspace/projects/litcoin/miner_service.log
+StandardError=append:/root/.openclaw/workspace/projects/litcoin/miner_service.log
+
+[Install]
+WantedBy=default.target
