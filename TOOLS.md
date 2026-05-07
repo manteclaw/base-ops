@@ -54,9 +54,9 @@
 | 8 | Predictive Difficulty Scoring | ✅ Active (skips <30/100) |
 
 **Provider Status:**
-- Fireworks: `fw_26tRWzW5noUbJBbF9PGd6y` — ✅ Working, primary
-- OpenRouter: `sk-or-v1-163aa8db1a...` — 🔴 Rate limited on ALL models
-- Kimi: `sk-kimi-2cnBbceqc8hWN...` — ✅ Available (not wired to miner)
+- Fireworks: `fw_***` — ✅ Working, primary
+- OpenRouter: `sk-or-v1-***` — 🔴 Rate limited on ALL models
+- Kimi: `sk-kimi-***` — ✅ Available (not wired to miner)
 
 **Controls:**
 ```bash

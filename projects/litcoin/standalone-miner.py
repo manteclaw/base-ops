@@ -135,7 +135,7 @@ class LitcoiinResearchMiner:
     # Task rotation: don't repeat same type for N rounds
     TASK_ROTATION_MEMORY = 5  # remember last 5 task types
     # Min solutions to queue before batch submit
-    BATCH_SIZE = 1  # set to 3+ to enable batching (coordinator may not support)
+    BATCH_SIZE = 3  # TESTING: coordinator batch support
 
     def __init__(self, account, openrouter_key, fireworks_key=None, kimi_key=None):
         self.account = account
