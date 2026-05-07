@@ -1,6 +1,6 @@
 {
-  "round_count": 363,
-  "total_earned": 11691,
+  "round_count": 500,
+  "total_earned": 11986,
   "last_task_type": "smart_contracts",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
@@ -48,9 +48,9 @@
     },
     "smart_contracts": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 579,
-        "count": 7,
-        "avg": 82.71428571428571
+        "total": 874,
+        "count": 78,
+        "avg": 11.205128205128204
       }
     },
     "algorithm": {
@@ -130,8 +130,13 @@
       10493.685245513916,
       6598.365783691406,
       7207.958698272705,
-      7925.994396209717
+      7925.994396209717,
+      8175.22120475769,
+      8983.647584915161,
+      8895.298719406128,
+      7656.987905502319,
+      6935.58931350708
     ]
   },
-  "cache_hits": 0
+  "cache_hits": 132
 }

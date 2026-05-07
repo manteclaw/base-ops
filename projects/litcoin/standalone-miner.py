@@ -131,6 +131,10 @@ class LitcoiinResearchMiner:
         "bioinformatics",       # 94.0 avg
         "tcg_card_profile",     # 80.6 avg
     ]
+    # Task rotation: don't repeat same type for N rounds
+    TASK_ROTATION_MEMORY = 5  # remember last 5 task types
+    # Min solutions to queue before batch submit
+    BATCH_SIZE = 1  # set to 3+ to enable batching (coordinator may not support)
 
     def __init__(self, account, openrouter_key, fireworks_key=None):
         self.account = account
@@ -152,7 +156,14 @@ class LitcoiinResearchMiner:
         self.cb_forced_provider = None    # "openrouter" | "fireworks" | None
         # backoff
         self.backoff_attempt = 0          # resets on any success
-        # latency tracking
+        # task rotation state
+        self.recent_task_types = self.state.get("recent_task_types", [])
+        # time-of-day tracking: {hour: {"count": 0, "total": 0}}
+        self.hourly_stats = self.state.get("hourly_stats", {})
+        # batch submission queue
+        self.batch_queue = []
+        # solution quality tracking
+        self.quality_scores = self.state.get("quality_scores", {})
         self.provider_latency = {}  # {provider: [times]}
         # solution cache: {task_hash: solution}
         self.solution_cache = {}
@@ -179,6 +190,9 @@ class LitcoiinResearchMiner:
             "initial_balance": self.initial_balance,
             "provider_latency": self.provider_latency,
             "cache_hits": self.cache_hits,
+            "recent_task_types": self.recent_task_types,
+            "hourly_stats": self.hourly_stats,
+            "quality_scores": self.quality_scores,
         }
         save_state(payload)
 
@@ -201,7 +215,81 @@ class LitcoiinResearchMiner:
                     best = m
         self.best_model_overall = best
 
-    def _record_latency(self, provider, elapsed_ms):
+    def _should_rotate_task(self, task_type):
+        """Check if this task type was recently used (rotation)."""
+        if task_type in self.recent_task_types:
+            log.info(f"🔄 Task rotation: {task_type} was recently used, deprioritizing")
+            return True
+        return False
+
+    def _record_task_type(self, task_type):
+        """Remember recent task types for rotation."""
+        self.recent_task_types.append(task_type)
+        self.recent_task_types = self.recent_task_types[-self.TASK_ROTATION_MEMORY:]
+
+    def _score_solution(self, solution, task_type):
+        """Score solution quality (0-100). Higher = better expected reward."""
+        score = 50  # base
+        # Length bonus: longer solutions often earn more (up to +30)
+        length = len(solution)
+        if length > 3000:
+            score += 30
+        elif length > 1500:
+            score += 20
+        elif length > 500:
+            score += 10
+        # Complexity bonus: code density
+        code_lines = len([l for l in solution.split('\n') if l.strip() and not l.strip().startswith('#')])
+        if code_lines > 30:
+            score += 15
+        elif code_lines > 10:
+            score += 5
+        # Has imports = real code
+        if 'import ' in solution or 'from ' in solution:
+            score += 5
+        log.info(f"📊 Solution quality score: {score}/100 ({length} chars, {code_lines} code lines)")
+        return score
+
+    def _record_hourly(self, reward):
+        """Track rewards by hour of day."""
+        hour = time.strftime("%H")
+        if hour not in self.hourly_stats:
+            self.hourly_stats[hour] = {"count": 0, "total": 0}
+        self.hourly_stats[hour]["count"] += 1
+        self.hourly_stats[hour]["total"] += reward
+
+    def _get_best_hours(self):
+        """Return hours sorted by average reward."""
+        hours = []
+        for h, stats in self.hourly_stats.items():
+            if stats["count"] >= 3:
+                hours.append((h, stats["total"] / stats["count"]))
+        hours.sort(key=lambda x: x[1], reverse=True)
+        return hours
+
+    def _add_to_batch(self, task_id, solution, model):
+        """Queue solution for batch submission."""
+        self.batch_queue.append({"task_id": task_id, "solution": solution, "model": model})
+        log.info(f"📦 Batch queue: {len(self.batch_queue)}/{self.BATCH_SIZE}")
+        if len(self.batch_queue) >= self.BATCH_SIZE:
+            return self._flush_batch()
+        return None
+
+    def _flush_batch(self):
+        """Submit all queued solutions."""
+        if not self.batch_queue:
+            return []
+        results = []
+        log.info(f"🚀 Submitting batch of {len(self.batch_queue)} solutions...")
+        for item in self.batch_queue:
+            try:
+                result = self.submit_solution(item["task_id"], item["solution"], item["model"])
+                results.append(result)
+            except Exception as e:
+                log.error(f"Batch item failed: {e}")
+                results.append(None)
+        self.batch_queue = []
+        return results
         """Track provider response times."""
         if provider not in self.provider_latency:
             self.provider_latency[provider] = []
@@ -455,10 +543,19 @@ class LitcoiinResearchMiner:
         return False
 
     def fetch_task(self, task_type=None):
-        """Fetch a suitable research task, prioritizing high-value types."""
-        # Try high-value task types first
+        """Fetch a suitable research task, prioritizing high-value types with rotation."""
+        # Try high-value task types first (respecting rotation)
         if not task_type:
+            # Sort by: not recently used first, then random within that group
+            candidates = []
             for preferred_type in self.HIGH_VALUE_TASKS:
+                if self._should_rotate_task(preferred_type):
+                    candidates.append((1, preferred_type))  # lower priority
+                else:
+                    candidates.append((0, preferred_type))  # higher priority
+            candidates.sort(key=lambda x: x[0])
+            
+            for priority, preferred_type in candidates:
                 for _ in range(3):
                     token = self.authenticate()
                     payload = {"miner": self.account.address, "type": preferred_type}
@@ -740,6 +837,7 @@ class LitcoiinResearchMiner:
         task_id = task.get("id") or task_data.get("taskId")
         task_type = task.get("type", "unknown")
         self.last_task_type = task_type
+        self._record_task_type(task_type)
         log.info(f"Task: {task_id} | Type: {task_type}")
         
         # ── Check cache first ──
@@ -764,25 +862,55 @@ class LitcoiinResearchMiner:
         else:
             log.warning("⚠️ Solution validation failed — will submit anyway but flagging")
         
-        try:
-            result = self.submit_solution(task_id, solution, actual_model)
-            if result:
-                self.consec_global_fails = 0
-                # Cache successful solutions
-                if actual_model != "cached":
+        # ── Solution quality scoring ──
+        quality = self._score_solution(solution, task_type)
+        if quality < 40:
+            log.warning(f"⚠️ Low quality score ({quality}), regenerating...")
+            solution2, actual_model2 = self.solve_with_llm(task)
+            if solution2:
+                quality2 = self._score_solution(solution2, task_type)
+                if quality2 > quality:
+                    solution = solution2
+                    actual_model = actual_model2
+                    log.info(f"🔄 Regenerated with better quality: {quality2}")
+        
+        # ── Batch or immediate submit ──
+        if self.BATCH_SIZE > 1:
+            result = self._add_to_batch(task_id, solution, actual_model)
+            # Batch returns results only when full
+            if result is not None:
+                for r in result:
+                    if r:
+                        self.consec_global_fails = 0
+                        reward = r.get("reward", 0)
+                        self._record_hourly(reward)
+                        if actual_model != "cached":
+                            self._cache_solution(task, solution)
+                    else:
+                        self.consec_global_fails += 1
+                self._persist()
+                return result[0] if result else None
+            return None  # queued, not submitted yet
+        else:
+            # Immediate submission (default)
+            try:
+                result = self.submit_solution(task_id, solution, actual_model)
+                if result:
+                    self.consec_global_fails = 0
                     reward = result.get("reward", 0)
-                    if reward > 0:
+                    self._record_hourly(reward)
+                    if actual_model != "cached":
                         self._cache_solution(task, solution)
                         log.info(f"💾 Cached solution for future use")
-            else:
+                else:
+                    self.consec_global_fails += 1
+                self._persist()
+                return result
+            except Exception as e:
+                log.error(f"Submit failed: {e}")
                 self.consec_global_fails += 1
-            self._persist()
-            return result
-        except Exception as e:
-            log.error(f"Submit failed: {e}")
-            self.consec_global_fails += 1
-            self._persist()
-            return None
+                self._persist()
+                return None
 
     def _validate_solution(self, solution):
         """Quick validation: try to compile Python code, or check JSON validity."""
@@ -818,6 +946,8 @@ class LitcoiinResearchMiner:
                 log.warning(f"Could not snapshot balance: {e}")
 
         i = 0
+        restart_count = 0
+        max_restarts = 5
         while True:
             if rounds != float('inf') and i >= rounds:
                 break
@@ -844,6 +974,15 @@ class LitcoiinResearchMiner:
             except Exception as e:
                 log.error(f"Round error: {e}")
                 self.round_count += 1
+                restart_count += 1
+                if restart_count > max_restarts:
+                    log.error(f"Too many consecutive errors ({restart_count}). Stopping.")
+                    break
+                log.info(f"🔄 Auto-restart {restart_count}/{max_restarts} in 5s...")
+                time.sleep(5)
+                continue
+            else:
+                restart_count = 0  # Reset on success
 
             # ── Round summary ──
             avg = self.total_earned / max(1, self.round_count)
@@ -852,17 +991,25 @@ class LitcoiinResearchMiner:
                 f"Round {self.round_count}/{rounds} | Provider: {provider_used} | "
                 f"Reward: {reward} | Total: {self.total_earned} | Avg: {avg:.2f} | Status: {status}"
             )
+            
+            # ── Hourly stats every 10 rounds ──
+            if self.round_count % 10 == 0 and self.hourly_stats:
+                best_hours = self._get_best_hours()
+                if best_hours:
+                    top = best_hours[:3]
+                    log.info(f"📈 Best hours: {', '.join(f'{h}h={a:.1f}' for h,a in top)}")
+            
             self._persist()
 
             # ── Auto-claim check ──
-        if self.total_earned >= 50000:
-            log.info("🎉 BALANCE THRESHOLD HIT — 50,000 LITCOIN! Attempting auto-claim...")
-            try:
-                self._auto_claim()
-            except Exception as e:
-                log.warning(f"Auto-claim failed: {e}")
-        
-        # ── Delay with early-exit on kill switch ──
+            if self.total_earned >= 50000:
+                log.info("🎉 BALANCE THRESHOLD HIT — 50,000 LITCOIN! Attempting auto-claim...")
+                try:
+                    self._auto_claim()
+                except Exception as e:
+                    log.warning(f"Auto-claim failed: {e}")
+            
+            # ── Delay with early-exit on kill switch ──
             if rounds == float('inf') or i < rounds - 1:
                 log.info(f"Waiting {delay}s before next round...")
                 for _ in range(delay):
