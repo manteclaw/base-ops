@@ -1,7 +1,7 @@
 {
-  "round_count": 502,
-  "total_earned": 12149,
-  "last_task_type": "instruction_tuning",
+  "round_count": 516,
+  "total_earned": 12638,
+  "last_task_type": "agentic_trace",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -20,9 +20,9 @@
     },
     "agentic_trace": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 3296,
-        "count": 25,
-        "avg": 131.84
+        "total": 3467,
+        "count": 28,
+        "avg": 123.82142857142857
       }
     },
     "knowledge_synthesis": {
@@ -41,16 +41,16 @@
     },
     "instruction_tuning": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 1453,
-        "count": 9,
-        "avg": 161.44444444444446
+        "total": 1632,
+        "count": 11,
+        "avg": 148.36363636363637
       }
     },
     "smart_contracts": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 874,
-        "count": 79,
-        "avg": 11.063291139240507
+        "count": 80,
+        "avg": 10.925
       }
     },
     "algorithm": {
@@ -83,9 +83,9 @@
     },
     "tcg_card_profile": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 2610,
-        "count": 31,
-        "avg": 84.19354838709677
+        "total": 2749,
+        "count": 33,
+        "avg": 83.3030303030303
       }
     },
     "runescape_ta": {
@@ -128,18 +128,31 @@
   "provider_latency": {
     "fireworks": [
       7729.26926612854,
-      4948.6565589904785
+      4948.6565589904785,
+      5236.926794052124,
+      9605.499982833862,
+      5007.558107376099,
+      12125.654697418213,
+      3496.5667724609375,
+      5489.7050857543945,
+      8511.343479156494,
+      4450.742244720459,
+      7053.783178329468,
+      5273.740768432617
     ]
   },
-  "cache_hits": 0,
+  "cache_hits": 4,
   "recent_task_types": [
+    "tcg_card_profile",
     "smart_contracts",
-    "instruction_tuning"
+    "instruction_tuning",
+    "adversarial_robustness",
+    "agentic_trace"
   ],
   "hourly_stats": {
     "08": {
-      "count": 2,
-      "total": 163
+      "count": 10,
+      "total": 652
     }
   },
   "quality_scores": {}
