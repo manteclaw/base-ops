@@ -44,6 +44,17 @@ MODEL_NVIDIA_PRIMARY = "meta/llama-3.1-8b-instruct"
 MODEL_NVIDIA_BACKUP = "meta/llama-3.1-70b-instruct"
 MODEL_FIREWORKS_BACKUP = "accounts/fireworks/models/qwen3-235b-a22b"  # Backup Fireworks model
 
+# ── New Providers ──
+GROQ_URL = "https://api.groq.com/openai/v1"
+MODEL_GROQ_PRIMARY = "llama-3.3-70b-versatile"
+DEEPSEEK_URL = "https://api.deepseek.com/v1"
+MODEL_DEEPSEEK_PRIMARY = "deepseek-chat"
+CEREBRAS_URL = "https://api.cerebras.ai/v1"
+MODEL_CEREBRAS_PRIMARY = "llama3.1-8b"
+MODEL_CEREBRAS_BACKUP = "gpt-oss-120b"
+MODEL_CEREBRAS_BACKUP2 = "qwen-3-235b-a22b-instruct-2507"
+MODEL_OPENROUTER_BACKUP = "meta-llama/llama-3.3-70b-instruct"
+
 # Circuit-breaker constants
 CB_TRIGGER_FAILURES = 3      # consecutive failures before flipping provider
 CB_LOCKOUT_ROUNDS = 2       # how many rounds to stay on the alt provider (reduced from 5)

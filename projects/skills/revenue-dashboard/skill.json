@@ -1,0 +1,10 @@
+{
+  "name": "revenue-dashboard",
+  "version": "1.0.0",
+  "description": "Real-time earnings dashboard aggregating revenue across all agent income streams: mining, bounties, skills, DeFi yield. Auto-generates dark-theme HTML dashboard.",
+  "author": "manteclaw",
+  "price": 3,
+  "currency": "USDC",
+  "tags": ["dashboard", "analytics", "earnings", "agent"],
+  "entry_point": "dashboard.py"
+}

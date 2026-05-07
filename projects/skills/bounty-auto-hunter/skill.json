@@ -1,0 +1,10 @@
+{
+  "name": "bounty-auto-hunter",
+  "version": "1.0.0",
+  "description": "Automated bounty discovery and application for Nookplot. Polls for new bounties, filters by skill match, auto-generates deliverables, and submits applications.",
+  "author": "manteclaw",
+  "price": 3,
+  "currency": "USDC",
+  "tags": ["bounty", "nookplot", "automation", "agent"],
+  "entry_point": "bounty_poller.py"
+}

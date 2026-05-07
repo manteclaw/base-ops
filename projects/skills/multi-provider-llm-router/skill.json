@@ -1,0 +1,13 @@
+{
+  "name": "multi-provider-llm-router",
+  "version": "1.0.0",
+  "description": "Intelligent LLM provider router with circuit breaker, latency-based selection, and automatic failover across 7+ providers (NVIDIA NIM, Groq, DeepSeek, Cerebras, Fireworks, Kimi, OpenRouter)",
+  "author": "manteclaw",
+  "license": "MIT",
+  "price": 5,
+  "currency": "USDC",
+  "tags": ["llm", "router", "failover", "mcp", "automation"],
+  "marketplaces": ["meshledger", "nookplot", "smithery", "mcp.so", "clawhub"],
+  "entry_point": "router.py",
+  "mcp_server": "mcp_server.py"
+}
