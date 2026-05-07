@@ -17,12 +17,12 @@
     "last_skip": "conversation_hash_unchanged"
   },
   "compact": {
-    "count": 4,
-    "last_ts": "2026-05-07T03:57:26.822195",
+    "count": 5,
+    "last_ts": "2026-05-08T03:48:08.536986",
     "last_invoke": 4,
-    "last_sessions": 110,
-    "last_messages": 3326,
-    "last_latency_s": 8.8,
+    "last_sessions": 180,
+    "last_messages": 4647,
+    "last_latency_s": 7.1,
     "last_model": "k2p6",
     "last_skip": "stm_hash_unchanged"
   }
