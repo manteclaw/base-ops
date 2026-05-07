@@ -1,7 +1,7 @@
 {
-  "round_count": 712,
+  "round_count": 716,
   "total_earned": 15140,
-  "last_task_type": "instruction_tuning",
+  "last_task_type": "smart_contracts",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -155,37 +155,14 @@
     }
   },
   "initial_balance": 0,
-  "provider_latency": {
-    "openrouter": [
-      800.21071434021,
-      2069.902181625366,
-      838.6480808258057,
-      783.4501266479492,
-      812.2894763946533,
-      696.326494216919,
-      808.8150024414062,
-      815.7210350036621,
-      1165.006399154663,
-      675.8887767791748,
-      860.3544235229492,
-      804.9144744873047,
-      1038.205862045288,
-      944.695234298706,
-      1189.8229122161865,
-      824.2781162261963,
-      843.2376384735107,
-      1232.0284843444824,
-      893.8450813293457,
-      750.4968643188477
-    ]
-  },
-  "cache_hits": 112,
+  "provider_latency": {},
+  "cache_hits": 0,
   "recent_task_types": [
+    "adversarial_robustness",
     "agentic_trace",
     "bioinformatics",
     "tcg_card_profile",
-    "smart_contracts",
-    "instruction_tuning"
+    "smart_contracts"
   ],
   "hourly_stats": {
     "08": {

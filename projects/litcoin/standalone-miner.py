@@ -433,6 +433,29 @@ class LitcoiinResearchMiner:
             oldest = next(iter(self.solution_cache))
             del self.solution_cache[oldest]
 
+    def _pick_smart_model(self, task_type):
+        """UCB1 bandit: balance exploration vs exploitation for model selection."""
+        tracker = self.model_tracker.get(task_type, {})
+        if not tracker:
+            return None
+        
+        total_pulls = sum(s["count"] for s in tracker.values())
+        best_score = -1
+        best_model = None
+        
+        for model, stats in tracker.items():
+            if stats["count"] == 0:
+                return model  # unexplored model gets priority
+            avg_reward = stats["avg"]
+            # UCB1 formula: avg + sqrt(2 * ln(total) / count)
+            exploration = math.sqrt(2 * math.log(total_pulls) / stats["count"])
+            ucb_score = avg_reward + exploration
+            if ucb_score > best_score:
+                best_score = ucb_score
+                best_model = model
+        
+        return best_model
+
     def _provider_available(self, name):
         if name == "openrouter":
             return bool(self.openrouter_key)
