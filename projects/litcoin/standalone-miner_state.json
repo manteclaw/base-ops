@@ -1,7 +1,7 @@
 {
-  "round_count": 12181,
-  "total_earned": 32509.0,
-  "last_task_type": "tcg_card_profile",
+  "round_count": 12353,
+  "total_earned": 32803.0,
+  "last_task_type": "agentic_trace",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -23,9 +23,9 @@
         "avg": 161.0
       },
       "meta/llama-3.1-8b-instruct": {
-        "total": 341.0,
-        "count": 102,
-        "avg": 3.343137254901961
+        "total": 410.0,
+        "count": 112,
+        "avg": 3.6607142857142856
       }
     },
     "agentic_trace": {
@@ -46,7 +46,7 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 0.0,
-        "count": 46,
+        "count": 54,
         "avg": 0.0
       }
     },
@@ -77,8 +77,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 684.0,
-        "count": 77,
-        "avg": 8.883116883116884
+        "count": 85,
+        "avg": 8.047058823529412
       }
     },
     "smart_contracts": {
@@ -93,9 +93,9 @@
         "avg": 0.0
       },
       "meta/llama-3.1-8b-instruct": {
-        "total": 598.0,
-        "count": 125,
-        "avg": 4.784
+        "total": 823.0,
+        "count": 136,
+        "avg": 6.051470588235294
       }
     },
     "algorithm": {
@@ -149,8 +149,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 24.0,
-        "count": 104,
-        "avg": 0.23076923076923078
+        "count": 113,
+        "avg": 0.21238938053097345
       }
     },
     "runescape_ta": {
@@ -192,10 +192,6 @@
   "initial_balance": 0,
   "provider_latency": {
     "nvidia": [
-      5427.2301197052,
-      6215.240716934204,
-      8182.860374450684,
-      3568.3553218841553,
       10663.315534591675,
       6043.045520782471,
       3492.9895401000977,
@@ -211,16 +207,20 @@
       17701.167583465576,
       7453.990697860718,
       7547.260999679565,
-      3528.0120372772217
+      3528.0120372772217,
+      13040.451526641846,
+      6869.510650634766,
+      15685.57858467102,
+      15482.908725738525
     ]
   },
-  "cache_hits": 1317,
+  "cache_hits": 1452,
   "recent_task_types": [
+    "tcg_card_profile",
+    "instruction_tuning",
     "smart_contracts",
     "adversarial_robustness",
-    "agentic_trace",
-    "bioinformatics",
-    "tcg_card_profile"
+    "agentic_trace"
   ],
   "hourly_stats": {
     "08": {
@@ -304,12 +304,12 @@
       "total": 3482
     },
     "04": {
-      "count": 52,
-      "total": 534
+      "count": 121,
+      "total": 1035
     },
     "05": {
-      "count": 75,
-      "total": 313
+      "count": 144,
+      "total": 386
     },
     "06": {
       "count": 75,
