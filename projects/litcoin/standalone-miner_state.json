@@ -1,5 +1,5 @@
 {
-  "round_count": 11481,
+  "round_count": 11655,
   "total_earned": 31128.0,
   "last_task_type": "smart_contracts",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
@@ -24,8 +24,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 43.0,
-        "count": 63,
-        "avg": 0.6825396825396826
+        "count": 68,
+        "avg": 0.6323529411764706
       }
     },
     "agentic_trace": {
@@ -46,7 +46,7 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 0.0,
-        "count": 27,
+        "count": 31,
         "avg": 0.0
       }
     },
@@ -77,8 +77,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 46.0,
-        "count": 54,
-        "avg": 0.8518518518518519
+        "count": 58,
+        "avg": 0.7931034482758621
       }
     },
     "smart_contracts": {
@@ -94,8 +94,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 153.0,
-        "count": 84,
-        "avg": 1.8214285714285714
+        "count": 96,
+        "avg": 1.59375
       }
     },
     "algorithm": {
@@ -149,8 +149,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 24.0,
-        "count": 65,
-        "avg": 0.36923076923076925
+        "count": 74,
+        "avg": 0.32432432432432434
       }
     },
     "runescape_ta": {
@@ -214,7 +214,7 @@
       8615.975618362427
     ]
   },
-  "cache_hits": 880,
+  "cache_hits": 983,
   "recent_task_types": [
     "agentic_trace",
     "bioinformatics",
@@ -272,11 +272,11 @@
       "total": 32
     },
     "20": {
-      "count": 141,
-      "total": 99
+      "count": 192,
+      "total": 145
     },
     "21": {
-      "count": 91,
+      "count": 142,
       "total": 2285
     },
     "22": {
