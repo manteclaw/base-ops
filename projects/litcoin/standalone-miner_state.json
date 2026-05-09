@@ -1,7 +1,7 @@
 {
-  "round_count": 13711,
-  "total_earned": 32887.0,
-  "last_task_type": "tcg_card_profile",
+  "round_count": 13883,
+  "total_earned": 32965.0,
+  "last_task_type": "agentic_trace",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -23,9 +23,9 @@
         "avg": 161.0
       },
       "meta/llama-3.1-8b-instruct": {
-        "total": 494.0,
-        "count": 188,
-        "avg": 2.627659574468085
+        "total": 572.0,
+        "count": 198,
+        "avg": 2.888888888888889
       }
     },
     "agentic_trace": {
@@ -46,7 +46,7 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 0.0,
-        "count": 128,
+        "count": 137,
         "avg": 0.0
       }
     },
@@ -77,8 +77,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 684.0,
-        "count": 159,
-        "avg": 4.30188679245283
+        "count": 168,
+        "avg": 4.071428571428571
       }
     },
     "smart_contracts": {
@@ -94,8 +94,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 823.0,
-        "count": 212,
-        "avg": 3.8820754716981134
+        "count": 222,
+        "avg": 3.7072072072072073
       }
     },
     "algorithm": {
@@ -149,8 +149,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 24.0,
-        "count": 189,
-        "avg": 0.12698412698412698
+        "count": 199,
+        "avg": 0.12060301507537688
       }
     },
     "runescape_ta": {
@@ -214,13 +214,13 @@
       10260.037183761597
     ]
   },
-  "cache_hits": 2578,
+  "cache_hits": 2721,
   "recent_task_types": [
+    "tcg_card_profile",
+    "instruction_tuning",
     "smart_contracts",
     "adversarial_robustness",
-    "agentic_trace",
-    "bioinformatics",
-    "tcg_card_profile"
+    "agentic_trace"
   ],
   "hourly_stats": {
     "08": {
@@ -280,12 +280,12 @@
       "total": 2285
     },
     "22": {
-      "count": 188,
+      "count": 257,
       "total": 2958
     },
     "23": {
-      "count": 231,
-      "total": 0
+      "count": 306,
+      "total": 78
     },
     "00": {
       "count": 225,
