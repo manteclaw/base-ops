@@ -1,7 +1,7 @@
 {
-  "round_count": 14225,
+  "round_count": 14395,
   "total_earned": 32965.0,
-  "last_task_type": "agentic_trace",
+  "last_task_type": "tcg_card_profile",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -24,8 +24,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 572.0,
-        "count": 217,
-        "avg": 2.6359447004608296
+        "count": 226,
+        "avg": 2.5309734513274336
       }
     },
     "agentic_trace": {
@@ -46,7 +46,7 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 0.0,
-        "count": 156,
+        "count": 166,
         "avg": 0.0
       }
     },
@@ -77,8 +77,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 684.0,
-        "count": 187,
-        "avg": 3.657754010695187
+        "count": 197,
+        "avg": 3.472081218274112
       }
     },
     "smart_contracts": {
@@ -94,8 +94,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 823.0,
-        "count": 241,
-        "avg": 3.4149377593360994
+        "count": 250,
+        "avg": 3.292
       }
     },
     "algorithm": {
@@ -149,8 +149,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 24.0,
-        "count": 218,
-        "avg": 0.11009174311926606
+        "count": 227,
+        "avg": 0.10572687224669604
       }
     },
     "runescape_ta": {
@@ -214,13 +214,13 @@
       10260.037183761597
     ]
   },
-  "cache_hits": 3006,
+  "cache_hits": 3147,
   "recent_task_types": [
-    "tcg_card_profile",
-    "instruction_tuning",
     "smart_contracts",
     "adversarial_robustness",
-    "agentic_trace"
+    "agentic_trace",
+    "bioinformatics",
+    "tcg_card_profile"
   ],
   "hourly_stats": {
     "08": {
@@ -304,11 +304,11 @@
       "total": 3482
     },
     "04": {
-      "count": 121,
+      "count": 190,
       "total": 1035
     },
     "05": {
-      "count": 144,
+      "count": 216,
       "total": 386
     },
     "06": {
