@@ -7,8 +7,8 @@
     "last_chars": 24107
   },
   "diary": {
-    "count": 8,
-    "last_ts": "2026-05-09T03:42:50.708100",
+    "count": 12,
+    "last_ts": "2026-05-10T03:58:41.889197",
     "last_day": 4,
     "last_sessions": 5,
     "last_messages": 13,
@@ -17,8 +17,8 @@
     "last_skip": "no_sessions_today"
   },
   "compact": {
-    "count": 8,
-    "last_ts": "2026-05-09T03:43:01.977493",
+    "count": 12,
+    "last_ts": "2026-05-10T03:58:47.229932",
     "last_invoke": 5,
     "last_sessions": 180,
     "last_messages": 4647,

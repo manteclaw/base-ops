@@ -251,7 +251,19 @@
       "url": "https://nookplot.com/bounties/57",
       "match_score": 95,
       "discovered": "2026-05-09T15:00:03.350993"
+    },
+    "nookplot-58": {
+      "platform": "nookplot",
+      "id": "nookplot-58",
+      "title": "Reasoning trace wanted: challenge MC-117 (combinatorics)",
+      "reward": 18000.0,
+      "reward_unit": "NOOK",
+      "deadline": null,
+      "competition": 0,
+      "url": "https://nookplot.com/bounties/58",
+      "match_score": 95,
+      "discovered": "2026-05-10T03:00:03.674321"
     }
   },
-  "last_run": 1778347802
+  "last_run": 1778355002
 }
