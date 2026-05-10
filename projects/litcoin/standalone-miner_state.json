@@ -1,7 +1,7 @@
 {
-  "round_count": 14927,
-  "total_earned": 34434.0,
-  "last_task_type": "instruction_tuning",
+  "round_count": 15108,
+  "total_earned": 34452.0,
+  "last_task_type": "smart_contracts",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -23,9 +23,9 @@
         "avg": 161.0
       },
       "meta/llama-3.1-8b-instruct": {
-        "total": 935.0,
-        "count": 254,
-        "avg": 3.6811023622047245
+        "total": 942.0,
+        "count": 264,
+        "avg": 3.5681818181818183
       }
     },
     "agentic_trace": {
@@ -46,7 +46,7 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 0.0,
-        "count": 186,
+        "count": 192,
         "avg": 0.0
       }
     },
@@ -77,8 +77,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 735.0,
-        "count": 222,
-        "avg": 3.310810810810811
+        "count": 233,
+        "avg": 3.1545064377682404
       }
     },
     "smart_contracts": {
@@ -94,8 +94,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 1858.0,
-        "count": 283,
-        "avg": 6.565371024734982
+        "count": 291,
+        "avg": 6.384879725085911
       }
     },
     "algorithm": {
@@ -148,9 +148,9 @@
         "avg": 33.15384615384615
       },
       "meta/llama-3.1-8b-instruct": {
-        "total": 44.0,
-        "count": 254,
-        "avg": 0.1732283464566929
+        "total": 55.0,
+        "count": 265,
+        "avg": 0.20754716981132076
       }
     },
     "runescape_ta": {
@@ -214,13 +214,13 @@
       3505.847215652466
     ]
   },
-  "cache_hits": 3490,
+  "cache_hits": 3629,
   "recent_task_types": [
-    "adversarial_robustness",
     "agentic_trace",
     "tcg_card_profile",
     "bioinformatics",
-    "instruction_tuning"
+    "instruction_tuning",
+    "smart_contracts"
   ],
   "hourly_stats": {
     "08": {
@@ -240,11 +240,11 @@
       "total": 2331
     },
     "12": {
-      "count": 299,
-      "total": 114
+      "count": 371,
+      "total": 132
     },
     "13": {
-      "count": 304,
+      "count": 370,
       "total": 12
     },
     "14": {
