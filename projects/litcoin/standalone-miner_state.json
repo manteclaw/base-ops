@@ -1,6 +1,6 @@
 {
-  "round_count": 15289,
-  "total_earned": 34543.0,
+  "round_count": 15463,
+  "total_earned": 34562.0,
   "last_task_type": "adversarial_robustness",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
@@ -24,8 +24,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 942.0,
-        "count": 273,
-        "avg": 3.4505494505494507
+        "count": 282,
+        "avg": 3.3404255319148937
       }
     },
     "agentic_trace": {
@@ -46,7 +46,7 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 0.0,
-        "count": 199,
+        "count": 208,
         "avg": 0.0
       }
     },
@@ -77,8 +77,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 807.0,
-        "count": 244,
-        "avg": 3.307377049180328
+        "count": 254,
+        "avg": 3.177165354330709
       }
     },
     "smart_contracts": {
@@ -93,9 +93,9 @@
         "avg": 0.0
       },
       "meta/llama-3.1-8b-instruct": {
-        "total": 1877.0,
-        "count": 302,
-        "avg": 6.21523178807947
+        "total": 1896.0,
+        "count": 312,
+        "avg": 6.076923076923077
       }
     },
     "algorithm": {
@@ -149,8 +149,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 55.0,
-        "count": 272,
-        "avg": 0.20220588235294118
+        "count": 281,
+        "avg": 0.19572953736654805
       }
     },
     "runescape_ta": {
@@ -192,13 +192,6 @@
   "initial_balance": 0,
   "provider_latency": {
     "nvidia": [
-      7661.810398101807,
-      4039.2305850982666,
-      7774.635791778564,
-      8323.583602905273,
-      6475.918769836426,
-      3747.546434402466,
-      6158.007383346558,
       4478.365659713745,
       4307.559967041016,
       4084.689140319824,
@@ -211,10 +204,17 @@
       13526.474475860596,
       1716.440200805664,
       4782.5939655303955,
-      5676.405668258667
+      5676.405668258667,
+      3828.9811611175537,
+      4974.029302597046,
+      4022.4177837371826,
+      3323.348045349121,
+      2716.351270675659,
+      10234.199285507202,
+      39735.864877700806
     ]
   },
-  "cache_hits": 3759,
+  "cache_hits": 3893,
   "recent_task_types": [
     "tcg_card_profile",
     "bioinformatics",
@@ -256,12 +256,12 @@
       "total": 239
     },
     "16": {
-      "count": 271,
-      "total": 0
+      "count": 340,
+      "total": 29
     },
     "17": {
-      "count": 306,
-      "total": 0
+      "count": 378,
+      "total": 73
     },
     "18": {
       "count": 308,
