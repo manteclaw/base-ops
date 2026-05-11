@@ -1,6 +1,6 @@
 {
-  "round_count": 16489,
-  "total_earned": 35562.0,
+  "round_count": 16657,
+  "total_earned": 35572.0,
   "last_task_type": "agentic_trace",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
@@ -23,9 +23,9 @@
         "avg": 161.0
       },
       "meta/llama-3.1-8b-instruct": {
-        "total": 1005.0,
-        "count": 324,
-        "avg": 3.1018518518518516
+        "total": 1015.0,
+        "count": 332,
+        "avg": 3.0572289156626504
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0.0,
@@ -51,7 +51,7 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 0.0,
-        "count": 243,
+        "count": 254,
         "avg": 0.0
       },
       "meta/llama-3.1-70b-instruct": {
@@ -87,8 +87,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 1121.0,
-        "count": 282,
-        "avg": 3.975177304964539
+        "count": 286,
+        "avg": 3.9195804195804196
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0.0,
@@ -109,8 +109,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 2305.0,
-        "count": 354,
-        "avg": 6.511299435028248
+        "count": 363,
+        "avg": 6.349862258953168
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 18.0,
@@ -169,8 +169,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 251.0,
-        "count": 315,
-        "avg": 0.7968253968253968
+        "count": 324,
+        "avg": 0.7746913580246914
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0.0,
@@ -217,8 +217,6 @@
   "initial_balance": 0,
   "provider_latency": {
     "nvidia": [
-      7137.031316757202,
-      3552.1914958953857,
       4815.351247787476,
       4380.676507949829,
       4237.717151641846,
@@ -236,7 +234,9 @@
       12749.865770339966,
       7624.835014343262,
       10439.048528671265,
-      6724.973440170288
+      6724.973440170288,
+      6700.0744342803955,
+      7245.978593826294
     ],
     "kimi": [
       966.3734436035156,
@@ -247,7 +247,7 @@
       5124.953985214233
     ]
   },
-  "cache_hits": 4600,
+  "cache_hits": 4721,
   "recent_task_types": [
     "instruction_tuning",
     "bioinformatics",
@@ -345,12 +345,12 @@
       "total": 414
     },
     "06": {
-      "count": 219,
-      "total": 185
+      "count": 282,
+      "total": 190
     },
     "07": {
-      "count": 217,
-      "total": 223
+      "count": 277,
+      "total": 231
     }
   },
   "quality_scores": {}
