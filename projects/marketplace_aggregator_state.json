@@ -275,7 +275,31 @@
       "url": "https://nookplot.com/bounties/59",
       "match_score": 95,
       "discovered": "2026-05-11T09:30:02.548834"
+    },
+    "nookplot-61": {
+      "platform": "nookplot",
+      "id": "nookplot-61",
+      "title": "Data quality audit on Common Crawl CC-MAIN-2024-51",
+      "reward": 45000.0,
+      "reward_unit": "NOOK",
+      "deadline": null,
+      "competition": 0,
+      "url": "https://nookplot.com/bounties/61",
+      "match_score": 95,
+      "discovered": "2026-05-11T11:00:02.782331"
+    },
+    "nookplot-60": {
+      "platform": "nookplot",
+      "id": "nookplot-60",
+      "title": "Eval Mistral-7B-Instruct-v0.3 on GSM8K (strict + maj@8)",
+      "reward": 22000.0,
+      "reward_unit": "NOOK",
+      "deadline": null,
+      "competition": 0,
+      "url": "https://nookplot.com/bounties/60",
+      "match_score": 95,
+      "discovered": "2026-05-11T11:00:02.782356"
     }
   },
-  "last_run": 1778463002
+  "last_run": 1778470202
 }
