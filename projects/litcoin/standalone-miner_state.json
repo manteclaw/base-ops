@@ -1,7 +1,7 @@
 {
-  "round_count": 19226,
+  "round_count": 19407,
   "total_earned": 37334.0,
-  "last_task_type": "instruction_tuning",
+  "last_task_type": "adversarial_robustness",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -51,8 +51,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 34.0,
-        "count": 381,
-        "avg": 0.08923884514435695
+        "count": 386,
+        "avg": 0.08808290155440414
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0,
@@ -87,8 +87,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 1397.0,
-        "count": 389,
-        "avg": 3.5912596401028276
+        "count": 402,
+        "avg": 3.4751243781094527
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0.0,
@@ -109,8 +109,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 3714.0,
-        "count": 506,
-        "avg": 7.339920948616601
+        "count": 513,
+        "avg": 7.239766081871345
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 48.0,
@@ -169,8 +169,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 251.0,
-        "count": 461,
-        "avg": 0.544468546637744
+        "count": 472,
+        "avg": 0.5317796610169492
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0.0,
@@ -252,13 +252,13 @@
       109.36236381530762
     ]
   },
-  "cache_hits": 6406,
+  "cache_hits": 6512,
   "recent_task_types": [
-    "smart_contracts",
     "agentic_trace",
     "bioinformatics",
     "tcg_card_profile",
-    "instruction_tuning"
+    "instruction_tuning",
+    "adversarial_robustness"
   ],
   "hourly_stats": {
     "08": {
@@ -286,11 +286,11 @@
       "total": 58
     },
     "14": {
-      "count": 488,
-      "total": 23
+      "count": 542,
+      "total": 46
     },
     "15": {
-      "count": 409,
+      "count": 463,
       "total": 239
     },
     "16": {
