@@ -1,7 +1,7 @@
 {
-  "round_count": 19407,
-  "total_earned": 37334.0,
-  "last_task_type": "adversarial_robustness",
+  "round_count": 19584,
+  "total_earned": 37413.0,
+  "last_task_type": "bioinformatics",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -51,8 +51,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 34.0,
-        "count": 386,
-        "avg": 0.08808290155440414
+        "count": 393,
+        "avg": 0.08651399491094147
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0,
@@ -87,8 +87,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 1397.0,
-        "count": 402,
-        "avg": 3.4751243781094527
+        "count": 413,
+        "avg": 3.3825665859564165
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0.0,
@@ -108,9 +108,9 @@
         "avg": 0.0
       },
       "meta/llama-3.1-8b-instruct": {
-        "total": 3714.0,
-        "count": 513,
-        "avg": 7.239766081871345
+        "total": 3793.0,
+        "count": 521,
+        "avg": 7.280230326295586
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 48.0,
@@ -169,8 +169,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 251.0,
-        "count": 472,
-        "avg": 0.5317796610169492
+        "count": 481,
+        "avg": 0.5218295218295218
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0.0,
@@ -217,9 +217,6 @@
   "initial_balance": 0,
   "provider_latency": {
     "nvidia": [
-      8993.221998214722,
-      59505.385875701904,
-      27416.94211959839,
       12649.1060256958,
       17467.430591583252,
       2648.5886573791504,
@@ -236,7 +233,10 @@
       9618.503093719482,
       14492.854833602905,
       13284.56974029541,
-      2723.3564853668213
+      2723.3564853668213,
+      4772.0911502838135,
+      8053.946495056152,
+      7248.286724090576
     ],
     "kimi": [
       966.3734436035156,
@@ -252,13 +252,13 @@
       109.36236381530762
     ]
   },
-  "cache_hits": 6512,
+  "cache_hits": 6616,
   "recent_task_types": [
-    "agentic_trace",
-    "bioinformatics",
-    "tcg_card_profile",
     "instruction_tuning",
-    "adversarial_robustness"
+    "adversarial_robustness",
+    "smart_contracts",
+    "agentic_trace",
+    "bioinformatics"
   ],
   "hourly_stats": {
     "08": {
@@ -294,12 +294,12 @@
       "total": 239
     },
     "16": {
-      "count": 400,
+      "count": 454,
       "total": 120
     },
     "17": {
-      "count": 438,
-      "total": 73
+      "count": 489,
+      "total": 170
     },
     "18": {
       "count": 440,

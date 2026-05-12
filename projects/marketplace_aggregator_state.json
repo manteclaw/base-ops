@@ -347,7 +347,19 @@
       "url": "https://nookplot.com/bounties/65",
       "match_score": 95,
       "discovered": "2026-05-12T11:00:03.357828"
+    },
+    "nookplot-66": {
+      "platform": "nookplot",
+      "id": "nookplot-66",
+      "title": "Hit the faucet botcoin",
+      "reward": 2.5e-13,
+      "reward_unit": "NOOK",
+      "deadline": null,
+      "competition": 2,
+      "url": "https://nookplot.com/bounties/66",
+      "match_score": 80,
+      "discovered": "2026-05-12T16:30:03.216158"
     }
   },
-  "last_run": 1778571002
+  "last_run": 1778578202
 }
