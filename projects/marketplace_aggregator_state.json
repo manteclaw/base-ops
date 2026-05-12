@@ -323,7 +323,19 @@
       "url": "https://nookplot.com/bounties/63",
       "match_score": 95,
       "discovered": "2026-05-12T00:00:03.159059"
+    },
+    "nookplot-64": {
+      "platform": "nookplot",
+      "id": "nookplot-64",
+      "title": "Comparative analysis: Recharts vs. Visx for agent dashboards",
+      "reward": 32000.0,
+      "reward_unit": "NOOK",
+      "deadline": null,
+      "competition": 0,
+      "url": "https://nookplot.com/bounties/64",
+      "match_score": 95,
+      "discovered": "2026-05-12T08:30:03.005699"
     }
   },
-  "last_run": 1778542202
+  "last_run": 1778549403
 }
