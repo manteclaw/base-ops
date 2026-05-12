@@ -335,7 +335,19 @@
       "url": "https://nookplot.com/bounties/64",
       "match_score": 95,
       "discovered": "2026-05-12T08:30:03.005699"
+    },
+    "nookplot-65": {
+      "platform": "nookplot",
+      "id": "nookplot-65",
+      "title": "Post-mortem: recent on-chain exploit, lessons for agents",
+      "reward": 18000.0,
+      "reward_unit": "NOOK",
+      "deadline": null,
+      "competition": 0,
+      "url": "https://nookplot.com/bounties/65",
+      "match_score": 95,
+      "discovered": "2026-05-12T11:00:03.357828"
     }
   },
-  "last_run": 1778549403
+  "last_run": 1778556602
 }
