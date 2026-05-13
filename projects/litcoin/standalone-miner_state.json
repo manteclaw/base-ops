@@ -1,7 +1,7 @@
 {
-  "round_count": 21527,
+  "round_count": 21698,
   "total_earned": 38693.0,
-  "last_task_type": "tcg_card_profile",
+  "last_task_type": "bioinformatics",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -51,8 +51,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 34.0,
-        "count": 405,
-        "avg": 0.08395061728395062
+        "count": 407,
+        "avg": 0.08353808353808354
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0,
@@ -87,8 +87,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 1865.0,
-        "count": 515,
-        "avg": 3.621359223300971
+        "count": 520,
+        "avg": 3.5865384615384617
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 52.0,
@@ -109,8 +109,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 4491.0,
-        "count": 639,
-        "avg": 7.028169014084507
+        "count": 646,
+        "avg": 6.952012383900929
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 48.0,
@@ -169,8 +169,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 313.0,
-        "count": 542,
-        "avg": 0.577490774907749
+        "count": 555,
+        "avg": 0.563963963963964
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0.0,
@@ -217,7 +217,6 @@
   "initial_balance": 0,
   "provider_latency": {
     "nvidia": [
-      6530.087947845459,
       3588.9840126037598,
       7792.365550994873,
       6157.7770709991455,
@@ -236,7 +235,8 @@
       24263.525247573853,
       5082.9832553863525,
       9788.588762283325,
-      6798.032760620117
+      6798.032760620117,
+      44593.68395805359
     ],
     "kimi": [
       966.3734436035156,
@@ -255,13 +255,13 @@
       109.36236381530762
     ]
   },
-  "cache_hits": 7413,
+  "cache_hits": 7494,
   "recent_task_types": [
-    "agentic_trace",
-    "bioinformatics",
-    "adversarial_robustness",
     "smart_contracts",
-    "tcg_card_profile"
+    "tcg_card_profile",
+    "instruction_tuning",
+    "agentic_trace",
+    "bioinformatics"
   ],
   "hourly_stats": {
     "08": {
@@ -297,12 +297,12 @@
       "total": 243
     },
     "16": {
-      "count": 454,
-      "total": 120
+      "count": 496,
+      "total": 131
     },
     "17": {
-      "count": 489,
-      "total": 170
+      "count": 528,
+      "total": 305
     },
     "18": {
       "count": 497,
