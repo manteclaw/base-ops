@@ -1751,7 +1751,7 @@ class LitcoiinResearchMiner:
         predicted = self._predict_difficulty(task)
         # Only skip if we've proven this task type is dead (< 5 with best model)
         # AND we've tried it enough times to know (≥10 rounds in tracker)
-        skip_threshold = 5
+        skip_threshold = 0  # DISABLED: Let averages rebuild with fresh data post-cache-purge
         tracker = self.model_tracker.get(task_type, {})
         total_samples = sum(s.get("count", 0) for s in tracker.values())
         if predicted < skip_threshold and total_samples >= 10:
