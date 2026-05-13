@@ -1,30 +1,26 @@
 {
   "active": {
-    "test-lane-A": {
-      "session": "subagent-test-lane-A-0eb5d73d",
-      "started_at": "2026-05-13T20:49:27.868406+00:00",
+    "lane-A": {
+      "session": "subagent-lane-A-32fac24e",
+      "started_at": "2026-05-13T20:56:37.266923+00:00",
       "task": {
-        "description": "Lane A mining burst",
-        "skill": "base-l2-automation",
-        "priority": 1
+        "description": "Litcoiin mining burst"
       },
       "retries": 0
     },
-    "lane-B": {
-      "session": "subagent-lane-B-4476d325",
-      "started_at": "2026-05-13T20:50:00.713477+00:00",
+    "lane-C": {
+      "session": "subagent-lane-C-c1811886",
+      "started_at": "2026-05-13T20:59:28.257696+00:00",
       "task": {
-        "description": "Nookplot bounty scan",
-        "skill": "nookplot"
+        "description": "Arbitrage bot warmup"
       },
       "retries": 0
     },
     "lane-D": {
-      "session": "subagent-lane-D-69b28b10",
-      "started_at": "2026-05-13T20:50:36.913140+00:00",
+      "session": "subagent-lane-D-d7d42f82",
+      "started_at": "2026-05-13T21:00:22.548767+00:00",
       "task": {
-        "description": "Arbitrage bot",
-        "skill": "arbitrage"
+        "description": "Marketplace aggregator"
       },
       "retries": 0
     }

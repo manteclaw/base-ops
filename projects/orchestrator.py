@@ -51,6 +51,18 @@ def _now():
     return datetime.now(timezone.utc).isoformat()
 
 
+class _StateLock:
+    """File-based exclusive lock to prevent concurrent orchestrator state corruption."""
+    def __enter__(self):
+        self.fd = open(LOCK_FILE, "w")
+        fcntl.flock(self.fd, fcntl.LOCK_EX)
+        return self
+
+    def __exit__(self, *args):
+        fcntl.flock(self.fd, fcntl.LOCK_UN)
+        self.fd.close()
+
+
 def log_event(event_type: str, details: Dict[str, Any]):
     """Append structured event to log."""
     entry = {
@@ -266,50 +278,51 @@ def mark_failed(state: Dict[str, Any], label: str, reason: str = ""):
 # ── CLI Commands ──
 
 def cmd_spawn(label: str, task_json: str):
-    state = load_state()
-    try:
-        task = json.loads(task_json)
-    except json.JSONDecodeError:
-        print(f"ERROR: Invalid JSON for task: {task_json}")
-        sys.exit(1)
-    
-    if is_subagent_active(label, state):
-        print(f"WARNING: Subagent '{label}' already active. Adding to queue as duplicate.")
-        # Append a suffix to make it unique
-        label = f"{label}-{uuid.uuid4().hex[:4]}"
-    
-    if count_active(state) < MAX_CONCURRENT:
-        # Try immediate spawn
-        success = False
-        for attempt, delay in enumerate(BACKOFF_DELAYS):
-            if attempt > 0:
-                log_event("backoff", {"label": label, "delay": delay, "attempt": attempt})
-                time.sleep(delay)
-            if spawn_subagent(label, task):
-                success = True
-                state["active"][label] = {
-                    "session": f"subagent-{label}-{uuid.uuid4().hex[:8]}",
-                    "started_at": _now(),
-                    "task": task,
-                    "retries": attempt,
-                }
-                break
-            else:
-                log_event("spawn_retry", {"label": label, "attempt": attempt})
+    with _StateLock():
+        state = load_state()
+        try:
+            task = json.loads(task_json)
+        except json.JSONDecodeError:
+            print(f"ERROR: Invalid JSON for task: {task_json}")
+            sys.exit(1)
         
-        if not success:
-            # Exhausted immediate retries — queue it
-            enqueue_task(state, label, task)
-            print(f"QUEUED (after failed spawns): {label}")
+        if is_subagent_active(label, state):
+            print(f"WARNING: Subagent '{label}' already active. Adding to queue as duplicate.")
+            # Append a suffix to make it unique
+            label = f"{label}-{uuid.uuid4().hex[:4]}"
+        
+        if count_active(state) < MAX_CONCURRENT:
+            # Try immediate spawn
+            success = False
+            for attempt, delay in enumerate(BACKOFF_DELAYS):
+                if attempt > 0:
+                    log_event("backoff", {"label": label, "delay": delay, "attempt": attempt})
+                    time.sleep(delay)
+                if spawn_subagent(label, task):
+                    success = True
+                    state["active"][label] = {
+                        "session": f"subagent-{label}-{uuid.uuid4().hex[:8]}",
+                        "started_at": _now(),
+                        "task": task,
+                        "retries": attempt,
+                    }
+                    break
+                else:
+                    log_event("spawn_retry", {"label": label, "attempt": attempt})
+            
+            if not success:
+                # Exhausted immediate retries — queue it
+                enqueue_task(state, label, task)
+                print(f"QUEUED (after failed spawns): {label}")
+            else:
+                print(f"SPAWNED: {label}")
         else:
-            print(f"SPAWNED: {label}")
-    else:
-        enqueue_task(state, label, task)
-        print(f"QUEUED (max {MAX_CONCURRENT} active): {label}")
-    
-    # Also try to drain queue in case a slot just opened
-    process_queue(state)
-    save_state(state)
+            enqueue_task(state, label, task)
+            print(f"QUEUED (max {MAX_CONCURRENT} active): {label}")
+        
+        # Also try to drain queue in case a slot just opened
+        process_queue(state)
+        save_state(state)
 
 
 def cmd_queue():
@@ -399,57 +412,60 @@ def cmd_drain():
 
 
 def cmd_retry_failed():
-    state = load_state()
-    failed = state.get("failed", [])
-    if not failed:
-        print("No failed tasks to retry.")
-        return
-    
-    requeued = 0
-    for entry in failed[:]:
-        label = entry["label"]
-        task = entry["task"]
-        # Reset retry count for fresh attempt
-        task["_retried_from_failed"] = True
-        enqueue_task(state, label, task)
-        requeued += 1
-    
-    # Clear failed list
-    state["failed"] = []
-    
-    # Try to spawn immediately
-    spawned = process_queue(state)
-    save_state(state)
-    
-    print(f"Re-queued {requeued} failed tasks. Spawned {spawned} immediately.")
+    with _StateLock():
+        state = load_state()
+        failed = state.get("failed", [])
+        if not failed:
+            print("No failed tasks to retry.")
+            return
+        
+        requeued = 0
+        for entry in failed[:]:
+            label = entry["label"]
+            task = entry["task"]
+            # Reset retry count for fresh attempt
+            task["_retried_from_failed"] = True
+            enqueue_task(state, label, task)
+            requeued += 1
+        
+        # Clear failed list
+        state["failed"] = []
+        
+        # Try to spawn immediately
+        spawned = process_queue(state)
+        save_state(state)
+        
+        print(f"Re-queued {requeued} failed tasks. Spawned {spawned} immediately.")
 
 
 def cmd_kill(label: str):
-    state = load_state()
-    if label not in state.get("active", {}):
-        print(f"No active subagent with label '{label}'.")
-        return
-    
-    info = state["active"].pop(label)
-    log_event("killed", {"label": label, "session": info.get("session", "?")})
-    save_state(state)
-    print(f"Killed subagent '{label}'.")
-    
-    # Process queue to fill the freed slot
-    state = load_state()
-    process_queue(state)
-    save_state(state)
+    with _StateLock():
+        state = load_state()
+        if label not in state.get("active", {}):
+            print(f"No active subagent with label '{label}'.")
+            return
+        
+        info = state["active"].pop(label)
+        log_event("killed", {"label": label, "session": info.get("session", "?")})
+        save_state(state)
+        print(f"Killed subagent '{label}'.")
+        
+        # Process queue to fill the freed slot
+        state = load_state()
+        process_queue(state)
+        save_state(state)
 
 
 def cmd_process_queue():
     """Background worker: try to spawn queued tasks."""
-    state = load_state()
-    spawned = process_queue(state)
-    save_state(state)
-    if spawned:
-        print(f"Spawned {spawned} queued task(s).")
-    else:
-        print("No tasks spawned (queue empty or at capacity).")
+    with _StateLock():
+        state = load_state()
+        spawned = process_queue(state)
+        save_state(state)
+        if spawned:
+            print(f"Spawned {spawned} queued task(s).")
+        else:
+            print("No tasks spawned (queue empty or at capacity).")
 
 
 def main():

@@ -37,7 +37,8 @@ SECRET_PATTERNS = {
     "zyfai": re.compile(r"zyfai_[A-Za-z0-9_-]{20,60}"),
     "sambanova": re.compile(r"sam_[a-f0-9_-]{20,80}"),
     # Generic sk- pattern: must look like an API key (long, mixed case)
-    "generic_sk": re.compile(r"sk-[A-Za-z0-9_-]{20,120}"),
+    # Word boundary ensures we don't match inside longer keys like csk-xxx
+    "generic_sk": re.compile(r"(?<![A-Za-z0-9_-])sk-[A-Za-z0-9_-]{20,120}"),
     # Private key hex (0x + 64 hex chars, standalone word)
     "private_key_hex": re.compile(r"(?<![A-Fa-f0-9])0x[a-fA-F0-9]{64}(?![A-Fa-f0-9])"),
     # Context-aware: key=value patterns for common key names
@@ -79,6 +80,7 @@ def find_secrets_in_text(text: str, filename: str = "") -> List[Tuple[str, str, 
     Return list of (secret_type, secret_value, start, end) for each match.
     """
     findings = []
+    UUID_RE = re.compile(r"^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$", re.IGNORECASE)
     for secret_type, pattern in SECRET_PATTERNS.items():
         for match in pattern.finditer(text):
             # For patterns with capture groups, use group(1) if available
@@ -94,6 +96,9 @@ def find_secrets_in_text(text: str, filename: str = "") -> List[Tuple[str, str, 
             if secret_type == "generic_sk" and not val.startswith("sk-"):
                 continue
             if secret_type == "generic_sk" and len(val) < 10:
+                continue
+            # Skip UUIDs (false positives from token=abc-123... patterns)
+            if UUID_RE.match(val):
                 continue
             findings.append((secret_type, val, start, end))
     return findings
@@ -257,21 +262,35 @@ def main():
 
     report = scan_workspace(root, explicit_paths=explicit)
 
-    # Deduplicate: if a file has multiple findings, group them
+    # Deduplicate and merge overlapping regions
     files_to_redact = {}
     for finding in report["findings"]:
         fp = root / finding["file"]
         if fp not in files_to_redact:
             files_to_redact[fp] = []
-        files_to_redact[fp].append((finding["type"], finding["value"], finding["start"], finding["end"]))
+        files_to_redact[fp].append((finding["type"], finding["start"], finding["end"]))
+
+    # Merge overlapping regions within each file
+    for fp in files_to_redact:
+        regions = sorted(files_to_redact[fp], key=lambda x: x[1])
+        merged = []
+        for rtype, rstart, rend in regions:
+            if merged and rstart <= merged[-1][2]:
+                # Overlaps with previous; merge (keep the earliest start, latest end)
+                merged[-1] = (merged[-1][0], merged[-1][1], max(merged[-1][2], rend))
+            else:
+                merged.append((rtype, rstart, rend))
+        files_to_redact[fp] = merged
 
     changed_any = False
     if report["findings"]:
         print(f"\n🔍 Found {report['secrets_found']} secret(s) in {report['files_with_secrets']} file(s):\n")
-        for fp, findings in files_to_redact.items():
-            types = set(f[0] for f in findings)
+        for fp, regions in files_to_redact.items():
+            types = set(r[0] for r in regions)
             print(f"  📄 {fp.relative_to(root)}  ({', '.join(types)})")
-            changed = redact_file(fp, findings, dry_run=args.dry_run)
+            # Convert to old format for redact_text compatibility
+            findings_for_redact = [(r[0], "", r[1], r[2]) for r in regions]
+            changed = redact_file(fp, findings_for_redact, dry_run=args.dry_run)
             if changed:
                 changed_any = True
 

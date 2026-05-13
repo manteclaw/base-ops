@@ -2,3 +2,9 @@
 {"timestamp": "2026-05-13T20:50:00.712090+00:00", "event": "spawned", "label": "lane-B", "session": "subagent-lane-B-3568f5ab", "task": "Nookplot bounty scan"}
 {"timestamp": "2026-05-13T20:50:36.736913+00:00", "event": "spawned", "label": "lane-C", "session": "subagent-lane-C-0ddb242f", "task": "Marketplace aggregator"}
 {"timestamp": "2026-05-13T20:50:36.909916+00:00", "event": "spawned", "label": "lane-D", "session": "subagent-lane-D-4889e38d", "task": "Arbitrage bot"}
+{"timestamp": "2026-05-13T20:56:37.263949+00:00", "event": "spawned", "label": "lane-A", "session": "subagent-lane-A-4140f1b5", "task": "Litcoiin mining burst"}
+{"timestamp": "2026-05-13T20:57:12.783244+00:00", "event": "spawned", "label": "lane-B", "session": "subagent-lane-B-afa4c15e", "task": "Nookplot bounty scan"}
+{"timestamp": "2026-05-13T20:59:28.252783+00:00", "event": "spawned", "label": "lane-C", "session": "subagent-lane-C-d61d5358", "task": "Arbitrage bot warmup"}
+{"timestamp": "2026-05-13T20:59:41.854132+00:00", "event": "enqueued", "label": "lane-D", "task": "Marketplace aggregator"}
+{"timestamp": "2026-05-13T21:00:12.428460+00:00", "event": "killed", "label": "lane-B", "session": "subagent-lane-B-bec426e3"}
+{"timestamp": "2026-05-13T21:00:22.546081+00:00", "event": "spawned", "label": "lane-D", "session": "subagent-lane-D-b6af7cba", "task": "Marketplace aggregator"}
