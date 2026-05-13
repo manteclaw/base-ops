@@ -199,6 +199,7 @@ WebSocket: wss://base-mainnet.g.alchemy.com/v2/xNTF...
 🔌 Connecting WebSocket for block subscription...
 ✅ WebSocket connected. Listening for new blocks...
 
+<<<<<<< HEAD
 Traceback (most recent call last):
   File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 223, in <module>
     asyncio.run(main())
@@ -501,3 +502,5 @@ Traceback (most recent call last):
   File "/usr/lib/python3.12/json/decoder.py", line 340, in decode
     raise JSONDecodeError("Extra data", s, end)
 json.decoder.JSONDecodeError: Extra data: line 45 column 4 (char 1613)
+=======
+>>>>>>> 724b2ebdce6fe51be44f9aad9f5eef93ef172a08

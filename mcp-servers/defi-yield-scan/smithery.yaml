@@ -1,0 +1,26 @@
+# Smithery.ai configuration for DeFi Yield Scan MCP Server
+# Scans Base L2 for highest-yield DeFi opportunities
+
+name: defi-yield-scan
+version: 1.0.0
+description: MCP server that scans Base L2 DeFi protocols (Aave, Morpho) for highest yield opportunities with safety metrics.
+author: Manteclaw
+license: MIT
+homepage: https://github.com/manteclaw/base-ops
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties: {}
+  commandFunction: |
+    (config) => ({ command: 'python3', args: ['server.py'] })
+
+mcp:
+  tools:
+    - name: scan_base_yields
+      description: "Scan Base L2 for highest DeFi yields. Returns top opportunities sorted by APY."
+    - name: get_best_usdc_yield
+      description: "Get the highest USDC yield opportunity on Base L2 with safety metrics."
+    - name: estimate_yield_apy
+      description: "Estimate APY for a specific token on a specific protocol."

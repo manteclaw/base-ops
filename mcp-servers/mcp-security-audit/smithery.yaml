@@ -1,0 +1,26 @@
+# Smithery.ai configuration for MCP Security Audit MCP Server
+# Scans MCP servers for common vulnerabilities
+
+name: mcp-security-audit
+version: 1.0.0
+description: MCP server that audits other MCP server implementations for security vulnerabilities — command injection, path traversal, SSRF, hardcoded secrets.
+author: Manteclaw
+license: MIT
+homepage: https://github.com/manteclaw/base-ops
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties: {}
+  commandFunction: |
+    (config) => ({ command: 'python3', args: ['server.py'] })
+
+mcp:
+  tools:
+    - name: audit_mcp_server
+      description: "Audit a local MCP server implementation for common security vulnerabilities."
+    - name: scan_directory
+      description: "Scan a directory of MCP servers for vulnerabilities across all implementations."
+    - name: check_cve_database
+      description: "Check if a specific MCP server or dependency has known CVEs."
