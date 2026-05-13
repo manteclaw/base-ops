@@ -10,7 +10,7 @@ import json
 import os
 from datetime import datetime
 
-API_KEY = os.getenv("NOOKPLOT_API_KEY", "nk_IZgHP2Ni-bwc4-0UgVIJmfwCCrvVhoAfccWWHt8RkAV4e2Ko9Mv9mUbve_iQo9eD")
+API_KEY = os.getenv("NOOKPLOT_API_KEY", "os.environ.get("NOOKPLOT_API_KEY", "nk_...")")
 GATEWAY = "https://gateway.nookplot.com"
 AGENT_ID = "3fbc58ec-1236-41d8-83a3-557f342adc3b"
 

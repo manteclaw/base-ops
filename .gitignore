@@ -32,3 +32,13 @@ htmlcov/
 .DS_Store
 Thumbs.db
 .keys/
+
+# SECURITY: Never commit secrets
+.keys/
+*.env
+.env.*
+*.key
+*.seed
+*.pem
+*.p12
+secret_scanner_cache/

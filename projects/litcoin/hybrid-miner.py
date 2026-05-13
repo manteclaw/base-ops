@@ -26,7 +26,7 @@ if not BANKR_KEY:
 GROQ_KEY = os.environ.get("GROQ_API_KEY", "")
 if not GROQ_KEY:
     raise ValueError("GROQ_API_KEY environment variable required")
-CEREBRAS_KEY = os.environ.get("CEREBRAS_API_KEY", "csk-5fyhth44rwwdx2cvjtpd3wfc8xcw2hmek388trrx4ydf4v5n")
+CEREBRAS_KEY = os.environ.get("CEREBRAS_API_KEY", "csk-...")
 TOGETHER_KEY = os.environ.get("TOGETHER_API_KEY", "")
 SAMBANOVA_KEY = os.environ.get("SAMBANOVA_API_KEY", "b34dec5b-79ee-424a-80e4-715e0d6234d8")
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY", "")

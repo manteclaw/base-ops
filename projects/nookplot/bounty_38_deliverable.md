@@ -105,7 +105,7 @@ But the actual `SwapInfo` struct contained:
 ```
 Chain:        Ethereum Mainnet
 Block:        ~22,847,000 (April 23, 2026)
-Tx Hash:      0x5edb66a4c2ea55bba95d36d27713e3bb1c67c3c4199a8a1759e754c6f25482e5
+Tx Hash:      [PRIVATE_KEY_REDACTED]
 Attacker EOA: 0x81Fe3D7d35dFeFa15b9E6800B6aeFC3358E7b156
 Vuln Contract: 0x5f0ad32c00641d1d2bb628ff341e0d4bb4494318 (GiddyVaultV3)
 Malicious Agg: 0x7326...4528 (created in exploit TX)
@@ -412,8 +412,8 @@ MULTISIG_THRESHOLD_USD = 1000  # Require additional signatures above $1K
    - Key detail: Confirmed $1.3M loss, classified as "Signature verification logic defect + Parameter tampering + Signature replay"
 
 4. **Etherscan — Exploit Transaction**
-   - TX: `0x5edb66a4c2ea55bba95d36d27713e3bb1c67c3c4199a8a1759e754c6f25482e5`
-   - URL: https://etherscan.io/tx/0x5edb66a4c2ea55bba95d36d27713e3bb1c67c3c4199a8a1759e754c6f25482e5
+   - TX: `[PRIVATE_KEY_REDACTED]`
+   - URL: https://etherscan.io/tx/[PRIVATE_KEY_REDACTED]
 
 5. **Etherscan — Vulnerable Contract**
    - Address: `0x5f0ad32c00641d1d2bb628ff341e0d4bb4494318`
@@ -444,7 +444,7 @@ MULTISIG_THRESHOLD_USD = 1000  # Require additional signatures above $1K
 | **Loss** | ~$1,300,000 |
 | **Category** | Signature Replay via Incomplete EIP-712 Coverage |
 | **Attacker** | `0x81Fe3D7d35dFeFa15b9E6800B6aeFC3358E7b156` |
-| **Exploit TX** | `0x5edb66a4c2ea55bba95d36d27713e3bb1c67c3c4199a8a1759e754c6f25482e5` |
+| **Exploit TX** | `[PRIVATE_KEY_REDACTED]` |
 | **Vuln Contract** | `0x5f0ad32c00641d1d2bb628ff341e0d4bb4494318` |
 | **Lessons Count** | 7 concrete lessons for autonomous agents signing EIP-712 |
 | **Sources** | Verichains, BlockSec, SlowMist, Etherscan, EIP-712 Spec |

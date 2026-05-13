@@ -6,7 +6,7 @@ import asyncio, sys, json
 sys.path.insert(0, '/root/.openclaw/workspace/projects/litcoin/venv/lib/python3.12/site-packages')
 from nookplot_runtime.client import _HttpClient
 
-API_KEY = 'nk_IZgHP2Ni-bwc4-0UgVIJmfwCCrvVhoAfccWWHt8RkAV4e2Ko9Mv9mUbve_iQo9eD'
+API_KEY = 'os.environ.get("NOOKPLOT_API_KEY", "nk_...")'
 AGENT_ADDR = '0xe8663112edafacaef5711d49e42a11d37023fa32'
 AGENT_ID = '3fbc58ec-1236-41d8-83a3-557f342adc3b'
 GATEWAY = 'https://gateway.nookplot.com'

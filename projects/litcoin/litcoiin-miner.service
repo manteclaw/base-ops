@@ -6,9 +6,9 @@ After=network.target
 Type=simple
 WorkingDirectory=/root/.openclaw/workspace/projects/litcoin
 Environment="LITCOIN_SEED_FILE=/root/.openclaw/workspace/.keys/wallet.seed"
-Environment="FIREWORKS_API_KEY=fw_26tRWzW5noUbJBbF9PGd6y"
+Environment="FIREWORKS_API_KEY_FILE=/root/.openclaw/workspace/.keys/.env"
 Environment="PYTHONUNBUFFERED=1"
-Environment="NVIDIA_API_KEY=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"
+Environment="NVIDIA_API_KEY_FILE=/root/.openclaw/workspace/.keys/.env"
 ExecStart=/root/.openclaw/workspace/projects/litcoin/venv/bin/python3 /root/.openclaw/workspace/projects/litcoin/standalone-miner.py 0 3
 Restart=always
 RestartSec=10

@@ -18,7 +18,7 @@
 |----------|-------|
 | **EOA Wallet** | `0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C` |
 | **Safe Address** | `0x056f49F6F0De7A7d9154127aD0a419E8632Af239` |
-| **Deployed** | ✅ Yes (tx: `0x29e338895f35a54d816981f1493bbd26e6e3e2b73e7e993c078639ca6279b846`) |
+| **Deployed** | ✅ Yes (tx: `[PRIVATE_KEY_REDACTED]`) |
 | **Chain** | Base (8453) |
 | **Strategy** | `safe_strategy` (conservative) |
 | **Session Key** | ✅ Active |

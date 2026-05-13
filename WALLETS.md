@@ -7,7 +7,7 @@
 - **Type:** Bankr-managed (Privy)
 - **Network:** Base, Ethereum, Polygon, Unichain, World Chain, Arbitrum, BNB, Solana
 - **Base ETH:** 0.0003279
-- **Status:** ✅ Active — key `bk_usr_RARnzAJC_pztKgaX6dCC4rF8s6k79bYUVQHLSD3Rd`
+- **Status:** ✅ Active — key `[BANKR_KEY_REDACTED]QHLSD3Rd`
 - **Purpose:** Litcoiin mining, 0xWork Agent #93, general agent ops
 - **Security:** API-controlled — rotate key without changing wallet
 
@@ -24,7 +24,7 @@
 ### 4. Bankr Wallet (SECONDARY)
 - **Address:** `0x6a5fcc372a3ebca643409afe06d1eee82b5a3535`
 - **Linked to:** Different Bankr account (email: ajcheasty2@gmail.com)
-- **Key:** `bk_usr_LdsyvYJn_D6G8UB2gSKNMBxjnd87gqBu3DfdQZr4y`
+- **Key:** `[BANKR_KEY_REDACTED]DfdQZr4y`
 - **Status:** Active but not used for mining/0xWork
 
 ### 5. New Consolidation Wallet

@@ -1,0 +1,35 @@
+#!/bin/sh
+# Git pre-commit hook — blocks commits containing secrets
+# Install: cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+
+echo "🔒 Running secret scan..."
+python3 scripts/secret_scanner.py
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ COMMIT BLOCKED: Secrets detected in source files."
+    echo "   Fix the violations above or add to .keys/ (never committed)."
+    exit 1
+fi
+
+# Also check .env files aren't being committed
+STAGED_ENV=$(git diff --cached --name-only | grep -E '\.env$|\.env\.' || true)
+if [ -n "$STAGED_ENV" ]; then
+    echo ""
+    echo "❌ COMMIT BLOCKED: .env files staged:"
+    echo "$STAGED_ENV"
+    echo "   Move to .keys/ and use .env.template instead."
+    exit 1
+fi
+
+# Check .keys/ directory is NOT staged
+STAGED_KEYS=$(git diff --cached --name-only | grep '^\.keys/' || true)
+if [ -n "$STAGED_KEYS" ]; then
+    echo ""
+    echo "❌ COMMIT BLOCKED: .keys/ directory staged:"
+    echo "$STAGED_KEYS"
+    echo "   NEVER commit the .keys/ directory."
+    exit 1
+fi
+
+echo "✅ No secrets found. Commit approved."
+exit 0

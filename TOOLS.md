@@ -92,7 +92,7 @@ tail -f /root/.openclaw/workspace/projects/litcoin/miner_service.log
 
 | Provider | Key | Status | Notes |
 |----------|-----|--------|-------|
-| **Fireworks** | `fw_26tRWzW5noUbJBbF9PGd6y` | ✅ Working | Primary miner provider |
+| **Fireworks** | `[FIREWORKS_KEY_REDACTED]` | ✅ Working | Primary miner provider |
 | **OpenRouter** | `sk-or-v1-163aa...` | ❌ **DEAD** | 401 "User not found" — key invalid or account deleted |
 | **Groq** | `gsk_H7e2l1gu...` | ✅ Working | Available |
 | **Mistral** | `JI2Oxew4H...` | ✅ Working | Available |

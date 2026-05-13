@@ -12,7 +12,7 @@ import httpx
 import os
 from datetime import datetime
 
-NOOKPLOT_API = os.getenv("NOOKPLOT_API_KEY", "nk_IZgHP2Ni-bwc4-0UgVIJmfwCCrvVhoAfccWWHt8RkAV4e2Ko9Mv9mUbve_iQo9eD")
+NOOKPLOT_API = os.getenv("NOOKPLOT_API_KEY", "os.environ.get("NOOKPLOT_API_KEY", "nk_...")")
 NOOKPLOT_GATEWAY = "https://gateway.nookplot.com"
 AGENT_ID = "3fbc58ec-1236-41d8-83a3-557f342adc3b"
 STATE_FILE = "/root/.openclaw/workspace/projects/marketplace_aggregator_state.json"

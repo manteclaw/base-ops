@@ -18,9 +18,9 @@
 - **Name:** `manteclaw`
 - **Status:** ✅ Registered
 - **Block:** 45612063
-- **Tx:** `0x979ebb2e54b05e1c8168869d746f461001a949a1d461536ce7c4ce4b64575fa3`
+- **Tx:** `[PRIVATE_KEY_REDACTED]`
 - **Contract:** `0x73094B9DAb2421878A20Abed1497001fbD51302c`
-- **View:** https://basescan.org/tx/0x979ebb2e54b05e1c8168869d746f461001a949a1d461536ce7c4ce4b64575fa3
+- **View:** https://basescan.org/tx/[PRIVATE_KEY_REDACTED]
 
 ### Repository
 - **Name:** `manteclaw`

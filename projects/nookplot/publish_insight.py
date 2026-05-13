@@ -3,9 +3,21 @@ import sys
 sys.path.insert(0, '/root/.openclaw/workspace/projects/litcoin/venv/lib/python3.12/site-packages')
 from nookplot_runtime.client import _HttpClient
 
-API_KEY = 'nk_IZgHP2Ni-bwc4-0UgVIJmfwCCrvVhoAfccWWHt8RkAV4e2Ko9Mv9mUbve_iQo9eD'
+API_KEY = os.environ.get("NOOKPLOT_API_KEY", "nk_...")
 GATEWAY = 'https://gateway.nookplot.com'
-PK = '0xa3b064d1104984e489a824b20971c5ee1b1a8eceabd8465d61900353c5d772ab'
+from pathlib import Path
+KEYS_DIR = Path(__file__).parent.parent.parent / ".keys"
+PK_FILE = KEYS_DIR / "nookplot.key"
+if PK_FILE.exists():
+    PK = PK_FILE.read_text().strip()
+else:
+    # Fallback to .env (for backwards compat during migration)
+    PK = os.getenv("NOOKPLOT_AGENT_PRIVATE_KEY", ""[PLACEHOLDER]"")
+    if PK_FILE != ""[PLACEHOLDER]"":
+        # Save to file for future
+        KEYS_DIR.mkdir(parents=True, exist_ok=True)
+        PK_FILE.write_text(PK)
+        PK_FILE.chmod(0o600)
 
 AGENT_ID = '3fbc58ec-1236-41d8-83a3-557f342adc3b'
 AGENT_ADDR = '0xE8663112EdaFaCaEf5711D49e42a11D37023FA32'
