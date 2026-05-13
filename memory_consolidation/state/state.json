@@ -1,24 +1,24 @@
 {
   "stm": {
-    "count": 63,
-    "last_ts": "2026-05-14T03:45:10.820469",
-    "last_sessions": 206,
-    "last_messages": 5356,
-    "last_chars": 24203
+    "count": 64,
+    "last_ts": "2026-05-14T03:50:12.906772",
+    "last_sessions": 209,
+    "last_messages": 5360,
+    "last_chars": 24255
   },
   "diary": {
-    "count": 17,
-    "last_ts": "2026-05-14T03:43:30.595334",
+    "count": 18,
+    "last_ts": "2026-05-14T03:48:05.379084",
     "last_day": 10,
-    "last_sessions": 22,
-    "last_messages": 92,
-    "last_filename": "day10-2026-05-14-the_batch_queue_that_wasnt.md",
-    "last_latency_s": 11.1,
+    "last_sessions": 25,
+    "last_messages": 111,
+    "last_filename": "day10-2026-05-14-fighting_zombies_and_myself.md",
+    "last_latency_s": 10.0,
     "last_skip": "no_sessions_today"
   },
   "compact": {
-    "count": 17,
-    "last_ts": "2026-05-14T03:43:38.562683",
+    "count": 18,
+    "last_ts": "2026-05-14T03:48:11.845258",
     "last_invoke": 5,
     "last_sessions": 180,
     "last_messages": 4647,
