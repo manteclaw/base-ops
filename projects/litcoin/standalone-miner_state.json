@@ -1,7 +1,7 @@
 {
-  "round_count": 22656,
+  "round_count": 22676,
   "total_earned": 40372.0,
-  "last_task_type": "ai_safety",
+  "last_task_type": "bioinformatics",
   "best_model_overall": "inclusionai/ling-2.6-1t-20260423:free",
   "model_tracker": {
     "exploit_forensics": {
@@ -14,8 +14,8 @@
     "adversarial_robustness": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 6215.0,
-        "count": 220,
-        "avg": 28.25
+        "count": 224,
+        "avg": 27.745535714285715
       },
       "inclusionai/ling-2.6-1t-20260423:free": {
         "total": 161,
@@ -126,8 +126,8 @@
     "algorithm": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 906.0,
-        "count": 62,
-        "avg": 14.612903225806452
+        "count": 65,
+        "avg": 13.938461538461539
       },
       "inclusionai/ling-2.6-1t:free": {
         "total": 0,
@@ -138,8 +138,8 @@
     "runescape_insight": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 322.0,
-        "count": 42,
-        "avg": 7.666666666666667
+        "count": 45,
+        "avg": 7.155555555555556
       },
       "inclusionai/ling-2.6-1t:free": {
         "total": 12.0,
@@ -150,8 +150,8 @@
     "bioinformatics": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 1666.0,
-        "count": 91,
-        "avg": 18.307692307692307
+        "count": 95,
+        "avg": 17.53684210526316
       },
       "inclusionai/ling-2.6-1t-20260423:free": {
         "total": 0,
@@ -201,8 +201,8 @@
     "runescape_ta": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 369.0,
-        "count": 42,
-        "avg": 8.785714285714286
+        "count": 45,
+        "avg": 8.2
       },
       "inclusionai/ling-2.6-1t:free": {
         "total": 6.0,
@@ -234,8 +234,8 @@
     "ai_safety": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 308.0,
-        "count": 39,
-        "avg": 7.897435897435898
+        "count": 42,
+        "avg": 7.333333333333333
       },
       "inclusionai/ling-2.6-1t:free": {
         "total": 0.0,
@@ -258,14 +258,14 @@
       1966.737985610962
     ]
   },
-  "exact_cache_hits": 145,
-  "fuzzy_cache_hits": 51,
+  "exact_cache_hits": 160,
+  "fuzzy_cache_hits": 56,
   "recent_task_types": [
-    "bioinformatics",
-    "runescape_ta",
     "runescape_insight",
     "algorithm",
-    "ai_safety"
+    "ai_safety",
+    "adversarial_robustness",
+    "bioinformatics"
   ],
   "hourly_stats": {
     "08": {
@@ -349,7 +349,7 @@
       "total": 4425.0
     },
     "04": {
-      "count": 404,
+      "count": 424,
       "total": 1081.0
     },
     "05": {

@@ -1,0 +1,4 @@
+{"timestamp": "2026-05-13T20:49:27.867832+00:00", "event": "spawned", "label": "test-lane-A", "session": "subagent-test-lane-A-28183352", "task": "Lane A mining burst"}
+{"timestamp": "2026-05-13T20:50:00.712090+00:00", "event": "spawned", "label": "lane-B", "session": "subagent-lane-B-3568f5ab", "task": "Nookplot bounty scan"}
+{"timestamp": "2026-05-13T20:50:36.736913+00:00", "event": "spawned", "label": "lane-C", "session": "subagent-lane-C-0ddb242f", "task": "Marketplace aggregator"}
+{"timestamp": "2026-05-13T20:50:36.909916+00:00", "event": "spawned", "label": "lane-D", "session": "subagent-lane-D-4889e38d", "task": "Arbitrage bot"}

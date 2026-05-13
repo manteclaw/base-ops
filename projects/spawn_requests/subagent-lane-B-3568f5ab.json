@@ -1,0 +1,10 @@
+{
+  "label": "lane-B",
+  "session_label": "subagent-lane-B-3568f5ab",
+  "description": "Nookplot bounty scan",
+  "task": {
+    "description": "Nookplot bounty scan",
+    "skill": "nookplot"
+  },
+  "requested_at": "2026-05-13T20:49:50.652756+00:00"
+}

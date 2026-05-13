@@ -1,0 +1,10 @@
+{
+  "label": "lane-D",
+  "session_label": "subagent-lane-D-4889e38d",
+  "description": "Arbitrage bot",
+  "task": {
+    "description": "Arbitrage bot",
+    "skill": "arbitrage"
+  },
+  "requested_at": "2026-05-13T20:50:26.832235+00:00"
+}

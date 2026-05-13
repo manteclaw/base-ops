@@ -1,0 +1,19 @@
+#!/bin/bash
+# Pre-commit hook: scan for secrets before allowing commit.
+# Install: ln -s ../../.git-hooks/pre-commit .git/hooks/pre-commit
+#   (or copy if symlinks aren't available)
+
+echo "🔍 Running secret guard pre-commit check..."
+python3 /root/.openclaw/workspace/projects/secret_guard.py "$@"
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo ""
+    echo "❌ Commit blocked: secrets detected in workspace files."
+    echo "   Run 'python3 projects/secret_guard.py' to auto-redact,"
+    echo "   or use --no-verify to bypass (NOT RECOMMENDED)."
+    exit 1
+fi
+
+echo "✅ No secrets found. Proceeding with commit."
+exit 0

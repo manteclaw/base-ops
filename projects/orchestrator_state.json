@@ -1,0 +1,36 @@
+{
+  "active": {
+    "test-lane-A": {
+      "session": "subagent-test-lane-A-0eb5d73d",
+      "started_at": "2026-05-13T20:49:27.868406+00:00",
+      "task": {
+        "description": "Lane A mining burst",
+        "skill": "base-l2-automation",
+        "priority": 1
+      },
+      "retries": 0
+    },
+    "lane-B": {
+      "session": "subagent-lane-B-4476d325",
+      "started_at": "2026-05-13T20:50:00.713477+00:00",
+      "task": {
+        "description": "Nookplot bounty scan",
+        "skill": "nookplot"
+      },
+      "retries": 0
+    },
+    "lane-D": {
+      "session": "subagent-lane-D-69b28b10",
+      "started_at": "2026-05-13T20:50:36.913140+00:00",
+      "task": {
+        "description": "Arbitrage bot",
+        "skill": "arbitrage"
+      },
+      "retries": 0
+    }
+  },
+  "queue": [],
+  "completed": [],
+  "failed": [],
+  "version": 2
+}

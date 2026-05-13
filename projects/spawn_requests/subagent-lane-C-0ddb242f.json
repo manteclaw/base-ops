@@ -1,0 +1,10 @@
+{
+  "label": "lane-C",
+  "session_label": "subagent-lane-C-0ddb242f",
+  "description": "Marketplace aggregator",
+  "task": {
+    "description": "Marketplace aggregator",
+    "skill": "marketplace"
+  },
+  "requested_at": "2026-05-13T20:50:26.667514+00:00"
+}

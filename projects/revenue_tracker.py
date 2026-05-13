@@ -11,25 +11,133 @@ Lanes:
   E — Skill Marketplace (marketplace_aggregator_state.json)
   F — Yield Farming (yield/last_scan.json)
 
+Alerts:
+  ALERT: CLAIM READY — Litcoiin balance ≥ 50,000
+  ALERT: NEW BOUNTY — New Nookplot bounty detected
+  ALERT: NEW TASK — New marketplace task detected
+
 Usage:
-    python3 revenue_tracker.py           # Generate snapshot
-    python3 revenue_tracker.py --watch   # Continuous mode (every 60s)
-    python3 revenue_tracker.py --html    # Also regenerate dashboard.html
+    python3 revenue_tracker.py                  # Generate snapshot
+    python3 revenue_tracker.py --watch          # Continuous mode (every 60s)
+    python3 revenue_tracker.py --html           # Also regenerate dashboard.html
+    python3 revenue_tracker.py --alert-webhook=<url>  # POST alerts to webhook
+    python3 revenue_tracker.py --dry-run        # Test alerts without writing state
 """
+
 
 import json
 import os
 import re
 import sys
 import time
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
 WORKSPACE = Path("/root/.openclaw/workspace")
 SNAP_FILE = WORKSPACE / "projects" / "revenue_snapshot.json"
 LOG_FILE = WORKSPACE / "projects" / "revenue_history.jsonl"
+PREV_SNAP_FILE = WORKSPACE / "projects" / "revenue_snapshot_prev.json"
 
-# ── Helpers ──
+# ── Alert Webhook ──
+
+ALERT_WEBHOOK = None
+
+def set_webhook(url):
+    global ALERT_WEBHOOK
+    ALERT_WEBHOOK = url
+
+def send_alert(alert_type, message, details=None):
+    """Print alert and optionally POST to webhook."""
+    ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+    line = f"[{ts}] ALERT: {alert_type} — {message}"
+    print(line)
+    
+    if ALERT_WEBHOOK:
+        payload = {
+            "alert_type": alert_type,
+            "message": message,
+            "details": details or {},
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        try:
+            req = urllib.request.Request(
+                ALERT_WEBHOOK,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                pass  # webhook fired
+        except Exception as e:
+            print(f"  [webhook failed: {e}]")
+
+
+def load_previous_snapshot():
+    """Load the previous snapshot for change detection."""
+    try:
+        with open(PREV_SNAP_FILE) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_snapshot_for_comparison(snap):
+    """Save current snapshot for next run's comparison."""
+    try:
+        with open(PREV_SNAP_FILE, "w") as f:
+            json.dump(snap, f)
+    except Exception as e:
+        print(f"  [warn: could not save prev snapshot: {e}]")
+
+
+def check_alerts(snap, prev):
+    """Compare current vs previous snapshot and fire alerts."""
+    if not prev:
+        return  # First run, no baseline
+    
+    curr_lanes = snap.get("lanes", {})
+    prev_lanes = prev.get("lanes", {})
+    
+    # Alert 1: Litcoiin claim ready
+    a_curr = curr_lanes.get("A", {})
+    a_prev = prev_lanes.get("A", {})
+    if a_curr.get("claim_ready") and not a_prev.get("claim_ready"):
+        bal = a_curr.get("balance_lit", 0)
+        send_alert("CLAIM READY", f"Litcoiin balance {bal:,.0f} ≥ 50,000 — time to claim!", {
+            "balance": bal,
+            "threshold": 50000,
+        })
+    
+    # Alert 2: New Nookplot bounty (tracked count increased)
+    b_curr = curr_lanes.get("B", {})
+    b_prev = prev_lanes.get("B", {})
+    curr_tracked = b_curr.get("tracked_bounties", 0)
+    prev_tracked = b_prev.get("tracked_bounties", 0)
+    if curr_tracked > prev_tracked:
+        new_count = curr_tracked - prev_tracked
+        zero_comp = b_curr.get("zero_competition_bounties", 0)
+        send_alert("NEW BOUNTY", f"{new_count} new Nookplot bounty(s) detected ({zero_comp} zero-competition)", {
+            "new_bounties": new_count,
+            "total_tracked": curr_tracked,
+            "zero_competition": zero_comp,
+            "exposure": b_curr.get("potential_exposure_nook", 0),
+        })
+    
+    # Alert 3: New 0xWork / marketplace high-bounty task
+    e_curr = curr_lanes.get("E", {})
+    e_prev = prev_lanes.get("E", {})
+    curr_tasks = e_curr.get("tracked_tasks", 0)
+    prev_tasks = e_prev.get("tracked_tasks", 0)
+    if curr_tasks > prev_tasks:
+        new_count = curr_tasks - prev_tasks
+        potential = e_curr.get("total_potential_reward", 0)
+        send_alert("NEW TASK", f"{new_count} new marketplace task(s) ({potential:,.0f} NOOK potential)", {
+            "new_tasks": new_count,
+            "total_tracked": curr_tasks,
+            "total_potential_nook": potential,
+            "platforms": e_curr.get("platforms", {}),
+        })
 
 def load_json(path):
     try:
@@ -676,10 +784,24 @@ fetch('revenue_history.jsonl')
 def main():
     watch = "--watch" in sys.argv
     html = "--html" in sys.argv
+    dry_run = "--dry-run" in sys.argv
+    
+    # Parse --alert-webhook=<url>
+    webhook = None
+    for arg in sys.argv:
+        if arg.startswith("--alert-webhook="):
+            webhook = arg.split("=", 1)[1]
+            set_webhook(webhook)
+            break
+    
+    if dry_run:
+        print("[DRY RUN] No state files will be written. Testing alert logic only.")
     
     while True:
         snap = build_snapshot()
-        write_snapshot(snap)
+        
+        if not dry_run:
+            write_snapshot(snap)
         
         if html or "--html" in sys.argv:
             dash_path = generate_html_dashboard(snap)
@@ -690,6 +812,12 @@ def main():
         # Print summary line
         s = snap["summary"]
         print(f"  LIT:{s['total_lit_pending']:>8,.0f} | ETH:{s['total_pnl_eth']:>+.4f} | NOOK-exp:{s['total_nook_exposure']:>10,.0f} | Lanes:{s['active_lanes']}/6 | Est-LIT/day:{s['estimated_daily_lit']:>8,.0f} | Claim-Ready:{'YES' if s['claim_ready'] else 'NO'}")
+        
+        # Alert detection
+        prev = load_previous_snapshot()
+        check_alerts(snap, prev)
+        if not dry_run:
+            save_snapshot_for_comparison(snap)
         
         if not watch:
             break

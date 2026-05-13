@@ -1,0 +1,11 @@
+{
+  "label": "test-lane-A",
+  "session_label": "subagent-test-lane-A-28183352",
+  "description": "Lane A mining burst",
+  "task": {
+    "description": "Lane A mining burst",
+    "skill": "base-l2-automation",
+    "priority": 1
+  },
+  "requested_at": "2026-05-13T20:49:17.809521+00:00"
+}
