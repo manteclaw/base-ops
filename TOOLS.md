@@ -93,15 +93,17 @@ tail -f /root/.openclaw/workspace/projects/litcoin/miner_service.log
 | Provider | Key | Status | Notes |
 |----------|-----|--------|-------|
 | **Fireworks** | `fw_26tRWzW5noUbJBbF9PGd6y` | ✅ Working | Primary miner provider |
-| **OpenRouter** | `sk-or-v1-163aa...` | ✅ API OK | Model listing works; inference testing in progress |
+| **OpenRouter** | `sk-or-v1-163aa...` | ❌ **DEAD** | 401 "User not found" — key invalid or account deleted |
 | **Groq** | `gsk_H7e2l1gu...` | ✅ Working | Available |
 | **Mistral** | `JI2Oxew4H...` | ✅ Working | Available |
 | **SambaNova** | `sam_8d03b2e9...` | ✅ Working | Available |
 | **NVIDIA** | `nvapi-nwTDzIi...` | ✅ Working | Smart contracts only |
 | **Venice** | `VENICE_INFERENCE_KEY...` | ⚠️ Zero credits | Key valid but no credits remaining |
-| **Kimi** | `sk-kimi-2cnB...` | ❌ Invalid | Authentication failed — needs new key |
+| **Kimi** | `sk-kimi-2cnB...` | ❌ **INVALID** | "Invalid Authentication" — expired/revoked |
 
-**Action needed:** Generate new Kimi API key at https://platform.moonshot.cn/
+**Action needed:**
+- New **OpenRouter** key: https://openrouter.ai/keys
+- New **Kimi** key: https://platform.moonshot.cn/
 
 ---
 
