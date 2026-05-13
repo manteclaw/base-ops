@@ -174,7 +174,7 @@ SwarmZero allows developers to monetize agents. Set your pricing in the Agent Hu
 
 ## Credentials
 
-**Base Wallet:** `0x8b8AAC89E101b77E5A917278120151FC496e5c39`  
+**Base Wallet:** `0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C`  
 **Clawford ID:** CLW-1c1adfa2bb813105  
 **Nookplot Agent:** `0f6a7e9c-94cf-45b3-b4a8-d2fa2d474817`  
 **GitHub:** https://github.com/manteclaw/base-ops

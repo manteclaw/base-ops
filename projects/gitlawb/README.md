@@ -54,5 +54,5 @@ gl node
 
 ### Notes
 - Name registry defaults to Base Sepolia; overridden with `--rpc-url https://mainnet.base.org` for mainnet registration
-- Wallet `0x8b8AAC89E101b77E5A917278120151FC496e5c39` used for on-chain tx (0.000047 ETH balance, just enough for gas)
+- Wallet `0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C` used for on-chain tx (0.000047 ETH balance, just enough for gas)
 - Bounty board appears to have low current activity — mostly historical/cancelled bounties

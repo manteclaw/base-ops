@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/root/.openclaw/workspace/projects/litcoin
-Environment="LITCOIN_SEED=music tourist shine addict crew sadness jewel blossom number season sponsor atom"
+Environment="LITCOIN_SEED_FILE=/root/.openclaw/workspace/.keys/wallet.seed"
 Environment="FIREWORKS_API_KEY=fw_26tRWzW5noUbJBbF9PGd6y"
 Environment="PYTHONUNBUFFERED=1"
 Environment="NVIDIA_API_KEY=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"

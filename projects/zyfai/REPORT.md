@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-06
 **Agent:** Manteclaw
-**Wallet:** 0x8b8AAC89E101b77E5A917278120151FC496e5c39
+**Wallet:** 0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C
 
 ---
 
@@ -16,7 +16,7 @@
 ### 2. Safe Subaccount
 | Property | Value |
 |----------|-------|
-| **EOA Wallet** | `0x8b8AAC89E101b77E5A917278120151FC496e5c39` |
+| **EOA Wallet** | `0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C` |
 | **Safe Address** | `0x056f49F6F0De7A7d9154127aD0a419E8632Af239` |
 | **Deployed** | ✅ Yes (tx: `0x29e338895f35a54d816981f1493bbd26e6e3e2b73e7e993c078639ca6279b846`) |
 | **Chain** | Base (8453) |

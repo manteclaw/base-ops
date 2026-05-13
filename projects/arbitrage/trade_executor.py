@@ -41,9 +41,9 @@ def get_w3() -> Web3:
 CHAIN_ID = 8453  # Base mainnet
 
 # ── Wallet ──
-MNEMONIC = os.environ.get("MNEMONIC", "music tourist shine addict crew sadness jewel blossom number season sponsor atom")
+MNEMONIC = os.environ.get("MNEMONIC_FILE") or os.environ.get("MNEMONIC")
 WALLET_ADDRESS = Web3.to_checksum_address(
-    os.environ.get("WALLET_ADDRESS", CONFIG.get("wallet", "0x8b8AAC89E101b77E5A917278120151FC496e5c39"))
+    os.environ.get("WALLET_ADDRESS", CONFIG.get("wallet", "0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C"))
 )
 
 _wallet_account: Optional[Account] = None

@@ -113,7 +113,7 @@ tail -f /root/.openclaw/workspace/projects/litcoin/miner_service.log
 - **Address:** `0xC4Cf88b691D9b820040d861954d32e0C5f4538b7`
 - **Status:** DO NOT USE
 - **Reason:** Private key may have been exposed (platform wipe + recovery from external sources)
-- **Switched to:** `0x8b8AAC89E101b77E5A917278120151FC496e5c39`
+- **Switched to:** `0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C`
 
 **Files updated:** SwarmZero profile, MuleRun profile, Gitlawb README, Zyfai files, Dune utils, WALLET.md, WALLETS.md
 

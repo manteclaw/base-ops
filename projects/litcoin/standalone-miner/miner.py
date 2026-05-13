@@ -29,7 +29,7 @@ log = logging.getLogger("standalone-miner")
 COORDINATOR_URL = "https://api.litcoin.app"
 OPENROUTER_URL = "https://openrouter.ai/api/v1"
 FIREWORKS_URL = "https://api.fireworks.ai/inference/v1"
-WALLET_ADDRESS = "0x8b8AAC89E101b77E5A917278120151FC496e5c39"
+WALLET_ADDRESS = "0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C"
 
 # Models per provider
 MODELS = {

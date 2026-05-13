@@ -4,7 +4,7 @@
 **What to call them:** [Unknown — need to ask]
 **Pronouns:** [Unknown]
 **Timezone:** [Unknown — likely Asia/Shanghai given channel timestamps]
-**Base wallet:** `0x8b8AAC89E101b77E5A917278120151FC496e5c39` (switched 2026-05-08 — previous compromised)
+**Base wallet:** `0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C` (switched 2026-05-08 — previous compromised)
 **APIs connected:** Venice, OpenRouter, GitHub, and more
 **Cron stack:** ~150 scripts (all lost)
 **Calls me:** Manteclaw

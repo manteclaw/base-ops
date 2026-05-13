@@ -23,8 +23,8 @@ if not ALCHEMY_KEY:
 ALCHEMY_RPC = f"https://base-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}"
 
 WALLETS = {
-    "wallet_1_compromised": "0x8b8AAC89E101b77E5A917278120151FC496e5c39",
-    "wallet_2_active": "0x8b8AAC89E101b77E5A917278120151FC496e5c39",
+    "wallet_1_compromised": "0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C",
+    "wallet_2_active": "0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C",
     "wallet_2_active": "0xD4E4b8e531d8AdAe126F400603361Ccda3931A8D",
     "wallet_3_bankr": "0x550c0cec65c9e585a0e59164f147a350e75a7a56",
     "wallet_4_fresh": "0xFC56950105883F46a3bB96ac9517A110724F2F27",

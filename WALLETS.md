@@ -12,7 +12,7 @@
 - **Security:** API-controlled — rotate key without changing wallet
 
 ### 2. Base Wallet 1 (COMPROMISED — DO NOT USE)
-- **Address:** `0x8b8AAC89E101b77E5A917278120151FC496e5c39`
+- **Address:** `0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C`
 - **Seed:** `state insane tooth rain scan march liberty man sick category noble divorce`
 - **Status:** ❌ COMPROMISED — do not fund or use
 
@@ -44,7 +44,7 @@
 
 ### 8. Zyfai Safe Wallet
 - **Safe:** `0x056f49F6F0De7A7d9154127aD0a419E8632Af239`
-- **EOA:** `0x8b8AAC89E101b77E5A917278120151FC496e5c39`
+- **EOA:** `0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C`
 - **Status:** Safe deployed, session active, needs USDC deposit
 
 ## Funding Priority
@@ -64,5 +64,5 @@
 
 ## Helixa On-Chain Identity
 - **Token ID:** 1416
-- **Agent Address:** `0x8b8AAC89E101b77E5A917278120151FC496e5c39` (compromised wallet — may need re-mint)
+- **Agent Address:** `0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C` (compromised wallet — may need re-mint)
 - **Status:** Minted but linked to compromised address

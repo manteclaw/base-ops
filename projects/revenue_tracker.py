@@ -237,7 +237,7 @@ def lane_arbitrage():
         "trades_executed": parsed["trade_count"],
         "total_pnl_eth": parsed["total_pnl_eth"],
         "recent_trades": parsed["recent_trades"],
-        "wallet": config.get("wallet", "0x8b8AAC89E101b77E5A917278120151FC496e5c39"),
+        "wallet": config.get("wallet", "0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C"),
         "reserve_eth": config.get("reserve", 0.0025),
     }
 

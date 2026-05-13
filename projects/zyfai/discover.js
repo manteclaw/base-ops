@@ -9,7 +9,7 @@ async function main() {
     process.exit(1);
   }
 
-  const userAddress = "0x8b8AAC89E101b77E5A917278120151FC496e5c39";
+  const userAddress = "0xfF6d5C5073F7c5B68FEe717002aA8857D41F567C";
   const chainId = 8453; // Base
 
   const sdk = new ZyfaiSDK(apiKey);
