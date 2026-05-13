@@ -1,6 +1,6 @@
 {
-  "round_count": 21347,
-  "total_earned": 38689.0,
+  "round_count": 21527,
+  "total_earned": 38693.0,
   "last_task_type": "tcg_card_profile",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
@@ -87,8 +87,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 1865.0,
-        "count": 512,
-        "avg": 3.642578125
+        "count": 515,
+        "avg": 3.621359223300971
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 52.0,
@@ -108,9 +108,9 @@
         "avg": 0.0
       },
       "meta/llama-3.1-8b-instruct": {
-        "total": 4487.0,
-        "count": 624,
-        "avg": 7.190705128205129
+        "total": 4491.0,
+        "count": 639,
+        "avg": 7.028169014084507
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 48.0,
@@ -169,8 +169,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 313.0,
-        "count": 535,
-        "avg": 0.5850467289719626
+        "count": 542,
+        "avg": 0.577490774907749
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0.0,
@@ -217,9 +217,6 @@
   "initial_balance": 0,
   "provider_latency": {
     "nvidia": [
-      9367.388248443604,
-      6323.908090591431,
-      7102.5238037109375,
       6530.087947845459,
       3588.9840126037598,
       7792.365550994873,
@@ -236,7 +233,10 @@
       7478.949785232544,
       4616.585254669189,
       7281.116008758545,
-      24263.525247573853
+      24263.525247573853,
+      5082.9832553863525,
+      9788.588762283325,
+      6798.032760620117
     ],
     "kimi": [
       966.3734436035156,
@@ -255,7 +255,7 @@
       109.36236381530762
     ]
   },
-  "cache_hits": 7340,
+  "cache_hits": 7413,
   "recent_task_types": [
     "agentic_trace",
     "bioinformatics",
@@ -289,12 +289,12 @@
       "total": 66
     },
     "14": {
-      "count": 542,
-      "total": 46
+      "count": 578,
+      "total": 50
     },
     "15": {
-      "count": 463,
-      "total": 239
+      "count": 502,
+      "total": 243
     },
     "16": {
       "count": 454,
