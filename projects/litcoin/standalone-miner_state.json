@@ -1,7 +1,7 @@
 {
-  "round_count": 22857,
+  "round_count": 22862,
   "total_earned": 40448.0,
-  "last_task_type": "runescape_ta",
+  "last_task_type": "bioinformatics",
   "best_model_overall": "inclusionai/ling-2.6-1t-20260423:free",
   "model_tracker": {
     "exploit_forensics": {
@@ -14,8 +14,8 @@
     "adversarial_robustness": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 6215.0,
-        "count": 254,
-        "avg": 24.468503937007874
+        "count": 255,
+        "avg": 24.372549019607842
       },
       "inclusionai/ling-2.6-1t-20260423:free": {
         "total": 161,
@@ -126,8 +126,8 @@
     "algorithm": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 965.0,
-        "count": 95,
-        "avg": 10.157894736842104
+        "count": 96,
+        "avg": 10.052083333333334
       },
       "inclusionai/ling-2.6-1t:free": {
         "total": 0,
@@ -150,8 +150,8 @@
     "bioinformatics": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 1666.0,
-        "count": 125,
-        "avg": 13.328
+        "count": 126,
+        "avg": 13.222222222222221
       },
       "inclusionai/ling-2.6-1t-20260423:free": {
         "total": 0,
@@ -258,14 +258,14 @@
       1966.737985610962
     ]
   },
-  "exact_cache_hits": 294,
-  "fuzzy_cache_hits": 87,
+  "exact_cache_hits": 296,
+  "fuzzy_cache_hits": 88,
   "recent_task_types": [
+    "runescape_insight",
     "algorithm",
     "ai_safety",
     "adversarial_robustness",
-    "bioinformatics",
-    "runescape_ta"
+    "bioinformatics"
   ],
   "hourly_stats": {
     "08": {
@@ -357,7 +357,7 @@
       "total": 540.0
     },
     "06": {
-      "count": 443,
+      "count": 446,
       "total": 424.0
     },
     "07": {

@@ -190,7 +190,7 @@ def verify_signature(message, signature, nonce_token):
     
     print(f"[Step 4] POST {url}")
     try:
-        resp = requests.post(url, json=payload, timeout=10)
+        resp = requests.post(url, json=payload, timeout=30)
         print(f"[Step 4] HTTP {resp.status_code}")
         return resp.json()
     except Exception as e:
@@ -206,7 +206,7 @@ def claim_drip(receipt):
     
     print(f"[Step 5] POST {url}")
     try:
-        resp = requests.post(url, headers=headers, timeout=10)
+        resp = requests.post(url, headers=headers, timeout=30)
         print(f"[Step 5] HTTP {resp.status_code}")
         return resp.json()
     except Exception as e:
