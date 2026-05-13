@@ -1,28 +1,28 @@
 {
-  "timestamp": "2026-05-13T18:54:40.943629+00:00",
+  "timestamp": "2026-05-13T20:13:40.099019+00:00",
   "lanes": {
     "A": {
       "lane": "A",
       "name": "Litcoiin Mining",
       "status": "active",
-      "balance_lit": 39954.0,
-      "rounds": 22476,
+      "balance_lit": 40372.0,
+      "rounds": 22619,
       "avg_per_round": 1.78,
       "best_task_type": "tcg_card_profile",
       "best_task_avg": 33.15,
       "best_hour": "08:00",
       "best_hour_avg": 14.77,
       "recent_rewards": [
-        46.0,
-        46.0,
-        29.0,
-        29.0,
-        6.0,
-        6.0,
         0.0,
         0.0,
-        34.0,
-        34.0
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "claim_threshold": 50000,
       "claim_ready": false,
@@ -31,7 +31,7 @@
         "kimi",
         "nvidia"
       ],
-      "estimated_daily_lit": 331200.0
+      "estimated_daily_lit": 0.0
     },
     "B": {
       "lane": "B",
@@ -128,11 +128,11 @@
     }
   },
   "summary": {
-    "total_lit_pending": 39954.0,
+    "total_lit_pending": 40372.0,
     "total_nook_exposure": 369000.0,
     "total_pnl_eth": 0.0,
     "active_lanes": 6,
     "claim_ready": false,
-    "estimated_daily_lit": 331200.0
+    "estimated_daily_lit": 0.0
   }
 }

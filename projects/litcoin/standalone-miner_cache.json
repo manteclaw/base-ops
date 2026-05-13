@@ -246,5 +246,13 @@
     "timestamp": 1778700682.6226058,
     "task_type": "algorithm",
     "normalized_prompt": "after battling shikamaru tayuya decided that her flute is too predictable and replaced it with a guitar the guitar has 6 strings and an infinite number of frets numbered from 1 fretting the fret number j on the ith string produces the note ai  j tayuya wants to play a melody of n notes each note can be played on different stringfret combination the easiness of performance depends on the difference between the maximal and the minimal indices of used frets the less this difference is the easier it is to perform the technique please determine the minimal possible difference for example if a  1 1 2 2 3 3 and the sequence of notes is 4 11 11 12 12 13 13 corresponding to the second example we can play the first note on the first string and all the other notes on the sixth string then the maximal fret will be 10 the minimal one will be 3 and the answer is 10  3  7 as shown on the picture sample input 1 4 100 10 30 5 6 101 104 105 110 130 200 sample output 0 important before writing code briefly explain your approach and reasoning in english 24 sentences then write your solution in a python block"
+  },
+  "a1b6ce0af38c9e4847bc34a5b34b10fe": {
+    "solution": "def solve():\n    N = int(input())\n    if N % 2 == 1:\n        print('-' * (N // 2) + '=' + '-' * (N // 2))\n    else:\n        print('-' * (N // 2 - 1) + '==' + '-' * (N // 2 - 1))",
+    "model": "accounts/fireworks/models/llama-v3p3-70b-instruct",
+    "score": 50,
+    "timestamp": 1778702758.9390905,
+    "task_type": "algorithm",
+    "normalized_prompt": "find a lengthn string that satisfies all of the following conditions  each character is  or   it is a palindrome  it contains exactly one or exactly two s if it contains two s they are adjacent such a string is unique input the input is given from standard input in the following format n output print the answer constraints  1 leq n leq 100  n is an integer sample input 1 4 sample output 1  sample input 2 7 sample output 2  your solve function will be called with no arguments it should read from stdin and print to stdout just like a competitive programming submission important before writing code briefly explain your approach and reasoning in english 24 sentences then write your solution in a python block"
   }
 }

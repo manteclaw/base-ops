@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="refresh" content="60">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Manteclaw Revenue Dashboard</title>
 <style>
@@ -42,17 +43,6 @@ h1 .emoji { font-size: 28px; }
   font-size: 13px;
   margin-bottom: 20px;
 }
-#conn-status {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--red);
-  margin-left: 8px;
-  vertical-align: middle;
-}
-#conn-status.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
-#conn-status.connecting { background: var(--yellow); }
 .summary-bar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -165,34 +155,71 @@ a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
-<h1><span class="emoji">⚡</span>Manteclaw Revenue Dashboard <span id="conn-status" title="SSE status"></span></h1>
-<p class="sub">6 earning lanes · Real-time via SSE · <span id="last-update">Loading...</span></p>
+<h1><span class="emoji">⚡</span>Manteclaw Revenue Dashboard</h1>
+<p class="sub">6 earning lanes · Auto-refreshes every 60s · 2026-05-13T20:13:40.099019+00:00</p>
 
-<div class="summary-bar" id="summary-bar">
-    <div class="summary-item">
-        <div class="summary-value" id="lit-pending">—</div>
-        <div class="summary-label">LITCOIN Pending</div>
-    </div>
-    <div class="summary-item">
-        <div class="summary-value" id="eth-pnl">—</div>
-        <div class="summary-label">ETH PnL</div>
-    </div>
-    <div class="summary-item">
-        <div class="summary-value" id="nook-exp">—</div>
-        <div class="summary-label">NOOK Exposure</div>
-    </div>
-    <div class="summary-item">
-        <div class="summary-value" id="active-lanes">—</div>
-        <div class="summary-label">Active Lanes</div>
-    </div>
-    <div class="summary-item">
-        <div class="summary-value" id="est-daily">—</div>
-        <div class="summary-label">Est. Daily LIT</div>
-    </div>
-</div>
 
-<div class="grid" id="lane-grid">
-    <!-- Cards injected by JS from snapshot -->
+    <div class="summary-bar">
+        <div class="summary-item">
+            <div class="summary-value">40,372</div>
+            <div class="summary-label">LITCOIN Pending</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value">0.0000</div>
+            <div class="summary-label">ETH PnL</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value">369,000</div>
+            <div class="summary-label">NOOK Exposure</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value">6/6</div>
+            <div class="summary-label">Active Lanes</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value">0</div>
+            <div class="summary-label">Est. Daily LIT</div>
+        </div>
+    </div>
+    
+
+<div class="grid">
+
+        <div class="card">
+            <h2><span class="status" style="background:#d29922"></span>⛏️ Litcoiin Mining</h2>
+            <div class="metric">40,372 <span class="unit">LITCOIN</span></div><div class="row"><span>Rounds</span><span>22,619</span></div><div class="row"><span>Avg/Round</span><span>1.78</span></div><div class="row"><span>Best Task</span><span>tcg_card_profile (33.1)</span></div><div class="row"><span>Best Hour</span><span>08:00 (14.8)</span></div><div class="row"><span>Claim Ready</span><span>⏳ No</span></div><div class="row"><span>Providers</span><span>fireworks, kimi, nvidia</span></div>
+        </div>
+        
+
+        <div class="card">
+            <h2><span class="status" style="background:#a371f7"></span>🏦 Nookplot Bounties</h2>
+            <div class="metric">31 <span class="unit">tracked</span></div><div class="row"><span>Applied</span><span>0</span></div><div class="row"><span>Submitted</span><span>0</span></div><div class="row"><span>Zero-Comp</span><span>16</span></div><div class="row"><span>Exposure</span><span>369,000 NOOK</span></div>
+        </div>
+        
+
+        <div class="card">
+            <h2><span class="status" style="background:#3fb950"></span>📊 Nookplot Insights</h2>
+            <div class="metric">7 <span class="unit">published</span></div><div class="row"><span>Failed</span><span>1</span></div><div class="row"><span>Est. NOOK</span><span>0</span></div><div class="row"><span>CIDs</span><span>7 stored</span></div>
+        </div>
+        
+
+        <div class="card">
+            <h2><span class="status" style="background:#d29922"></span>🔄 Base L2 Arbitrage</h2>
+            <div class="metric">0.0000 <span class="unit">ETH</span></div><div class="row"><span>Trades</span><span>0</span></div><div class="row"><span>Reserve</span><span>0.0025 ETH</span></div>
+        </div>
+        
+
+        <div class="card">
+            <h2><span class="status" style="background:#3fb950"></span>🌐 Skill Marketplace</h2>
+            <div class="metric">31 <span class="unit">tasks</span></div><div class="row"><span>Platforms</span><span>nookplot:31</span></div><div class="row"><span>Potential</span><span>574,000 NOOK</span></div><div class="row"><span>Registered</span><span>swarmzero, mulerun</span></div>
+        </div>
+        
+
+        <div class="card">
+            <h2><span class="status" style="background:#3fb950"></span>💰 Yield Farming</h2>
+            <div class="metric">133,843% <span class="unit">APY</span></div><div class="row"><span>Protocol</span><span>Morpho Blue</span></div><div class="row"><span>Pool</span><span>APRUSDC</span></div><div class="row"><span>TVL</span><span>$18,753</span></div><div class="row"><span>Pools</span><span>93</span></div>
+        </div>
+        
 </div>
 
 <div class="history-chart">
@@ -200,147 +227,30 @@ a:hover { text-decoration: underline; }
 <pre id="history">Loading...</pre>
 </div>
 
-<p class="timestamp">Last updated: <span id="timestamp">—</span> · Generated by revenue_tracker.py · SSE: <span id="sse-state">disconnected</span></p>
+<p class="timestamp">Last updated: 2026-05-13T20:13:40.099019+00:00 UTC · Generated by revenue_tracker.py</p>
 
 <script>
-// ── Load snapshot and render ──
-function renderDashboard() {
-  fetch('revenue_snapshot.json')
-    .then(r => r.json())
-    .then(data => {
-      const s = data.summary;
-      document.getElementById('lit-pending').textContent = Math.round(s.total_lit_pending).toLocaleString();
-      document.getElementById('eth-pnl').textContent = s.total_pnl_eth.toFixed(4);
-      document.getElementById('nook-exp').textContent = Math.round(s.total_nook_exposure).toLocaleString();
-      document.getElementById('active-lanes').textContent = s.active_lanes + '/6';
-      document.getElementById('est-daily').textContent = Math.round(s.estimated_daily_lit).toLocaleString();
-      document.getElementById('last-update').textContent = new Date(data.timestamp).toLocaleString();
-      document.getElementById('timestamp').textContent = data.timestamp;
-
-      // Render lane cards
-      const grid = document.getElementById('lane-grid');
-      const lanes = data.lanes;
-      let html = '';
-      const laneMeta = {
-        A: { icon: '⛏️', title: 'Litcoiin Mining', color: '#d29922' },
-        B: { icon: '🏦', title: 'Nookplot Bounties', color: '#a371f7' },
-        C: { icon: '📊', title: 'Nookplot Insights', color: '#3fb950' },
-        D: { icon: '🔄', title: 'Base L2 Arbitrage', color: '#d29922' },
-        E: { icon: '🌐', title: 'Skill Marketplace', color: '#3fb950' },
-        F: { icon: '💰', title: 'Yield Farming', color: '#3fb950' },
-      };
-      for (const id of ['A','B','C','D','E','F']) {
-        const l = lanes[id];
-        if (!l) continue;
-        const m = laneMeta[id];
-        let rows = '';
-        if (id === 'A') {
-          rows = `<div class="row"><span>Rounds</span><span>${l.rounds.toLocaleString()}</span></div>
-                  <div class="row"><span>Avg/Round</span><span>${l.avg_per_round.toFixed(2)}</span></div>
-                  <div class="row"><span>Best Task</span><span>${l.best_task_type || 'N/A'} (${l.best_task_avg.toFixed(1)})</span></div>
-                  <div class="row"><span>Best Hour</span><span>${l.best_hour || 'N/A'}</span></div>
-                  <div class="row"><span>Claim Ready</span><span>${l.claim_ready ? '✅ Yes' : '⏳ No'}</span></div>
-                  <div class="row"><span>Providers</span><span>${l.providers.join(', ')}</span></div>`;
-        } else if (id === 'B') {
-          rows = `<div class="row"><span>Tracked</span><span>${l.tracked_bounties}</span></div>
-                  <div class="row"><span>Applied</span><span>${l.applied}</span></div>
-                  <div class="row"><span>Submitted</span><span>${l.submitted}</span></div>
-                  <div class="row"><span>Zero-Comp</span><span>${l.zero_competition_bounties}</span></div>
-                  <div class="row"><span>Exposure</span><span>${l.potential_exposure_nook.toLocaleString()} NOOK</span></div>`;
-        } else if (id === 'C') {
-          rows = `<div class="row"><span>Published</span><span>${l.published}</span></div>
-                  <div class="row"><span>Failed</span><span>${l.failed || 0}</span></div>
-                  <div class="row"><span>Est. NOOK</span><span>${(l.estimated_nook_earned || 0).toLocaleString()}</span></div>
-                  <div class="row"><span>CIDs</span><span>${l.published} stored</span></div>`;
-        } else if (id === 'D') {
-          rows = `<div class="row"><span>Trades</span><span>${l.trades_executed}</span></div>
-                  <div class="row"><span>Total PnL</span><span>${l.total_pnl_eth.toFixed(4)} ETH</span></div>
-                  <div class="row"><span>Reserve</span><span>0.0025 ETH</span></div>`;
-        } else if (id === 'E') {
-          rows = `<div class="row"><span>Tasks</span><span>${l.tracked_tasks}</span></div>
-                  <div class="row"><span>Platforms</span><span>${JSON.stringify(l.platforms || {})}</span></div>
-                  <div class="row"><span>Potential</span><span>${l.total_potential_reward.toLocaleString()} NOOK</span></div>`;
-        } else if (id === 'F') {
-          if (l.status === 'idle') {
-            rows = `<div class="row"><span>Status</span><span>Idle — run yield scanner</span></div>`;
-          } else {
-            rows = `<div class="row"><span>Best APY</span><span>${l.best_apy.toLocaleString()}%</span></div>
-                    <div class="row"><span>Protocol</span><span>${l.best_protocol}</span></div>
-                    <div class="row"><span>Pool</span><span>${l.best_symbol}</span></div>
-                    <div class="row"><span>TVL</span><span>$${l.best_tvl ? l.best_tvl.toLocaleString() : '—'}</span></div>`;
-          }
-        }
-        html += `<div class="card">
-            <h2><span class="status" style="background:${m.color}"></span>${m.icon} ${m.title}</h2>
-            <div class="metric">${l.metric_value || '—'} <span class="unit">${l.metric_unit || ''}</span></div>
-            ${rows}
-        </div>`;
-      }
-      grid.innerHTML = html;
-    })
-    .catch(err => console.error('Failed to load snapshot:', err));
-
-  // History sparkline
-  fetch('revenue_history.jsonl')
-    .then(r => r.text())
-    .then(text => {
-      const lines = text.trim().split('\n').slice(-20);
-      const data = lines.map(l => JSON.parse(l));
-      let out = 'Date        LITCOIN    ETH-PnL    Lanes\n';
-      out += '-------------------------------------------\n';
-      data.forEach(d => {
-        const dt = d.timestamp.slice(0,10);
-        const lit = String(Math.round(d.total_lit)).padStart(10);
-        const eth = String(d.total_pnl_eth.toFixed(4)).padStart(10);
-        const lanes = String(d.active_lanes).padStart(5);
-        out += `${dt}  ${lit}  ${eth}  ${lanes}\n`;
-      });
-      document.getElementById('history').textContent = out;
-    })
-    .catch(() => {
-      document.getElementById('history').textContent = 'No history data available yet.';
+// Simple sparkline from revenue_history.jsonl if accessible
+fetch('revenue_history.jsonl')
+  .then(r => r.text())
+  .then(text => {
+    const lines = text.trim().split('
+').slice(-20);
+    const data = lines.map(l => JSON.parse(l));
+    let out = 'Date        LITCOIN    ETH-PnL    Lanes\n';
+    out += '-------------------------------------------\n';
+    data.forEach(d => {
+      const dt = d.timestamp.slice(0,10);
+      const lit = String(Math.round(d.total_lit)).padStart(10);
+      const eth = String(d.total_pnl_eth.toFixed(4)).padStart(10);
+      const lanes = String(d.active_lanes).padStart(5);
+      out += `${dt}  ${lit}  ${eth}  ${lanes}\n`;
     });
-}
-
-// ── SSE real-time updates ──
-function connectSSE() {
-  const statusEl = document.getElementById('conn-status');
-  const sseStateEl = document.getElementById('sse-state');
-  statusEl.className = 'connecting';
-  sseStateEl.textContent = 'connecting...';
-
-  const es = new EventSource('/events');
-
-  es.onopen = () => {
-    statusEl.className = 'online';
-    sseStateEl.textContent = 'connected';
-  };
-
-  es.onmessage = (e) => {
-    try {
-      const msg = JSON.parse(e.data);
-      if (msg.type === 'refresh') {
-        renderDashboard();
-        console.log('Dashboard refreshed via SSE at', msg.timestamp);
-      } else if (msg.type === 'connected') {
-        console.log('SSE connected');
-      }
-    } catch (err) {
-      // heartbeat or non-JSON
-    }
-  };
-
-  es.onerror = () => {
-    statusEl.className = '';
-    sseStateEl.textContent = 'reconnecting...';
-    es.close();
-    setTimeout(connectSSE, 3000);
-  };
-}
-
-// ── Init ──
-renderDashboard();
-connectSSE();
+    document.getElementById('history').textContent = out;
+  })
+  .catch(() => {
+    document.getElementById('history').textContent = 'No history data available yet.';
+  });
 </script>
 </body>
 </html>
