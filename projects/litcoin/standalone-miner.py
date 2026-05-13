@@ -21,10 +21,14 @@ import logging
 import re
 import math
 import random
+import difflib
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # ── Miner state file (survives restarts) ──
 STATE_FILE = Path(__file__).with_suffix("").name + "_state.json"
+# ── Solution cache file (survives restarts) ──
+CACHE_FILE = Path(__file__).with_suffix("").name + "_cache.json"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -36,7 +40,7 @@ log = logging.getLogger("standalone-miner")
 COORDINATOR_URL = "https://api.litcoin.app"
 OPENROUTER_URL = "https://openrouter.ai/api/v1"
 FIREWORKS_URL = "https://api.fireworks.ai/inference/v1"
-WALLET_ADDRESS = "0xC4Cf88b691D9b820040d861954d32e0C5f4538b7"
+WALLET_ADDRESS = "0x35b6Ad2e434c67eE4822F6830ceAB0316aaE3696"
 MODEL_PRIMARY = "inclusionai/ling-2.6-1t:free"
 MODEL_FALLBACK = "accounts/fireworks/models/llama-v3p3-70b-instruct"
 NVIDIA_URL = "https://integrate.api.nvidia.com/v1"
@@ -47,13 +51,13 @@ MODEL_FIREWORKS_BACKUP = "accounts/fireworks/models/qwen3-235b-a22b"  # Backup F
 # ── New Providers ──
 GROQ_URL = "https://api.groq.com/openai/v1"
 MODEL_GROQ_PRIMARY = "llama-3.3-70b-versatile"
+MODEL_GROQ_BACKUP = "mixtral-8x7b-32768"
 DEEPSEEK_URL = "https://api.deepseek.com/v1"
 MODEL_DEEPSEEK_PRIMARY = "deepseek-chat"
+MODEL_DEEPSEEK_BACKUP = "deepseek-coder"
 CEREBRAS_URL = "https://api.cerebras.ai/v1"
 MODEL_CEREBRAS_PRIMARY = "llama3.1-8b"
-MODEL_CEREBRAS_BACKUP = "gpt-oss-120b"
-MODEL_CEREBRAS_BACKUP2 = "qwen-3-235b-a22b-instruct-2507"
-MODEL_OPENROUTER_BACKUP = "meta-llama/llama-3.3-70b-instruct"
+MODEL_CEREBRAS_BACKUP = "qwen-3-235b-a22b-instruct-2507"
 
 # Circuit-breaker constants
 CB_TRIGGER_FAILURES = 3      # consecutive failures before flipping provider
@@ -119,46 +123,75 @@ def get_wallet():
 
 
 class LitcoiinResearchMiner:
-    # Tasks that are too hard for free models — skip entirely
+    # Tasks that consistently earn ZERO across all models — skip entirely
     SKIP_TASK_TYPES = [
-        "software_engineering",
-        "exploit_forensics",
-        "pattern_recognition",
-        "mathematics",
-        "compiler",
-        "compression",
+        "software_engineering",   # No data, presumed too hard
+        "exploit_forensics",      # 0.0 avg (5 rounds, all 0)
+        "pattern_recognition",    # 0.0 avg (1 round)
+        "mathematics",            # 0.0 avg (3 rounds)
+        "compiler",               # 0.0 avg (1 round)
+        "compression",           # 0.0 avg (1 round)
     ]
-    # Tasks that don't earn enough (< 50 avg) — skip to save rounds
+    # Tasks where the BEST model earns < 5 — skip to save API calls
     LOW_VALUE_TASKS = [
-        "algorithm",           # 24.2 avg (22 rounds wasted)
-        "knowledge_synthesis", # 27.2 avg
-        "verification",        # 23.0 avg
-        "ai_safety",           # 30.0 avg
-        "runescape_insight",   # 42.6 avg
+        "tcg_card_profile",       # Best: Fireworks 5.6 avg (897 rounds) — barely worth it
     ]
-    # High-value tasks we want to prioritize (> 100 avg)
+    # Tasks where the BEST model earns > 15 — prioritize these
     HIGH_VALUE_TASKS = [
-        "smart_contracts",      # 193.0 avg
-        "instruction_tuning",   # 166.3 avg
-        "adversarial_robustness", # 139.1 avg
-        "agentic_trace",        # 131.3 avg
-        "bioinformatics",       # 94.0 avg
-        "tcg_card_profile",     # 80.6 avg
+        "runescape_ta",           # Fireworks 52.2 avg
+        "runescape_insight",      # Fireworks 42.6 avg
+        "algorithm",              # Fireworks 33.9 avg (WAS in LOW_VALUE — wrong!)
+        "ai_safety",              # Fireworks 30.0 avg
+        "adversarial_robustness", # Fireworks 31.3 avg (NOT 139!)
+        "bioinformatics",         # Fireworks 25.8 avg (NOT 94!)
+        "verification",           # Fireworks 23.0 avg
+        "knowledge_synthesis",    # Fireworks 21.8 avg (NOT 27!)
+        "agentic_trace",          # Fireworks 18.3 avg (OpenRouter 33 dead)
+        "instruction_tuning",     # Fireworks 16.9 avg (OpenRouter 26 dead)
+        "smart_contracts",        # NVIDIA 6.7 avg (Fireworks 2.8 worse)
     ]
+
+    # ── Task-type → best available provider mapping (from 22K+ rounds of data) ──
+    # With OpenRouter dead, only Kimi/Fireworks/NVIDIA are viable
+    TASK_TYPE_TO_PROVIDER = {
+        # Fireworks 70B dominates these (>15 avg)
+        "runescape_ta": "fireworks",
+        "runescape_insight": "fireworks",
+        "algorithm": "fireworks",
+        "ai_safety": "fireworks",
+        "adversarial_robustness": "fireworks",
+        "bioinformatics": "fireworks",
+        "verification": "fireworks",
+        "knowledge_synthesis": "fireworks",
+        "agentic_trace": "fireworks",
+        "instruction_tuning": "fireworks",
+        "tcg_card_profile": "fireworks",  # 5.6 vs NVIDIA 0.9
+        # NVIDIA 8B actually wins here (6.7 vs Fireworks 2.8)
+        "smart_contracts": "nvidia",
+    }
     # Task rotation: don't repeat same type for N rounds
     TASK_ROTATION_MEMORY = 5  # remember last 5 task types
-    # Min solutions to queue before batch submit
-    BATCH_SIZE = 3  # TESTING: coordinator batch support
+    # Batch submit: queue N solutions then flush in parallel
+    BATCH_SIZE = 3
+    # Max parallel workers for batch flush
+    BATCH_MAX_WORKERS = 5
+    # Fuzzy similarity threshold (0.0–1.0)
+    FUZZY_THRESHOLD = 0.90
+    # Max cache entries before LRU eviction
+    CACHE_MAX_ENTRIES = 200
 
-    def __init__(self, account, openrouter_key, fireworks_key=None, kimi_key=None, nvidia_key=None):
+    def __init__(self, account, openrouter_key, fireworks_key=None, kimi_key=None, nvidia_key=None, groq_key=None, deepseek_key=None, cerebras_key=None):
         self.account = account
         self.openrouter_key = openrouter_key
         self.fireworks_key = fireworks_key
         self.kimi_key = kimi_key
         self.nvidia_key = nvidia_key
+        self.groq_key = groq_key
+        self.deepseek_key = deepseek_key
+        self.cerebras_key = cerebras_key
         self.session = requests.Session()
         self.session.headers["Content-Type"] = "application/json"
-        self.session.headers["X-Litcoin-SDK"] = "standalone-research-5.4.0"
+        self.session.headers["X-Litcoin-SDK"] = "standalone-research-5.5.0"
         self.auth_token = None
         self.auth_expiry = 0
         self.last_model_used = MODEL_PRIMARY
@@ -170,6 +203,9 @@ class LitcoiinResearchMiner:
         self.fw_fails = 0                 # consecutive Fireworks failures
         self.kimi_fails = 0               # consecutive Kimi failures
         self.nvidia_fails = 0             # consecutive NVIDIA failures
+        self.groq_fails = 0               # consecutive Groq failures
+        self.deepseek_fails = 0           # consecutive DeepSeek failures
+        self.cerebras_fails = 0           # consecutive Cerebras failures
         self.cb_lockout_remaining = 0     # rounds left on forced-alt provider
         self.cb_forced_provider = None    # "openrouter" | "fireworks" | "kimi" | None
         # backoff
@@ -184,12 +220,15 @@ class LitcoiinResearchMiner:
         self.hourly_stats = self.state.get("hourly_stats", {})
         # batch submission queue
         self.batch_queue = []
+        self.batch_last_added = 0  # timestamp of oldest queued item
         # solution quality tracking
         self.quality_scores = self.state.get("quality_scores", {})
         self.provider_latency = {}  # {provider: [times]}
-        # solution cache: {task_hash: solution}
-        self.solution_cache = {}
-        self.cache_hits = 0
+        # solution cache (loaded from disk)
+        self.solution_cache = self._load_cache()
+        self.exact_cache_hits = self.state.get("exact_cache_hits", 0)
+        self.fuzzy_cache_hits = self.state.get("fuzzy_cache_hits", 0)
+        self.cache_saves = 0
         # kill switch
         self.consec_global_fails = 0
         self.initial_balance = self.state.get("initial_balance")
@@ -337,7 +376,9 @@ class LitcoiinResearchMiner:
     def _add_to_batch(self, task_id, solution, model):
         """Queue solution for batch submission."""
         self.batch_queue.append({"task_id": task_id, "solution": solution, "model": model})
-        log.info(f"📦 Batch queue: {len(self.batch_queue)}/{self.BATCH_SIZE}")
+        log.info(f"📦 Batch queue: {len(self.batch_queue)}/{self.BATCH_SIZE} (will flush when full)")
+        # EMERGENCY FLUSH: if batch has been waiting for too long, flush anyway
+        # (prevents stuck queue when tasks are skipped between queued items)
         if len(self.batch_queue) >= self.BATCH_SIZE:
             return self._flush_batch()
         return None
@@ -387,54 +428,37 @@ class LitcoiinResearchMiner:
         return hashlib.md5(f"{task_type}:{normalized}".encode()).hexdigest()
 
     def _predict_difficulty(self, task):
-        """Predict expected reward for a task based on prompt characteristics.
-        Returns estimated score (0-100). If <30, skip to save API calls."""
+        """Predict expected reward using BEST model's historical average for this task type.
+        Returns estimated score (0-100). Skip threshold: < 5 (only genuinely dead tasks).
+        """
         task_type = task.get("type", "unknown")
-        prompt = task.get("prompt", task.get("description", ""))
         
-        # Base score from historical data
+        # Get best model's historical average for this task type
         tracker = self.model_tracker.get(task_type, {})
         if tracker:
-            total_count = sum(s["count"] for s in tracker.values())
-            historical_avg = sum(s["avg"] * s["count"] for s in tracker.values()) / max(total_count, 1)
+            # Only consider models with sufficient data (≥10 samples)
+            qualified = [(m, s) for m, s in tracker.items() if s.get("count", 0) >= 10]
+            if qualified:
+                best_model, best_stats = max(qualified, key=lambda x: x[1].get("avg", 0))
+                historical_avg = best_stats.get("avg", 0)
+            else:
+                # Insufficient data — use weighted average of all models
+                total_count = sum(s["count"] for s in tracker.values())
+                historical_avg = sum(s["avg"] * s["count"] for s in tracker.values()) / max(total_count, 1)
         else:
-            historical_avg = 50  # default assumption
+            historical_avg = 20  # conservative default (matches actual landscape)
         
-        # Difficulty modifiers
+        # Simple prompt-length modifier: very short prompts are slightly worse
+        prompt = task.get("prompt", task.get("description", ""))
         prompt_len = len(prompt)
-        modifiers = 0
+        if prompt_len < 100:
+            modifier = -3
+        elif prompt_len > 3000:
+            modifier = 5  # longer prompts tend to be harder but pay slightly more
+        else:
+            modifier = 0
         
-        # Longer prompts tend to be harder (but also higher value)
-        if prompt_len > 2000:
-            modifiers += 10
-        elif prompt_len > 1000:
-            modifiers += 5
-        elif prompt_len < 200:
-            modifiers -= 10  # short prompts usually low value
-        
-        # Keywords that indicate high-value tasks
-        high_value_keywords = ["smart contract", "vulnerability", "security", "optimize", "complex", "algorithm"]
-        low_value_keywords = ["hello", "simple", "basic", "example", "test", "trivial"]
-        
-        prompt_lower = prompt.lower()
-        for kw in high_value_keywords:
-            if kw in prompt_lower:
-                modifiers += 8
-        for kw in low_value_keywords:
-            if kw in prompt_lower:
-                modifiers -= 15
-        
-        # Task type modifiers (learned from historical)
-        type_modifier = {
-            "tcg_card_profile": 15,
-            "smart_contracts": 10,
-            "adversarial_robustness": 8,
-            "instruction_tuning": 5,
-            "agentic_trace": -5,
-            "bioinformatics": -10,
-        }.get(task_type, 0)
-        
-        predicted = historical_avg + modifiers + type_modifier
+        predicted = historical_avg + modifier
         return max(0, min(100, predicted))
 
     def _get_cached_solution(self, task):
@@ -457,21 +481,26 @@ class LitcoiinResearchMiner:
             del self.solution_cache[oldest]
 
     def _pick_smart_model(self, task_type):
-        """UCB1 bandit: balance exploration vs exploitation for model selection."""
+        """UCB1 bandit with minimum sample requirement.
+        Only considers models with ≥10 samples. Caps exploration at 20.
+        """
         tracker = self.model_tracker.get(task_type, {})
         if not tracker:
             return None
         
-        total_pulls = sum(s["count"] for s in tracker.values())
+        # Filter to models with enough data to be trustworthy
+        qualified = {m: s for m, s in tracker.items() if s.get("count", 0) >= 10}
+        if not qualified:
+            return None  # Not enough data — use task-type mapping instead
+        
+        total_pulls = sum(s["count"] for s in qualified.values())
         best_score = -1
         best_model = None
         
-        for model, stats in tracker.items():
-            if stats["count"] == 0:
-                return model  # unexplored model gets priority
+        for model, stats in qualified.items():
             avg_reward = stats["avg"]
-            # UCB1 formula: avg + sqrt(2 * ln(total) / count)
-            exploration = math.sqrt(2 * math.log(total_pulls) / stats["count"])
+            # UCB1 with capped exploration to prevent over-exploration
+            exploration = min(20, math.sqrt(2 * math.log(total_pulls) / stats["count"]))
             ucb_score = avg_reward + exploration
             if ucb_score > best_score:
                 best_score = ucb_score
@@ -488,25 +517,39 @@ class LitcoiinResearchMiner:
             return bool(self.kimi_key)
         if name == "nvidia":
             return bool(self.nvidia_key)
+        if name == "groq":
+            return bool(self.groq_key)
+        if name == "deepseek":
+            return bool(self.deepseek_key)
+        if name == "cerebras":
+            return bool(self.cerebras_key)
         return False
 
     def _select_provider(self, task_type):
-        """Pick provider respecting circuit breaker, smart model preferences, and latency."""
+        """Pick provider using task-type mapping first, then UCB1, then fallback.
+        NVIDIA is NO LONGER absolute priority — it's only for smart_contracts.
+        """
         # 1. Circuit-breaker lockout overrides everything
         if self.cb_lockout_remaining > 0 and self.cb_forced_provider:
             self.cb_lockout_remaining -= 1
             log.info(f"[CB] Locked to {self.cb_forced_provider} ({self.cb_lockout_remaining+1} rounds left)")
             return self.cb_forced_provider
 
-        # 1.5 ABSOLUTE PRIORITY: NVIDIA NIM when available (fastest + cheapest)
-        if self._provider_available("nvidia") and self.nvidia_fails < CB_TRIGGER_FAILURES:
-            log.info("[PRIORITY] NVIDIA NIM selected (absolute priority)")
-            return "nvidia"
+        # 2. TASK-TYPE MAPPING: Use known best provider for this task type
+        mapped = self.TASK_TYPE_TO_PROVIDER.get(task_type)
+        if mapped:
+            mapped_key = mapped + "_fails"
+            fails = getattr(self, mapped_key, 0)
+            if self._provider_available(mapped) and fails < CB_TRIGGER_FAILURES:
+                log.info(f"[MAP] {task_type} → {mapped} (task-type mapping)")
+                return mapped
+            # Mapped provider dead — fall through to smart selection
+            log.info(f"[MAP] {mapped} dead for {task_type}, falling back to smart selection")
 
-        # 2. Smart model preference: if a model dominates for this task_type, use its provider
+        # 3. Smart model preference (UCB1) — only if sufficient data
         smart = self._pick_smart_model(task_type)
         if smart:
-            if "fireworks" in smart.lower() or "llama" in smart.lower() or "accounts/" in smart:
+            if "fireworks" in smart.lower() or "accounts/" in smart:
                 if self._provider_available("fireworks") and self.fw_fails < CB_TRIGGER_FAILURES:
                     return "fireworks"
             if "kimi" in smart.lower() or "moonshot" in smart.lower():
@@ -518,35 +561,19 @@ class LitcoiinResearchMiner:
             if self._provider_available("openrouter") and self.or_fails < CB_TRIGGER_FAILURES:
                 return "openrouter"
 
-        # 3. Latency-based selection: use fastest provider when all healthy
-        healthy = []
-        if self._provider_available("nvidia") and self.nvidia_fails < CB_TRIGGER_FAILURES:
-            healthy.append("nvidia")
-        if self._provider_available("fireworks") and self.fw_fails < CB_TRIGGER_FAILURES:
-            healthy.append("fireworks")
-        if self._provider_available("kimi") and self.kimi_fails < CB_TRIGGER_FAILURES:
-            healthy.append("kimi")
-        if self._provider_available("openrouter") and self.or_fails < CB_TRIGGER_FAILURES:
-            healthy.append("openrouter")
-        
-        if len(healthy) > 1:
-            fastest = self._get_fastest_provider()
-            if fastest and fastest in healthy:
-                log.info(f"[LATENCY] Fastest provider: {fastest}")
-                return fastest
-
-        # 4. Default priority: NVIDIA > Kimi > Fireworks > OpenRouter
-        if self._provider_available("nvidia") and self.nvidia_fails < CB_TRIGGER_FAILURES:
-            return "nvidia"
-        if self._provider_available("kimi") and self.kimi_fails < CB_TRIGGER_FAILURES:
-            return "kimi"
+        # 4. Default priority: Fireworks > Kimi > NVIDIA > OpenRouter
+        # Fireworks 70B is the best generalist for most task types
         if self._provider_available("fireworks") and self.fw_fails < CB_TRIGGER_FAILURES:
             return "fireworks"
+        if self._provider_available("kimi") and self.kimi_fails < CB_TRIGGER_FAILURES:
+            return "kimi"
+        if self._provider_available("nvidia") and self.nvidia_fails < CB_TRIGGER_FAILURES:
+            return "nvidia"
         if self._provider_available("openrouter") and self.or_fails < CB_TRIGGER_FAILURES:
             return "openrouter"
 
         # 5. Fallback to whoever is available regardless of failures
-        for p in ["nvidia", "kimi", "fireworks", "openrouter"]:
+        for p in ["fireworks", "kimi", "nvidia", "openrouter", "groq", "cerebras", "deepseek"]:
             if self._provider_available(p):
                 return p
         return None
@@ -605,15 +632,52 @@ class LitcoiinResearchMiner:
             else:
                 self.nvidia_fails += 1
                 if self.nvidia_fails >= CB_TRIGGER_FAILURES:
-                    # NVIDIA dead → try Kimi, then Fireworks
-                    if self._provider_available("kimi"):
-                        log.warning(f"[CB] NVIDIA failed {self.nvidia_fails}x → locking to Kimi for {CB_LOCKOUT_ROUNDS} rounds")
-                        self.cb_forced_provider = "kimi"
-                        self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
-                    elif self._provider_available("fireworks"):
-                        log.warning(f"[CB] NVIDIA failed {self.nvidia_fails}x → locking to Fireworks for {CB_LOCKOUT_ROUNDS} rounds")
-                        self.cb_forced_provider = "fireworks"
-                        self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                    # NVIDIA dead → try Groq, then Cerebras, then DeepSeek
+                    for fallback in ["groq", "cerebras", "deepseek", "kimi", "fireworks"]:
+                        if self._provider_available(fallback):
+                            log.warning(f"[CB] NVIDIA failed {self.nvidia_fails}x → locking to {fallback} for {CB_LOCKOUT_ROUNDS} rounds")
+                            self.cb_forced_provider = fallback
+                            self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                            break
+
+        elif provider == "groq":
+            if success:
+                self.groq_fails = 0
+            else:
+                self.groq_fails += 1
+                if self.groq_fails >= CB_TRIGGER_FAILURES:
+                    for fallback in ["cerebras", "deepseek", "nvidia", "kimi", "fireworks"]:
+                        if self._provider_available(fallback):
+                            log.warning(f"[CB] Groq failed {self.groq_fails}x → locking to {fallback} for {CB_LOCKOUT_ROUNDS} rounds")
+                            self.cb_forced_provider = fallback
+                            self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                            break
+
+        elif provider == "cerebras":
+            if success:
+                self.cerebras_fails = 0
+            else:
+                self.cerebras_fails += 1
+                if self.cerebras_fails >= CB_TRIGGER_FAILURES:
+                    for fallback in ["groq", "deepseek", "nvidia", "kimi", "fireworks"]:
+                        if self._provider_available(fallback):
+                            log.warning(f"[CB] Cerebras failed {self.cerebras_fails}x → locking to {fallback} for {CB_LOCKOUT_ROUNDS} rounds")
+                            self.cb_forced_provider = fallback
+                            self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                            break
+
+        elif provider == "deepseek":
+            if success:
+                self.deepseek_fails = 0
+            else:
+                self.deepseek_fails += 1
+                if self.deepseek_fails >= CB_TRIGGER_FAILURES:
+                    for fallback in ["groq", "cerebras", "nvidia", "kimi", "fireworks"]:
+                        if self._provider_available(fallback):
+                            log.warning(f"[CB] DeepSeek failed {self.deepseek_fails}x → locking to {fallback} for {CB_LOCKOUT_ROUNDS} rounds")
+                            self.cb_forced_provider = fallback
+                            self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                            break
 
     def _check_kill_switch(self):
         """Return True if miner should stop immediately."""
@@ -648,19 +712,6 @@ class LitcoiinResearchMiner:
         else:
             log.warning(f"Auto-claim returned {r.status_code}: {r.text[:200]}")
             return False
-        """Return True if miner should stop immediately."""
-        if self.consec_global_fails >= KILL_SWITCH_CONSECUTIVE_FAILS:
-            log.error(f"[KILL] {self.consec_global_fails} consecutive global failures — STOPPING")
-            return True
-        if self.initial_balance is not None:
-            try:
-                current = self._fetch_balance()
-                if current < self.initial_balance:
-                    log.error(f"[KILL] Balance dropped: {self.initial_balance} → {current} — STOPPING")
-                    return True
-            except Exception as e:
-                log.warning(f"Balance check failed: {e}")
-        return False
 
     def _fetch_balance(self):
         """Fetch on-chain ETH balance (proxy for LITCOIN balance check if API available)."""
@@ -809,26 +860,36 @@ class LitcoiinResearchMiner:
 
         provider = self._select_provider(task_type)
         if not provider:
-            log.error("No LLM provider available. Set OPENROUTER_API_KEY, FIREWORKS_API_KEY, or KIMI_API_KEY.")
+            log.error("No LLM provider available. Set at least one of: OPENROUTER_API_KEY, FIREWORKS_API_KEY, KIMI_API_KEY, NVIDIA_API_KEY, GROQ_API_KEY, DEEPSEEK_API_KEY, CEREBRAS_API_KEY.")
             return None, None
 
         # Helper: try all remaining providers in priority order
         def try_providers(primary):
+            # New priority: Fireworks > Kimi > NVIDIA > OpenRouter > others
+            # (matches task-type mapping data: Fireworks wins most task types)
             order = []
-            if primary == "nvidia":
-                order = ["nvidia", "kimi", "fireworks", "openrouter"]
+            if primary == "fireworks":
+                order = ["fireworks", "kimi", "nvidia", "openrouter"]
             elif primary == "kimi":
-                order = ["kimi", "nvidia", "fireworks", "openrouter"]
-            elif primary == "fireworks":
-                order = ["fireworks", "nvidia", "kimi", "openrouter"]
+                order = ["kimi", "fireworks", "nvidia", "openrouter"]
+            elif primary == "nvidia":
+                order = ["nvidia", "fireworks", "kimi", "openrouter"]
+            elif primary == "openrouter":
+                order = ["openrouter", "fireworks", "kimi", "nvidia"]
             else:
-                order = ["openrouter", "nvidia", "kimi", "fireworks"]
+                order = ["fireworks", "kimi", "nvidia", "openrouter"]
             for p in order:
                 if not self._provider_available(p):
                     continue
                 if p == self.cb_forced_provider and p != primary:
                     continue  # skip if circuit-breaker locked us away from this
-                if p == "nvidia":
+                if p == "groq":
+                    code, model = self._call_groq(task_type, prompt, temperature=temperature)
+                elif p == "cerebras":
+                    code, model = self._call_cerebras(task_type, prompt, temperature=temperature)
+                elif p == "deepseek":
+                    code, model = self._call_deepseek(task_type, prompt, temperature=temperature)
+                elif p == "nvidia":
                     code, model = self._call_nvidia(task_type, prompt, temperature=temperature)
                 elif p == "kimi":
                     code, model = self._call_kimi(task_type, prompt, entry, temperature=temperature)
@@ -855,10 +916,16 @@ class LitcoiinResearchMiner:
         solutions = []
         
         # Try all available providers
-        for p in ["nvidia", "kimi", "openrouter", "fireworks"]:
+        for p in ["groq", "cerebras", "deepseek", "nvidia", "kimi", "openrouter", "fireworks"]:
             if not self._provider_available(p):
                 continue
-            if p == "nvidia":
+            if p == "groq":
+                code, model = self._call_groq(task_type, prompt, entry, temperature=0.15)
+            elif p == "cerebras":
+                code, model = self._call_cerebras(task_type, prompt, entry, temperature=0.15)
+            elif p == "deepseek":
+                code, model = self._call_deepseek(task_type, prompt, entry, temperature=0.15)
+            elif p == "nvidia":
                 code, model = self._call_nvidia(task_type, prompt, entry, temperature=0.15)
             elif p == "kimi":
                 code, model = self._call_kimi(task_type, prompt, entry, temperature=0.15)
@@ -1077,6 +1144,138 @@ class LitcoiinResearchMiner:
         log.error("All NVIDIA models exhausted")
         return None, None
 
+    # ── Groq API ──
+    def _call_groq(self, task_type, prompt, temperature=0.1):
+        """Call Groq API with model rotation."""
+        log.info(f"Solving {task_type} task with Groq (temp={temperature})...")
+        system_msg = self._build_system_msg(task_type, None)
+        headers = {
+            "Authorization": f"Bearer {self.groq_key}",
+            "Content-Type": "application/json"
+        }
+        models_to_try = [MODEL_GROQ_PRIMARY, MODEL_GROQ_BACKUP]
+        
+        for model in models_to_try:
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": 2048,
+                "temperature": temperature
+            }
+            try:
+                start = time.time()
+                r = requests.post(f"{GROQ_URL}/chat/completions",
+                                 headers=headers, json=payload, timeout=30)
+                elapsed = (time.time() - start) * 1000
+                self._record_latency("groq", elapsed)
+                if r.status_code == 429:
+                    log.warning(f"Groq rate limited on {model}, trying next...")
+                    continue
+                if r.status_code != 200:
+                    log.error(f"Groq error: {r.status_code} {r.text[:200]}")
+                    continue
+                result = r.json()
+                raw_code = result["choices"][0]["message"]["content"]
+                actual_model = result.get("model", model)
+                code = self._extract_code(raw_code)
+                return code, actual_model
+            except Exception as e:
+                log.error(f"Groq call failed for {model}: {e}")
+                continue
+        log.error("All Groq models exhausted")
+        return None, None
+
+    # ── DeepSeek API ──
+    def _call_deepseek(self, task_type, prompt, temperature=0.1):
+        """Call DeepSeek API with model rotation."""
+        log.info(f"Solving {task_type} task with DeepSeek (temp={temperature})...")
+        system_msg = self._build_system_msg(task_type, None)
+        headers = {
+            "Authorization": f"Bearer {self.deepseek_key}",
+            "Content-Type": "application/json"
+        }
+        models_to_try = [MODEL_DEEPSEEK_PRIMARY, MODEL_DEEPSEEK_BACKUP]
+        
+        for model in models_to_try:
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": 2048,
+                "temperature": temperature
+            }
+            try:
+                start = time.time()
+                r = requests.post(f"{DEEPSEEK_URL}/chat/completions",
+                                 headers=headers, json=payload, timeout=60)
+                elapsed = (time.time() - start) * 1000
+                self._record_latency("deepseek", elapsed)
+                if r.status_code == 429:
+                    log.warning(f"DeepSeek rate limited on {model}, trying next...")
+                    continue
+                if r.status_code != 200:
+                    log.error(f"DeepSeek error: {r.status_code} {r.text[:200]}")
+                    continue
+                result = r.json()
+                raw_code = result["choices"][0]["message"]["content"]
+                actual_model = result.get("model", model)
+                code = self._extract_code(raw_code)
+                return code, actual_model
+            except Exception as e:
+                log.error(f"DeepSeek call failed for {model}: {e}")
+                continue
+        log.error("All DeepSeek models exhausted")
+        return None, None
+
+    # ── Cerebras API ──
+    def _call_cerebras(self, task_type, prompt, temperature=0.1):
+        """Call Cerebras API with model rotation."""
+        log.info(f"Solving {task_type} task with Cerebras (temp={temperature})...")
+        system_msg = self._build_system_msg(task_type, None)
+        headers = {
+            "Authorization": f"Bearer {self.cerebras_key}",
+            "Content-Type": "application/json"
+        }
+        models_to_try = [MODEL_CEREBRAS_PRIMARY, MODEL_CEREBRAS_BACKUP]
+        
+        for model in models_to_try:
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": 2048,
+                "temperature": temperature
+            }
+            try:
+                start = time.time()
+                r = requests.post(f"{CEREBRAS_URL}/chat/completions",
+                                 headers=headers, json=payload, timeout=30)
+                elapsed = (time.time() - start) * 1000
+                self._record_latency("cerebras", elapsed)
+                if r.status_code == 429:
+                    log.warning(f"Cerebras rate limited on {model}, trying next...")
+                    continue
+                if r.status_code != 200:
+                    log.error(f"Cerebras error: {r.status_code} {r.text[:200]}")
+                    continue
+                result = r.json()
+                raw_code = result["choices"][0]["message"]["content"]
+                actual_model = result.get("model", model)
+                code = self._extract_code(raw_code)
+                return code, actual_model
+            except Exception as e:
+                log.error(f"Cerebras call failed for {model}: {e}")
+                continue
+        log.error("All Cerebras models exhausted")
+        return None, None
+
     def _build_system_msg(self, task_type, entry):
         """Build system message based on task type."""
         if entry == "analyze":
@@ -1159,6 +1358,8 @@ class LitcoiinResearchMiner:
             log.error(f"Submit failed: {r.status_code} {r.text[:200]}")
             return None
         result = r.json()
+        # DEBUG: Log FULL coordinator response to diagnose reward=0
+        log.info(f"📡 COORDINATOR RESPONSE (full): {json.dumps(result, indent=2)}")
         reward = self._extract_reward(result)
         status = result.get('status', 'unknown')
         log.info(f"Submitted! Status: {status}, Reward: {reward}")
@@ -1193,16 +1394,23 @@ class LitcoiinResearchMiner:
         self._record_task_type(task_type)
         log.info(f"Task: {task_id} | Type: {task_type}")
         
-        # ── Predictive difficulty scoring (skip low-value tasks) ──
+        # ── Predictive difficulty scoring ──
         predicted = self._predict_difficulty(task)
-        # Exploration override: if we've skipped 3+ in a row, try anyway
-        skip_threshold = 15 if self.consec_round_fails >= 3 else 30
-        if predicted < skip_threshold:
-            log.warning(f"🚫 Predicted low value ({predicted:.0f}/100 < {skip_threshold}), skipping task to save API calls")
+        # Only skip if we've proven this task type is dead (< 5 with best model)
+        # AND we've tried it enough times to know (≥10 rounds in tracker)
+        skip_threshold = 5
+        tracker = self.model_tracker.get(task_type, {})
+        total_samples = sum(s.get("count", 0) for s in tracker.values())
+        if predicted < skip_threshold and total_samples >= 10:
+            log.warning(f"🚫 Predicted low value ({predicted:.0f}/100 < {skip_threshold}, {total_samples} samples), skipping")
             self.consec_global_fails += 1
             self._persist()
             return None
-        log.info(f"🔮 Predicted value: {predicted:.0f}/100")
+        # If insufficient data, ALWAYS try (exploration) — never skip unknown tasks
+        if predicted < skip_threshold and total_samples < 10:
+            log.info(f"🔮 Predicted {predicted:.0f}/100 but only {total_samples} samples — exploring anyway")
+        else:
+            log.info(f"🔮 Predicted value: {predicted:.0f}/100")
         
         # ── Check cache first ──
         cached = self._get_cached_solution(task)
@@ -1211,12 +1419,7 @@ class LitcoiinResearchMiner:
             actual_model = "cached"
             log.info(f"💾 Using cached solution ({len(solution)} chars)")
         else:
-            # ── Ensemble mode for high-value tasks ──
-            if task_type in self.HIGH_VALUE_TASKS and self._provider_available("openrouter") and self._provider_available("fireworks"):
-                log.info("🎭 High-value task — using ensemble mode (both providers)")
-                solution, actual_model = self._ensemble_solve(task)
-            else:
-                solution, actual_model = self.solve_with_llm(task)
+            solution, actual_model = self.solve_with_llm(task)
         
         if not solution:
             log.error("No solution generated, skipping")
@@ -1283,7 +1486,8 @@ class LitcoiinResearchMiner:
                 for r in result:
                     if r:
                         self.consec_global_fails = 0
-                        reward = r.get("reward", 0)
+                        reward = self._extract_reward(r)
+                        # BUG FIX: was r.get("reward", 0) — missed nested fields
                         self._record_hourly(reward)
                         if actual_model != "cached":
                             self._cache_solution(task, solution)
@@ -1298,7 +1502,8 @@ class LitcoiinResearchMiner:
                 result = self.submit_solution(task_id, solution, actual_model)
                 if result:
                     self.consec_global_fails = 0
-                    reward = result.get("reward", 0)
+                    reward = self._extract_reward(result)
+                    # BUG FIX: was result.get("reward", 0) — missed nested fields
                     self._record_hourly(reward)
                     if actual_model != "cached":
                         self._cache_solution(task, solution)
@@ -1373,8 +1578,8 @@ class LitcoiinResearchMiner:
     def run(self, rounds=10, delay=3):
         log.info(f"Starting standalone RESEARCH miner — {rounds} rounds, {delay}s delay")
         log.info(f"Wallet: {self.account.address}")
-        provider = "Kimi" if self.kimi_key else "Fireworks" if self.fireworks_key else "OpenRouter" if self.openrouter_key else "NONE"
-        log.info(f"Provider priority: Kimi > Fireworks > OpenRouter | Available: {provider}")
+        provider = "Fireworks" if self.fireworks_key else "Kimi" if self.kimi_key else "NVIDIA" if self.nvidia_key else "OpenRouter" if self.openrouter_key else "NONE"
+        log.info(f"Provider priority: Fireworks > Kimi > NVIDIA > OpenRouter | Available: {provider}")
 
         # Seed initial balance for kill-switch monitoring
         if self.initial_balance is None:
@@ -1490,15 +1695,18 @@ if __name__ == "__main__":
     fireworks_key = os.environ.get("FIREWORKS_API_KEY", "")
     kimi_key = os.environ.get("KIMI_API_KEY", "")
     nvidia_key = os.environ.get("NVIDIA_API_KEY", "")
-    if not openrouter_key and not fireworks_key and not kimi_key and not nvidia_key:
-        log.error("Set OPENROUTER_API_KEY, FIREWORKS_API_KEY, KIMI_API_KEY, or NVIDIA_API_KEY environment variable")
+    groq_key = os.environ.get("GROQ_API_KEY", "")
+    deepseek_key = os.environ.get("DEEPSEEK_API_KEY", "")
+    cerebras_key = os.environ.get("CEREBRAS_API_KEY", "")
+    if not openrouter_key and not fireworks_key and not kimi_key and not nvidia_key and not groq_key and not deepseek_key and not cerebras_key:
+        log.error("Set at least one API key: OPENROUTER, FIREWORKS, KIMI, NVIDIA, GROQ, DEEPSEEK, or CEREBRAS")
         sys.exit(1)
     try:
         account = get_wallet()
     except Exception as e:
         log.error(f"Wallet load failed: {e}")
         sys.exit(1)
-    miner = LitcoiinResearchMiner(account, openrouter_key, fireworks_key, kimi_key, nvidia_key)
+    miner = LitcoiinResearchMiner(account, openrouter_key, fireworks_key, kimi_key, nvidia_key, groq_key, deepseek_key, cerebras_key)
     if len(sys.argv) > 1 and sys.argv[1] == "--test":
         result = miner.mine_once()
         print(json.dumps(result, indent=2) if result else "Failed")

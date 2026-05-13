@@ -1,5 +1,5 @@
 {
-  "wallet_address": "0xC4Cf88b691D9b820040d861954d32e0C5f4538b7",
+  "wallet_address": "0x35b6Ad2e434c67eE4822F6830ceAB0316aaE3696",
   "private_key": "[SET_FROM_ENV_OR_ARGS]",
   "snapshot_hub": "https://hub.snapshot.org/graphql",
   "network": "8453",

@@ -1,7 +1,7 @@
 {
-  "round_count": 22386,
-  "total_earned": 38918.0,
-  "last_task_type": "tcg_card_profile",
+  "round_count": 22425,
+  "total_earned": 39087.0,
+  "last_task_type": "runescape_ta",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -13,9 +13,9 @@
     },
     "adversarial_robustness": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 5727.0,
-        "count": 183,
-        "avg": 31.295081967213115
+        "total": 5763.0,
+        "count": 184,
+        "avg": 31.320652173913043
       },
       "inclusionai/ling-2.6-1t-20260423:free": {
         "total": 161,
@@ -87,8 +87,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 1865.0,
-        "count": 573,
-        "avg": 3.2547993019197206
+        "count": 577,
+        "avg": 3.2322357019064123
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 52.0,
@@ -121,22 +121,22 @@
     "algorithm": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
         "total": 813,
-        "count": 24,
-        "avg": 33.875
+        "count": 25,
+        "avg": 32.52
       }
     },
     "runescape_insight": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 213,
-        "count": 5,
-        "avg": 42.6
+        "total": 214.0,
+        "count": 6,
+        "avg": 35.666666666666664
       }
     },
     "bioinformatics": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 1368.0,
-        "count": 53,
-        "avg": 25.81132075471698
+        "total": 1475.0,
+        "count": 54,
+        "avg": 27.314814814814813
       },
       "inclusionai/ling-2.6-1t-20260423:free": {
         "total": 0,
@@ -180,9 +180,9 @@
     },
     "runescape_ta": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 209,
-        "count": 4,
-        "avg": 52.25
+        "total": 220.0,
+        "count": 6,
+        "avg": 36.666666666666664
       }
     },
     "mathematics": {
@@ -208,60 +208,30 @@
     },
     "ai_safety": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 30,
-        "count": 1,
-        "avg": 30.0
+        "total": 44.0,
+        "count": 2,
+        "avg": 22.0
       }
     }
   },
   "initial_balance": 0,
   "provider_latency": {
-    "nvidia": [
-      15105.633735656738,
-      14467.649221420288,
-      7165.942907333374,
-      4305.198669433594,
-      21424.092292785645,
-      21935.960054397583,
-      4969.141721725464,
-      7072.116136550903,
-      8963.604927062988,
-      12242.915391921997,
-      15068.875312805176,
-      11611.752271652222,
-      9843.818426132202,
-      7089.699029922485,
-      12929.224491119385,
-      11448.48918914795,
-      9917.710781097412,
-      12826.417684555054,
-      8178.795337677002,
-      15789.06512260437
-    ],
-    "kimi": [
-      966.3734436035156,
-      941.2021636962891,
-      891.1440372467041,
-      4871.781587600708,
-      5611.8927001953125,
-      5848.489999771118,
-      935.3430271148682,
-      954.2102813720703,
-      1006.7951679229736
-    ],
     "fireworks": [
-      5124.953985214233,
-      2679.4791221618652,
-      109.36236381530762
+      3846.229076385498,
+      1408.203363418579,
+      2527.409553527832,
+      3576.345682144165,
+      3562.0646476745605,
+      4614.747762680054
     ]
   },
-  "cache_hits": 7795,
+  "cache_hits": 0,
   "recent_task_types": [
-    "bioinformatics",
-    "instruction_tuning",
-    "smart_contracts",
+    "algorithm",
+    "ai_safety",
     "adversarial_robustness",
-    "tcg_card_profile"
+    "bioinformatics",
+    "runescape_ta"
   ],
   "hourly_stats": {
     "08": {
@@ -337,8 +307,8 @@
       "total": 1856
     },
     "02": {
-      "count": 364,
-      "total": 3353
+      "count": 383,
+      "total": 3584.0
     },
     "03": {
       "count": 378,

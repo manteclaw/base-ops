@@ -22,7 +22,7 @@ from litcoin import Agent
 BANKR_KEY = os.getenv("BANKR_API_KEY", "")
 OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "")
 FIREWORKS_KEY = os.getenv("FIREWORKS_API_KEY", "")
-WALLET_ADDRESS = os.getenv("LITCOIIN_WALLET_ADDRESS", "0xC4Cf88b691D9b820040d861954d32e0C5f4538b7")
+WALLET_ADDRESS = os.getenv("LITCOIIN_WALLET_ADDRESS", "0x35b6Ad2e434c67eE4822F6830ceAB0316aaE3696")
 
 # === CONFIG ===
 # Fallback chain: OpenRouter → Fireworks

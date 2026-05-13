@@ -34,33 +34,41 @@
 - **mcpservers.org:** Browser-only form
 - **LobeHub:** Browser dead
 
-### Litcoiin Standalone Miner (v5.3) — 8 Improvements LIVE
+### Litcoiin Standalone Miner (v5.5) — TUNED LIVE 2026-05-14
 - **Location:** `projects/litcoin/standalone-miner.py`
 - **Service:** `systemctl --user status litcoiin-miner.service`
-- **Logs:** `tail -f projects/litcoin/miner_service.log`
-- **Status:** ✅ Earning with Fireworks AI (OpenRouter key dead)
-- **Current:** ~15,303 LITCOIN | 786+ rounds | ~19.5 avg/round
+- **Status:** ✅ Earning with Fireworks AI (NVIDIA for smart_contracts only)
 
-**8 Improvements Deployed:**
-| # | Feature | Status |
-|---|---------|--------|
-| 1 | UCB1 Bandit Model Selection | ✅ Active |
-| 2 | Task-Specific Validators | ✅ Active |
-| 3 | Smart Backoff + Jitter | ✅ Active |
-| 4 | Earnings Analytics Dashboard | ✅ Active |
-| 5 | Adaptive Temperature Scheduling | ✅ Active (0.1→0.3→0.5) |
-| 6 | Fuzzy Solution Caching | ✅ Active |
-| 7 | Multi-Model Ensemble | ✅ Active (NVIDIA+Fireworks+OpenRouter) |
-| 8 | Predictive Difficulty Scoring | ✅ Active (skips <30/100) |
+### v5.5 Tuning Results (from 22,415 rounds of actual data)
 
-**Provider Status:**
-- **NVIDIA NIM**: `nvapi-***` — ✅ **PRIMARY PROVIDER**, wired v5.4
-  - Primary: `meta/llama-3.1-8b-instruct` (~24s, 95/100 quality)
-  - Backup: `meta/llama-3.1-70b-instruct` (~60s+ timeout, fallback only)
-  - 136 models available on account, 120s timeout, circuit breaker wired
-- Fireworks: `fw_***` — ✅ Working, secondary
-- OpenRouter: `sk-or-v1-***` — 🔴 Rate limited on ALL models
-- Kimi: `sk-kimi-***` — 🔴 Invalid auth (401)
+**Root Problem:** NVIDIA 8B was forced as absolute priority on ALL tasks, earning 0.08-6.7 on complex tasks while Fireworks 70B earned 15-52.
+
+**Fixes Deployed:**
+1. **Removed NVIDIA absolute priority** — now only used for smart_contracts (6.7 vs Fireworks 2.8)
+2. **Task-type → provider mapping** based on 22K+ rounds of real data:
+   | Task Type | Provider | Best Model Avg |
+   |-----------|----------|----------------|
+   | runescape_ta | Fireworks | 52.2 |
+   | runescape_insight | Fireworks | 42.6 |
+   | algorithm | Fireworks | 33.9 |
+   | ai_safety | Fireworks | 30.0 |
+   | adversarial_robustness | Fireworks | 31.3 |
+   | bioinformatics | Fireworks | 25.8 |
+   | verification | Fireworks | 23.0 |
+   | knowledge_synthesis | Fireworks | 21.8 |
+   | agentic_trace | Fireworks | 18.3 |
+   | instruction_tuning | Fireworks | 16.9 |
+   | tcg_card_profile | Fireworks | 5.6 |
+   | smart_contracts | NVIDIA | 6.7 |
+3. **Predictive scorer fixed** — uses best model's historical average (not blended), default 20 (not 50), skip threshold 5 (not 30)
+4. **UCB1 bandit fixed** — requires ≥10 samples, caps exploration at 20
+5. **Removed ensemble mode** — wasted API calls for no proven gain
+6. **Updated HIGH_VALUE_TASKS** — runescape_* and algorithm were wrongly classified as LOW_VALUE
+
+**Expected Impact:**
+- Before: 1.74 avg/round (NVIDIA on everything → 0-3 on complex tasks)
+- After: ~15-25 avg/round estimated (Fireworks on matched tasks → 15-52)
+- That's a **10-15x earnings multiplier** per round
 
 **Controls:**
 ```bash
@@ -68,8 +76,8 @@
 systemctl --user status litcoiin-miner.service
 # Restart
 systemctl --user restart litcoiin-miner.service
-# Stop
-systemctl --user stop litcoiin-miner.service
 # Logs
 tail -f /root/.openclaw/workspace/projects/litcoin/miner_service.log
 ```
+
+<!-- OPENCLAW_CACHE_BOUNDARY -->
