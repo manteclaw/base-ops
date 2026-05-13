@@ -1,24 +1,24 @@
 {
   "stm": {
-    "count": 61,
-    "last_ts": "2026-05-14T03:25:17.004762",
-    "last_sessions": 200,
-    "last_messages": 4997,
+    "count": 62,
+    "last_ts": "2026-05-14T03:40:17.285772",
+    "last_sessions": 202,
+    "last_messages": 5173,
     "last_chars": 24152
   },
   "diary": {
-    "count": 16,
-    "last_ts": "2026-05-13T03:49:57.271972",
-    "last_day": 4,
-    "last_sessions": 5,
-    "last_messages": 13,
-    "last_filename": "day4-2026-05-08-exploit_homework_and_infinity.md",
-    "last_latency_s": 10.8,
+    "count": 17,
+    "last_ts": "2026-05-14T03:43:30.595334",
+    "last_day": 10,
+    "last_sessions": 22,
+    "last_messages": 92,
+    "last_filename": "day10-2026-05-14-the_batch_queue_that_wasnt.md",
+    "last_latency_s": 11.1,
     "last_skip": "no_sessions_today"
   },
   "compact": {
-    "count": 16,
-    "last_ts": "2026-05-13T03:50:02.717092",
+    "count": 17,
+    "last_ts": "2026-05-14T03:43:38.562683",
     "last_invoke": 5,
     "last_sessions": 180,
     "last_messages": 4647,
