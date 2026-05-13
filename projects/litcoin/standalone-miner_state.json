@@ -1,6 +1,6 @@
 {
-  "round_count": 21167,
-  "total_earned": 38681.0,
+  "round_count": 21347,
+  "total_earned": 38689.0,
   "last_task_type": "tcg_card_profile",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
@@ -51,8 +51,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 34.0,
-        "count": 402,
-        "avg": 0.0845771144278607
+        "count": 405,
+        "avg": 0.08395061728395062
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0,
@@ -87,8 +87,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 1865.0,
-        "count": 508,
-        "avg": 3.671259842519685
+        "count": 512,
+        "avg": 3.642578125
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 52.0,
@@ -108,9 +108,9 @@
         "avg": 0.0
       },
       "meta/llama-3.1-8b-instruct": {
-        "total": 4479.0,
-        "count": 609,
-        "avg": 7.354679802955665
+        "total": 4487.0,
+        "count": 624,
+        "avg": 7.190705128205129
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 48.0,
@@ -169,8 +169,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 313.0,
-        "count": 530,
-        "avg": 0.590566037735849
+        "count": 535,
+        "avg": 0.5850467289719626
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0.0,
@@ -217,7 +217,6 @@
   "initial_balance": 0,
   "provider_latency": {
     "nvidia": [
-      7082.76104927063,
       9367.388248443604,
       6323.908090591431,
       7102.5238037109375,
@@ -236,7 +235,8 @@
       5384.777069091797,
       7478.949785232544,
       4616.585254669189,
-      7281.116008758545
+      7281.116008758545,
+      24263.525247573853
     ],
     "kimi": [
       966.3734436035156,
@@ -255,7 +255,7 @@
       109.36236381530762
     ]
   },
-  "cache_hits": 7262,
+  "cache_hits": 7340,
   "recent_task_types": [
     "agentic_trace",
     "bioinformatics",
@@ -281,12 +281,12 @@
       "total": 2507
     },
     "12": {
-      "count": 488,
+      "count": 530,
       "total": 138
     },
     "13": {
-      "count": 484,
-      "total": 58
+      "count": 523,
+      "total": 66
     },
     "14": {
       "count": 542,
