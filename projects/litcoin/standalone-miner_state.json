@@ -1,7 +1,7 @@
 {
-  "round_count": 20805,
-  "total_earned": 38553.0,
-  "last_task_type": "adversarial_robustness",
+  "round_count": 20982,
+  "total_earned": 38633.0,
+  "last_task_type": "instruction_tuning",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
   "model_tracker": {
     "exploit_forensics": {
@@ -87,8 +87,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 1865.0,
-        "count": 489,
-        "avg": 3.8139059304703475
+        "count": 501,
+        "avg": 3.722554890219561
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 52.0,
@@ -108,9 +108,9 @@
         "avg": 0.0
       },
       "meta/llama-3.1-8b-instruct": {
-        "total": 4413.0,
-        "count": 591,
-        "avg": 7.467005076142132
+        "total": 4442.0,
+        "count": 595,
+        "avg": 7.465546218487395
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 48.0,
@@ -168,9 +168,9 @@
         "avg": 33.15384615384615
       },
       "meta/llama-3.1-8b-instruct": {
-        "total": 251.0,
-        "count": 514,
-        "avg": 0.4883268482490272
+        "total": 302.0,
+        "count": 526,
+        "avg": 0.5741444866920152
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0.0,
@@ -217,26 +217,26 @@
   "initial_balance": 0,
   "provider_latency": {
     "nvidia": [
-      4941.636323928833,
-      7081.88796043396,
-      5708.739757537842,
-      7668.775796890259,
-      7373.838186264038,
-      2645.433187484741,
-      3259.7575187683105,
-      11990.004777908325,
-      5400.187015533447,
-      6414.424657821655,
-      10394.14119720459,
-      9028.122901916504,
-      8734.53664779663,
-      7583.8868618011475,
-      14517.702341079712,
       54988.696336746216,
       10848.287105560303,
       351.6535758972168,
       5405.1244258880615,
-      5834.762811660767
+      5834.762811660767,
+      8994.585275650024,
+      7082.76104927063,
+      9367.388248443604,
+      6323.908090591431,
+      7102.5238037109375,
+      6530.087947845459,
+      3588.9840126037598,
+      7792.365550994873,
+      6157.7770709991455,
+      8733.52336883545,
+      3997.8718757629395,
+      5682.084083557129,
+      7329.087018966675,
+      7636.187314987183,
+      2820.4708099365234
     ],
     "kimi": [
       966.3734436035156,
@@ -255,22 +255,22 @@
       109.36236381530762
     ]
   },
-  "cache_hits": 7119,
+  "cache_hits": 7190,
   "recent_task_types": [
-    "tcg_card_profile",
-    "instruction_tuning",
-    "agentic_trace",
     "bioinformatics",
-    "adversarial_robustness"
+    "adversarial_robustness",
+    "smart_contracts",
+    "tcg_card_profile",
+    "instruction_tuning"
   ],
   "hourly_stats": {
     "08": {
-      "count": 371,
-      "total": 5859
+      "count": 413,
+      "total": 6100
     },
     "09": {
-      "count": 436,
-      "total": 3651
+      "count": 478,
+      "total": 3832
     },
     "10": {
       "count": 451,
