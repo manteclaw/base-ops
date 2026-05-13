@@ -48,7 +48,8 @@ Both wallets need to acquire AXOBOTL.
 #### Primary Pair: AXOBOTL / WETH
 | Metric | Value |
 |--------|-------|
-| **Pair Address** | `0xb0f7379df76dda1c959d490173d56a4812fac7bc7565a40ebf7a42483c2394fd` |
+| **Pair Address** | ` | `[REDACTED-private_key_hex]` |
+` |
 | **DEX** | Uniswap v4 |
 | **Liquidity** | **$164,171 USD** |
 | **AXOBOTL in pool** | 39,712,141,051 |
@@ -205,7 +206,8 @@ npm install -g @0xwork/cli
 | Cost for 10K | ~$0.025 |
 | Cost for 15K | ~$0.038 |
 | Best DEX | Uniswap v4 (WETH pair) |
-| Pair URL | https://dexscreener.com/base/0xb0f7379df76dda1c959d490173d56a4812fac7bc7565a40ebf7a42483c2394fd |
+| Pair URL | https://dexscreener.com/base/ase/[REDACTED-private_key_hex] |
+| |
 | 0xWork | https://0xwork.org |
 | Twitter | https://x.com/Inner_Axiom |
 | Telegram | https://t.me/axobotllab |

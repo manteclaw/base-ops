@@ -1,0 +1,152 @@
+# Agensi Signup & Skill Submission Report
+**Date:** 2026-05-14
+**Status:** BLOCKED — Requires manual steps
+
+---
+
+## 1. Account Creation — NOT COMPLETED
+
+**Registration URL:** https://www.agensi.io/auth
+
+**Available signup methods:**
+- Email + password (form-based)
+- Google OAuth (one-click)
+
+**Blocker:** Account creation requires either:
+1. A real email address for verification, OR
+2. Google OAuth sign-in (requires user interaction to select/confirm Google account)
+
+**What I observed:**
+- Clean registration form: Display name, Email, Password
+- "Create account" button
+- Alternative: "Sign up with Google" button
+- No CAPTCHA visible on initial form
+
+**Next step for user:**
+- Visit https://www.agensi.io/auth
+- Click "Don't have an account? Sign up"
+- Use "Sign up with Google" (fastest) or fill email form
+- Once logged in, navigate to Creator Dashboard: https://www.agensi.io/dashboard/submit
+
+---
+
+## 2. GitHub Repos — DO NOT EXIST
+
+The task specified these repos must exist for skill submission:
+
+| Repo | Status | HTTP Code |
+|------|--------|-----------|
+| https://github.com/manteclaw/base-l2-ops | ❌ MISSING | 404 |
+| https://github.com/manteclaw/selfhealing | ❌ MISSING | 404 |
+| https://github.com/manteclaw/defi-yield-scan | ❌ MISSING | 404 |
+
+**Existing repos (Smithery):**
+| Repo | Status | HTTP Code |
+|------|--------|-----------|
+| https://github.com/manteclaw/smithery-security-audit | ✅ EXISTS | 200 |
+| https://github.com/manteclaw/smithery-defi-yield-scan | ✅ EXISTS | 200 |
+| https://github.com/manteclaw/smithery-selfhealing | ✅ EXISTS | 200 |
+
+**Action needed:**
+Create the 3 repos OR reuse the smithery repos for Agensi submission.
+
+---
+
+## 3. Skills Ready for Submission
+
+The following SKILL.md files exist in the workspace and match the submission requirements:
+
+### Skill 1: Base L2 Automation & Research (target: 5 USDC)
+**Source:** `skills-for-sale/04-base-l2-infrastructure/SKILL.md`
+**Content:** One-command Base L2 agent setup — wallet, identity, yield, mining, marketplace registration
+**Price in file:** 10 USDC setup + 2 USDC/mo maintenance
+**Suggested Agensi price:** 5 USDC (one-time)
+
+### Skill 2: Self-Healing API Executor (target: 3 USDC)
+**Source:** `skills-for-sale/01-self-healing-api/SKILL.md`
+**Content:** Python retry wrapper with circuit breaker, exponential backoff, full jitter
+**Price in file:** 3 USDC
+**Suggested Agensi price:** 3 USDC ✅ matches
+
+### Skill 3: DeFi Yield Scanner (target: 2 USDC)
+**Source:** `skills-for-sale/02-yield-scanner/SKILL.md`
+**Content:** Real-time Base L2 USDC yield scanner (7 protocols)
+**Price in file:** 2 USDC per scan / 5 USDC/mo subscription
+**Suggested Agensi price:** 2 USDC ✅ matches
+
+---
+
+## 4. Submission Requirements (from site analysis)
+
+**What Agensi needs for each skill:**
+1. SKILL.md file (✅ we have these)
+2. ZIP package with skill folder structure
+3. Creator profile with Stripe Connect for payouts
+4. Optional: GitHub repo link
+
+**Security scan:**
+- 8-point automated scan on every submission
+- Checks for: dangerous commands, hardcoded secrets, obfuscated code, prompt injection, suspicious network access
+- Zip structure validation
+- SKILL.md frontmatter checked
+
+**Revenue split:**
+- Creator keeps 80%
+- Agensi takes 20% + $0.50 per sale
+- Payout via Stripe Connect
+
+---
+
+## 5. Next Steps (Priority Order)
+
+### Immediate (requires user):
+1. **Create Agensi account** at https://www.agensi.io/auth
+2. **Set up Stripe Connect** in creator dashboard for payouts
+3. **Decide on repo strategy:**
+   - Option A: Create 3 new repos (base-l2-ops, selfhealing, defi-yield-scan)
+   - Option B: Reuse existing smithery repos and update READMEs
+
+### After account created:
+4. **Package skills as ZIPs** with proper folder structure:
+   ```
+   skill-name/
+   ├── SKILL.md
+   ├── references/ (optional)
+   └── scripts/ (optional)
+   ```
+5. **Submit at** https://www.agensi.io/dashboard/submit
+6. **Wait for security scan** (~automated, minutes)
+7. **Go live** after admin review
+
+---
+
+## 6. Marketplace Context
+
+**Why Agensi matters:**
+- 200+ skills listed
+- 80/20 revenue split (best found)
+- One-time purchases (no subscription fatigue)
+- Supports OpenClaw, Claude Code, Codex CLI, Cursor, etc.
+- MCP integration available
+- Creator community with leaderboards
+
+**Competing skills already on Agensi:**
+- `defi-autopilot` (exists — similar to our yield scanner)
+- `yield-maximizer` (exists — similar)
+- `security-audit` (exists — overlaps with our MCP security audit)
+- `base-l2-automation` category: none found (opportunity)
+
+---
+
+## 7. Files Referenced
+
+- `skills-for-sale/04-base-l2-infrastructure/SKILL.md`
+- `skills-for-sale/01-self-healing-api/SKILL.md`
+- `skills-for-sale/02-yield-scanner/SKILL.md`
+- `skills/base-l2-automation/SKILL.md` (alternative source)
+- `projects/marketplace-registrations/mulerun/skills/base-l2-operations/SKILL.md` (MuleRun version)
+
+---
+
+*Report generated by subagent for Agensi signup task*
+*Status: Documentation complete — awaiting user action for account creation*

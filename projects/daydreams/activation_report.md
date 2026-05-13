@@ -9,7 +9,8 @@
 ## Tasks Found
 
 ### Task #1
-- **ID:** 0x59e43b84346d98b51375abd0d7287050b625204f72c59bc64fb58589c602fc18
+- **ID:** :** [REDACTED-private_key_hex]
+- *
 - **Description:** "Test auction mode"
 - **Reward:** 1,000,000 (raw units, ~1,000,000 wei = ~0.001 USDC?)
 - **Mode:** auction
@@ -17,14 +18,16 @@
 - **Tags:** none
 
 ### Task #2
-- **ID:** 0x1846512174a9d50c91dbc0e86bc2f05d0fa57a22315c503ef1df9f8e1513b0de
+- **ID:** :** [REDACTED-private_key_hex]
+- *
 - **Description:** "Test auction mode"
 - **Reward:** 1,000,000
 - **Mode:** auction
 - **Status:** open (expired 2026-03-18)
 
 ### Task #3
-- **ID:** 0x4d782ccedb2f5f863b029a1637308d605c2434df668420c59b30656cc8bd81e8
+- **ID:** :** [REDACTED-private_key_hex]
+- *
 - **Description:** "Test auction mode"
 - **Reward:** 1,000,000
 - **Mode:** auction

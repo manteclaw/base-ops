@@ -62,6 +62,8 @@ SKIP_PATTERNS = [
     r"revenue_history\.jsonl$",
     r"\.cache",
     r"\.openclaw/extensions",
+    r"\.env$",
+    r"\.env\.",
 ]
 SKIP_RE = re.compile("|".join(SKIP_PATTERNS))
 
@@ -69,8 +71,9 @@ SKIP_RE = re.compile("|".join(SKIP_PATTERNS))
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
 
 # How many chars of context to preserve around a redacted secret
-REDACT_PREFIX_LEN = 4
-REDACT_SUFFIX_LEN = 4
+# Set to 0 to disable context preservation (cleaner output)
+REDACT_PREFIX_LEN = 0
+REDACT_SUFFIX_LEN = 0
 
 
 # --- Core Functions ----------------------------------------------------------

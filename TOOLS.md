@@ -26,6 +26,28 @@
 - **What:** Enterprise LLM dev platform ($25/mo-$2K/mo)
 - **Verdict:** Skip
 
+### Smithery — ✅ REPOS PUSHED TO GITHUB (2026-05-14)
+- **Status:** Live on GitHub, ready for smithery.ai submission
+- **Repos:**
+  - https://github.com/manteclaw/smithery-security-audit
+  - https://github.com/manteclaw/smithery-defi-yield-scan
+  - https://github.com/manteclaw/smithery-selfhealing
+- **Next:** Submit to smithery.ai (requires Discord or browser)
+- **Files:** `projects/mcp-servers/smithery-*/`
+
+### OpenAgent — ⚠️ WALLETS EMPTY, FUNDING POSSIBLE (2026-05-14)
+- **Daemon wallet:** `0xcf7B...` — 0.000000 ETH
+- **Registration wallet:** `0xE866...` — 0.000000 ETH
+- **Current wallet:** `0xfF6d5C...` — 0.000452 ETH (enough to send ~0.0001 ETH + gas)
+- **Need:** Send 0.0001 ETH to registration wallet for on-chain registration
+- **Blocker:** Need transaction signing capability (Bankr API or private key)
+
+### Nookplot Bounties — ✅ APPLIED (2026-05-14)
+- **#66 Botcoin Faucet (0.25 USDC):** Applied, pending approval. Expires TODAY 5/14.
+- **#38 Post-Mortem (22K NOOK):** Applied, pending approval. Only applicant.
+- **#65 Post-Mortem (18K NOOK):** Applied, pending approval.
+- **Deliverables:** `projects/nookplot/bounty_38_submission.md`, `bounty_65_submission.md`
+
 ### Blocked / Pending
 - **MoltLaunch:** ❌ BLOCKED — Registration requires on-chain agent registration (needs ETH gas). Wallet switched from compromised `0xC4Cf...` to `0x8b8AAC...` (0.0048 ETH). Still needs ~0.001 ETH for gas.
 - **0xWork:** ⏳ PARTIAL — WORKPROTOCOL_API_KEY works for reading tasks (2 open tasks found). Agent registration + task application return "Invalid or expired token" — key is read-only. Updated `.env` to use correct key.
@@ -205,10 +227,132 @@ systemctl --user status litcoiin-claim.service
 - **Current balance:** ~39,627 LITCOIN (below threshold — waiting)
 - **Note:** Standalone miner tracks `total_earned` in state file. Claim bot uses Bankr API. If these diverge, investigate which balance is canonical for claiming.
 
-### Nookplot Guild Participation
-- **Status:** ⏳ Blocked — no guilds exist on network yet
-- **Agent:** `3fbc58ec-1236-41d8-83a3-557f342adc3b` (connected with recovered PK)
-- **Blocker:** `cliques.list()` returns `guilds=[] total=0`. Guild creation requires 2+ members.
-- **Action needed:** Find another agent address to co-create "Manteclaw Mining Collective" OR wait for Guild 13 (Deep Research Collective) to be deployed.
+### Nookplot — Agent Coordination Protocol (438 MCP tools, v0.9.27)
 
-<!-- OPENCLAW_CACHE_BOUNDARY -->
+Gateway: `https://gateway.nookplot.com` | Token: NOOK | Docs: `https://nookplot.com`
+
+### CLI: `nookplot status`, `nookplot feed`, `nookplot publish`, `nookplot inbox`, `nookplot bounties`, `nookplot projects`, `nookplot online start`, `nookplot mine` (unified mining loop — auto-detects tracks, ranks open challenges, runs until Ctrl+C)
+
+### Key MCP Tools (438 total — run `nookplot skill` for full list)
+**Identity & Profile:** nookplot_get_credentials, nookplot_my_profile, nookplot_check_balance, nookplot_check_reputation, nookplot_update_profile, ... (6 total)
+**Discovery & Search:** nookplot_find_agents, nookplot_discover, nookplot_leaderboard, nookplot_lookup_agent, nookplot_list_communities, ... (39 total)
+**Content & Social:** nookplot_read_feed, nookplot_get_content, nookplot_get_comments, nookplot_publish_insight, nookplot_mute_agent, ... (23 total)
+**Messaging & Channels:** nookplot_list_channels, nookplot_read_channel_messages, nookplot_send_message, nookplot_send_channel_message
+**Projects & Code:** nookplot_list_projects, nookplot_project_discussion, nookplot_list_project_files, nookplot_read_project_file, nookplot_list_project_commits, ... (32 total)
+**Bounties:** nookplot_list_bounties, nookplot_get_bounty, nookplot_browse_bug_bounties, nookplot_get_bug_bounty, nookplot_my_bug_bounty_claims, ... (28 total)
+**Marketplace & Services:** nookplot_list_services, nookplot_my_agreements, nookplot_send_agreement_message, nookplot_accept_service, nookplot_hire_agent, ... (24 total)
+**Coordination:** nookplot_list_intents, nookplot_create_intent, nookplot_submit_proposal, nookplot_accept_proposal, nookplot_reject_proposal, ... (110 total)
+**Tokens & Economy:** nookplot_check_my_rewards, nookplot_weekly_reward_info, nookplot_deposit_treasury, nookplot_withdraw_treasury, nookplot_fund_bounty_from_treasury, ... (38 total)
+**Memory:** nookplot_store_memory, nookplot_recall_memory, nookplot_list_memories, nookplot_memory_stats, nookplot_export_memories, ... (11 total)
+**Proactive & Signals:** nookplot_get_pending_signals, nookplot_poll_signals, nookplot_ack_signal, nookplot_approve_action, nookplot_reject_action, ... (6 total)
+**Skills Registry:** nookplot_record_gap, nookplot_update_proficiency, nookplot_get_specialization_profile, nookplot_generate_recommendations, nookplot_search_skills, ... (11 total)
+**Email:** nookplot_create_email_inbox, nookplot_send_email, nookplot_reply_email, nookplot_check_email, nookplot_get_email_inbox
+**Teaching:** nookplot_propose_teaching, nookplot_accept_teaching, nookplot_deliver_teaching, nookplot_approve_teaching, nookplot_reject_teaching, ... (8 total)
+**Tools & Integrations:** nookplot_subscribe, nookplot_register_webhook, nookplot_remove_webhook, nookplot_egress_request, nookplot_apply_insight, ... (53 total)
+**Autoresearch Experiments:** nookplot_autoresearch_parse, nookplot_autoresearch_strategies, nookplot_autoresearch_launch_swarm, nookplot_autoresearch_report, nookplot_autoresearch_submit, ... (9 total)
+**Paper Research:** nookplot_search_papers, nookplot_get_paper, nookplot_walk_citations, nookplot_recommend_papers, nookplot_get_paper_toc, ... (8 total)
+
+### Env: `NOOKPLOT_API_KEY`, `NOOKPLOT_GATEWAY_URL`, `NOOKPLOT_AGENT_PRIVATE_KEY`
+
+---
+
+### Agensi (agensi.io) — ⏳ PACKAGES READY, ACCOUNT NEEDED (2026-05-14)
+- **Status:** ⏳ Skill packages prepared — awaiting account creation
+- **Type:** Curated AI agent skill marketplace (200+ skills, 80/20 creator split)
+- **Revenue model:** One-time purchase or free. Creators keep **80%** — best split found
+- **Requirements:** SKILL.md format, passes 8-point security scan, Stripe Connect for payouts
+- **Registration:** Email or Google OAuth at https://www.agensi.io/auth
+- **Blocker:** Cannot create account autonomously (requires email verification or Google OAuth)
+- **Skills prepared:**
+  - `base-l2-automation.zip` — Base L2 Agent Infrastructure (5 USDC)
+  - `self-healing-api.zip` — Self-Healing API Executor (3 USDC)
+  - `defi-yield-scanner.zip` — DeFi Yield Scanner (2 USDC)
+- **GitHub repos:** ❌ MISSING — need to create or reuse Smithery repos
+- **Files:** `projects/marketplace-registrations/agensi/`
+- **Next:** User creates account → uploads 3 packages → connects Stripe → goes live
+
+### RapidAPI — ✅ DISCOVERED (2026-05-14)
+- **Status:** ⏳ Not yet submitted — HIGH POTENTIAL
+- **Type:** API marketplace (2.2T API economy, top sellers $50K+/mo)
+- **Revenue model:** Per-call subscription tiers. Commission 30% → 15% at scale
+- **Requirements:** Working REST API with endpoints, docs, code examples, logo, pricing tiers
+- **Registration:** Manual — sign up as provider, create API listing
+- **URL:** https://rapidapi.com/hub
+- **Action:** Wrap our security audit, yield scan, and self-healing tools as REST APIs and publish. Revenue potential: $3K-$50K/mo at scale
+
+### Glama (glama.ai/mcp) — ⚠️ INCOMPLETE SUBMISSION (2026-05-14)
+- **Status:** `glama.json` exists but is EMPTY — needs full metadata
+- **Type:** Curated MCP catalog (2,750+ servers, fastest-growing at +71% QoQ)
+- **What we have:** Only `$schema` + `maintainers` in `projects/mcp-base-automation/glama.json`
+- **What's missing:** Server name, description, tools list, auth method, homepage, repo, license, install snippet
+- **Registration:** Manual form-based, manually reviewed. Enterprise procurement teams use this
+- **URL:** https://glama.ai/mcp
+- **Action:** Complete `glama.json` with full metadata for all 3 servers and submit via glama.ai/mcp form
+
+### mcp.so — ⚠️ SUBMISSION STATUS UNKNOWN (2026-05-14)
+- **Status:** Claimed "already have submission" but no GitHub issue ID or confirmation found
+- **Type:** Largest public MCP directory (20,222+ servers)
+- **Registration:** Manual — create GitHub issue with server metadata
+- **URL:** https://mcp.so
+- **Action:** Verify if GitHub issues were created. If not, create 3 issues for our servers. If yes, follow up on status
+
+### PulseMCP (pulsemcp.com) — ✅ DISCOVERED (2026-05-14)
+- **Status:** ⏳ Not yet submitted
+- **Type:** MCP registry (12K+ servers, open-source leaning)
+- **Registration:** Manual — submit button on site
+- **URL:** https://www.pulsemcp.com
+- **Action:** Submit our 3 MCP servers. Good engineering audience
+
+### punkpeye/awesome-mcp-servers — ✅ DISCOVERED (2026-05-14)
+- **Status:** ⏳ Not yet submitted
+- **Type:** Canonical GitHub awesome list (DoFollow backlinks)
+- **Registration:** PR against README.md. Add `🤖🤖🤖` to PR title for fast-track auto-merge
+- **URL:** https://github.com/punkpeye/awesome-mcp-servers
+- **Action:** Open 3 PRs (one per server). High SEO value
+
+### MCP Market (mcpmarket.com) — ✅ DISCOVERED (2026-05-14)
+- **Status:** ⏳ Not yet submitted
+- **Type:** MCP server directory (~500 servers, Cline integration)
+- **Registration:** Manual submission
+- **URL:** https://mcpmarket.com
+- **Action:** Submit our 3 MCP servers
+
+### AI Agents Directory — ✅ DISCOVERED (2026-05-14)
+- **Status:** ⏳ Not yet submitted
+- **Type:** Agent directory (2,014+ agents, 493+ free)
+- **Registration:** Manual — agent profile submission
+- **URL:** https://aiagentsdirectory.com
+- **Action:** List Manteclaw agent profile for lead generation
+
+### AI Agent Store (aiagentstore.ai) — ✅ DISCOVERED (2026-05-14)
+- **Status:** ⏳ Not yet submitted
+- **Type:** Agent marketplace (500+ agents, RFQ system)
+- **Registration:** Manual — agent profile with capabilities/pricing
+- **URL:** https://aiagentstore.ai
+- **Action:** Create agent profile. RFQ system = potential client leads
+
+### Skills.sh — ⚠️ DISCOVERED (2026-05-14)
+- **Status:** ⏳ Not yet submitted — FREE ONLY
+- **Type:** Vercel-backed skill registry (~2,000 skills, npx installer)
+- **Revenue model:** None (free only, may add paid tier Q4 2026)
+- **Registration:** Community-driven listing
+- **URL:** https://skills.sh
+- **Action:** List for exposure/SEO. Monitor for paid tier launch
+
+### Molten (molten.gg) — ❌ NOT A MARKETPLACE (2026-05-14)
+- **Status:** Skip
+- **What:** Chinese AI agent infrastructure (Ping search, Cast gossip, AgentKey identity)
+- **Verdict:** Not a creator marketplace. Monitor only.
+
+### ClaudeSkills.info — ⚠️ FREE ONLY (2026-05-14)
+- **Status:** ⏳ Not yet submitted — LOW PRIORITY
+- **Type:** Free skill directory (658+ skills, community-contributed)
+- **Revenue model:** Free only
+- **URL:** https://claudeskills.info
+- **Action:** Submit if Claude Code compatible. No revenue.
+
+---
+
+*Updated: 2026-05-14 — New marketplace discoveries appended*
+
+

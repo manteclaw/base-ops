@@ -149,8 +149,10 @@ if __name__ == "__main__":
 ### Environment Variables (`.env`)
 ```
 BANKR_API_KEY=your_bankr_key_here
-OPENROUTER_API_KEY=your_openrouter_key_here
-FIREWORKS_API_KEY=your_fireworks_key_here
+OPENROUTER_API_KEY=KEY=[REDACTED-api_key_assignment]
+FIR
+FIREWORKS_API_KEY=KEY=[REDACTED-api_key_assignment]
+BAS
 BASE_RPC_URL=https://mainnet.base.org
 ```
 

@@ -4,13 +4,22 @@
 #   (or copy if symlinks aren't available)
 
 echo "🔍 Running secret guard pre-commit check..."
-python3 /root/.openclaw/workspace/projects/secret_guard.py "$@"
+
+# Only scan files that are staged for commit
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+if [ -z "$STAGED_FILES" ]; then
+    echo "✅ No staged files. Proceeding with commit."
+    exit 0
+fi
+
+# Pass staged files as --paths arguments
+python3 /root/.openclaw/workspace/projects/secret_guard.py --paths $STAGED_FILES
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -ne 0 ]; then
     echo ""
-    echo "❌ Commit blocked: secrets detected in workspace files."
-    echo "   Run 'python3 projects/secret_guard.py' to auto-redact,"
+    echo "❌ Commit blocked: secrets detected in staged files."
+    echo "   Run 'python3 projects/secret_guard.py --paths <file>' to auto-redact,"
     echo "   or use --no-verify to bypass (NOT RECOMMENDED)."
     exit 1
 fi
