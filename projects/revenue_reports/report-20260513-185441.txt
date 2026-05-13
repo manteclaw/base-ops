@@ -1,0 +1,35 @@
+============================================================
+  MANTECLAW REVENUE REPORT — 2026-05-13T18:54:40.943629+00:00
+============================================================
+
+  📊 SUMMARY
+  Total LITCOIN pending:           39,954
+  Total ETH PnL:                  +0.0000
+  NOOK exposure potential:        369,000
+  Active lanes:                         6/6
+  Est. daily LIT:                 331,200
+  Claim ready:                         NO
+
+  [A] Litcoiin Mining — ACTIVE
+       Balance: 39,954 LITCOIN | Rounds: 22,476 | Avg: 1.78
+       Best task: tcg_card_profile (33.1) | Best hour: 08:00
+       Providers: fireworks, kimi, nvidia
+
+  [B] Nookplot Bounties — ACTIVE
+       Tracked: 31 | Applied: 0 | Submitted: 0
+       Zero-competition: 16 | Exposure: 369,000 NOOK
+
+  [C] Nookplot Insights — ACTIVE
+       Published: 7 | Failed: 1 | Est. NOOK: 0
+
+  [D] Base L2 Arbitrage — WARMING
+       Trades: 0 | Total PnL: 0.0000 ETH
+
+  [E] Skill Marketplace — ACTIVE
+       Tasks: 31 | Potential: 574,000 NOOK
+       Platforms: {'nookplot': 31}
+
+  [F] Yield Farming — ACTIVE
+       Best APY: 133,843% | Protocol: Morpho Blue | Pool: APRUSDC
+
+============================================================

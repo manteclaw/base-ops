@@ -826,23 +826,56 @@ class LitcoiinResearchMiner:
         return False
 
     def _auto_claim(self):
-        """Attempt to claim rewards when balance hits 50,000 threshold."""
-        token = self.authenticate()
-        payload = {"miner": self.account.address}
-        r = self._api("POST", "/v1/research/claim", json=payload,
-                       headers={"Authorization": f"Bearer {token}"}, retries=1)
-        if r.status_code == 200:
-            result = r.json()
-            claimed = result.get("claimed", 0)
-            tx_hash = result.get("txHash", "N/A")
-            log.info(f"✅ AUTO-CLAIM SUCCESS: {claimed} LITCOIN claimed! TX: {tx_hash}")
-            # Reset earned counter since we claimed
-            self.total_earned = 0
-            self._persist()
-            return True
-        else:
-            log.warning(f"Auto-claim returned {r.status_code}: {r.text[:200]}")
+        """Attempt to claim rewards when balance hits 50,000 threshold.
+        Uses actual on-chain balance, not session-local total_earned.
+        """
+        try:
+            token = self.authenticate()
+            # Check actual balance first
+            bal_r = self._api("GET", f"/v1/miner/{self.account.address}/balance",
+                              headers={"Authorization": f"Bearer {token}"}, retries=1)
+            actual_balance = 0
+            if bal_r.status_code == 200:
+                actual_balance = bal_r.json().get("balance", 0)
+                log.info(f"💰 Actual balance: {actual_balance:,.0f} LITCOIN")
+            else:
+                log.warning(f"Balance check returned {bal_r.status_code}, using earned estimate: {self.total_earned}")
+                actual_balance = self.total_earned
+
+            if actual_balance < 50000:
+                log.info(f"Auto-claim skipped — balance {actual_balance:,.0f} < 50,000 threshold")
+                return False
+
+            payload = {"miner": self.account.address}
+            r = self._api("POST", "/v1/research/claim", json=payload,
+                           headers={"Authorization": f"Bearer {token}"}, retries=2)
+            if r.status_code == 200:
+                result = r.json()
+                claimed = result.get("claimed", 0)
+                tx_hash = result.get("txHash", "N/A")
+                log.info(f"✅ AUTO-CLAIM SUCCESS: {claimed:,.0f} LITCOIN claimed! TX: {tx_hash}")
+                # Reset earned counter since we claimed — but DON'T wipe model tracker
+                self.total_earned = 0
+                self._persist()
+                return True
+            else:
+                log.warning(f"Auto-claim returned {r.status_code}: {r.text[:300]}")
+                return False
+        except Exception as e:
+            log.error(f"Auto-claim exception: {e}")
             return False
+
+    def _fetch_lit_balance(self):
+        """Fetch actual LITCOIN balance from coordinator."""
+        try:
+            token = self.authenticate()
+            r = self._api("GET", f"/v1/miner/{self.account.address}/balance",
+                          headers={"Authorization": f"Bearer {token}"}, retries=1)
+            if r.status_code == 200:
+                return r.json().get("balance", 0)
+        except Exception as e:
+            log.warning(f"Balance fetch failed: {e}")
+        return None
 
     def _fetch_balance(self):
         """Fetch on-chain ETH balance (proxy for LITCOIN balance check if API available)."""
@@ -1798,9 +1831,23 @@ class LitcoiinResearchMiner:
             
             self._persist()
 
-            # ── Auto-claim check ──
-            if self.total_earned >= 50000:
-                log.info("🎉 BALANCE THRESHOLD HIT — 50,000 LITCOIN! Attempting auto-claim...")
+            # ── Auto-claim check (every round, uses actual balance) ──
+            actual_bal = None
+            if self.round_count % 5 == 0:  # check balance every 5 rounds to avoid spam
+                try:
+                    actual_bal = self._fetch_lit_balance()
+                except Exception:
+                    pass
+            # Also trigger if session total_earned suggests we're close
+            trigger = False
+            if actual_bal is not None and actual_bal >= 50000:
+                trigger = True
+                log.info(f"🎉 ON-CHAIN BALANCE THRESHOLD HIT — {actual_bal:,.0f} LITCOIN! Auto-claiming...")
+            elif self.total_earned >= 50000 and actual_bal is None:
+                trigger = True
+                log.info(f"🎉 ESTIMATED BALANCE THRESHOLD HIT — {self.total_earned:,.0f} LITCOIN! Auto-claiming...")
+            
+            if trigger:
                 try:
                     self._auto_claim()
                 except Exception as e:

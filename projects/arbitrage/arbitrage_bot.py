@@ -22,6 +22,20 @@ from price_monitor import (
     get_eth_price_usd,
 )
 
+from alert_system import (
+    alert_opportunity,
+    alert_low_balance,
+    alert_error,
+    alert_executed,
+)
+
+from trade_executor import (
+    execute_trade,
+    healthcheck,
+    mev_protect_tip,
+    reset_nonce,
+)
+
 # ── Wallet ──
 PRIVATE_KEY = os.environ.get("PRIVATE_KEY", "")
 MNEMONIC = os.environ.get("MNEMONIC", "")
@@ -34,6 +48,7 @@ MAX_TRADE_ETH = CONFIG.get("max_trade_size_eth", 0.005)
 SLIPPAGE_BPS = CONFIG.get("slippage_bps", 150)  # 1.5% medium risk
 
 def log_opportunity(opp: dict, block_num: int):
+    """Log + alert on arbitrage opportunity"""
     ts = datetime.utcnow().isoformat()
     line = (
         f"[{ts}] Block #{block_num} | ARBITRAGE: {opp['token_a']}/{opp['token_b']} | "
@@ -41,6 +56,9 @@ def log_opportunity(opp: dict, block_num: int):
         f"diff: +{opp['price_diff_pct']:.3f}% | slippage: {SLIPPAGE_BPS/100:.1f}%"
     )
     print(line)
+    # Also send structured alert
+    alert_opportunity(opp, block_num)
+    # Keep legacy log for backwards compat
     log_path = os.path.join(os.path.dirname(__file__), "arbitrage_log.txt")
     with open(log_path, "a") as f:
         f.write(line + "\n")
@@ -76,7 +94,13 @@ async def scan_block(w3: Web3, block_num: int, dry_run: bool = True):
 
             if not dry_run:
                 print(f"🚀 Block #{block_num} | EXECUTING trade...")
-                # TODO: execute_trade(opp, SLIPPAGE_BPS)
+                reset_nonce()  # Fresh nonce sequence per block
+                result = execute_trade(opp, SLIPPAGE_BPS, block_num=block_num, dry_run=False)
+                if result.get("status") == "success":
+                    print(f"  💰 PROFIT: ${result.get('net_profit_usd', 0):.4f}")
+                else:
+                    print(f"  ⚠️  Trade result: {result.get('status')} — {result.get('error', 'N/A')}")
+                reset_nonce()  # Clean up for next block
 
     return opportunities
 
@@ -92,6 +116,8 @@ async def reactive_loop(ws_url: str, dry_run: bool = True):
     print(f"Max trade: {MAX_TRADE_ETH} ETH")
     print(f"Slippage: {SLIPPAGE_BPS/100:.1f}% (medium risk)")
     print(f"WebSocket: {ws_url[:40]}...")
+    if not dry_run:
+        print(mev_protect_tip())
     print("=" * 60)
 
     # Initial HTTP check for balance
@@ -105,7 +131,16 @@ async def reactive_loop(ws_url: str, dry_run: bool = True):
     print(f"💰 Wallet balance: {balance:.6f} ETH")
     print(f"   Reserve: {RESERVE_ETH} ETH | Tradeable: {max(0, balance - RESERVE_ETH):.6f} ETH")
 
+    if not dry_run:
+        try:
+            hc = healthcheck()
+            print(f"🔧 Executor health: wallet={'✅' if hc['wallet_loaded'] else '❌'} | "
+                  f"nonce={hc['nonce']} | gas={hc['gas_price_gwei']:.4f} gwei")
+        except Exception as e:
+            print(f"⚠️  Healthcheck failed: {e}")
+
     if balance < MIN_BALANCE_ETH:
+        alert_low_balance(balance, MIN_BALANCE_ETH)
         print(f"⚠️  Balance below minimum ({MIN_BALANCE_ETH} ETH). Waiting for funding...")
         print(f"   User said: '$10 ETH tomorrow morning'")
 

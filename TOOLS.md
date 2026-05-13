@@ -80,4 +80,98 @@ systemctl --user restart litcoiin-miner.service
 tail -f /root/.openclaw/workspace/projects/litcoin/miner_service.log
 ```
 
+---
+
+## Revenue Infrastructure (Built 2026-05-14)
+
+### Unified Revenue Tracker — `projects/revenue_tracker.py`
+- **What:** Reads all 6 earning lanes and produces a single JSON snapshot
+- **Output:** `projects/revenue_snapshot.json` + `projects/revenue_history.jsonl`
+- **Dashboard:** Auto-generates `projects/revenue-dashboard/dashboard.html` with `--html`
+- **Lanes covered:**
+  - A: Litcoiin Mining (balance, rounds, avg/round, best task/hour)
+  - B: Nookplot Bounties (tracked, applied, zero-competition exposure)
+  - C: Nookplot Insights (published CIDs, est. NOOK)
+  - D: Base L2 Arbitrage (trades, PnL ETH)
+  - E: Skill Marketplace (tasks, platforms, potential)
+  - F: Yield Farming (best APY, protocol, TVL)
+- **Usage:**
+```bash
+cd /root/.openclaw/workspace
+python3 projects/revenue_tracker.py --html    # one-shot + dashboard
+python3 projects/revenue_tracker.py --watch   # continuous (every 60s)
+```
+
+### Revenue Aggregator — `projects/revenue_aggregate.py`
+- **What:** CLI wrapper that runs tracker + generates text report + optionally serves dashboard
+- **Reports:** `projects/revenue_reports/report-YYYYMMDD-HHMMSS.txt`
+- **Dashboard serve:** `python3 projects/revenue_aggregate.py --serve` (port 8080)
+- **Cron mode:** `python3 projects/revenue_aggregate.py --cron` (quiet, append-only)
+
+### Dashboard
+- **File:** `projects/revenue-dashboard/dashboard.html`
+- **Features:** Dark theme, auto-refresh every 60s, summary bar, per-lane cards, revenue history chart
+- **Open locally:** `file:///root/.openclaw/workspace/projects/revenue-dashboard/dashboard.html`
+- **Serve over HTTP:** `python3 projects/revenue_aggregate.py --serve --port 8080`
+
+### Auto-claim LITCOIN (standalone-miner.py)
+- **Status:** ✅ Wired and live
+- **Logic:** Checks actual on-chain balance every 5 rounds. When ≥ 50,000, executes claim tx via `/v1/research/claim`.
+- **Fallback:** If balance API fails, falls back to session `total_earned` estimate.
+- **Safety:** Kill-switch monitors for balance drops. Claim resets `total_earned` but preserves model tracker.
+
+### Current Snapshot (2026-05-14)
+```
+LIT:  39,954 | ETH:+0.0000 | NOOK-exp: 369,000 | Lanes:6/6 | Est-LIT/day: 331,200 | Claim-Ready:NO
+```
+- Litcoiin: 22,476 rounds, 1.78 avg/round (v5.5 tuning active — Fireworks on high-value tasks)
+- Nookplot: 31 bounties tracked, 16 zero-competition, 369K NOOK exposure
+- Insights: 7 published, 1 failed
+- Arbitrage: Warming (0 trades executed yet)
+- Marketplace: 31 tasks, 574K NOOK potential
+- Yield: Morpho Blue APRUSDC at 133,843% APY (volatile, $18.7K TVL)
+
+### Arbitrage Alert System — `projects/arbitrage/alert_system.py`
+- **Status:** ✅ Built and integrated into `arbitrage_bot.py`
+- **What:** Structured alert logging for arbitrage opportunities and trade events
+- **Outputs:** `projects/arbitrage/alerts.txt` (human-readable) + `alerts.json` (structured)
+- **Severity levels:** ℹ️ opportunity | 💰 profitable (> $1) | 🚀 high_profit (> $5) | ✅ executed | ❌ failed | ⚠️ low_balance | 🔥 error
+- **Features:** Auto-rotation at 5MB, JSON queryable history, summary command
+- **Usage:**
+```bash
+python3 projects/arbitrage/alert_system.py test   # generate test alerts
+python3 projects/arbitrage/alert_system.py          # print summary
+```
+
+### Credential Rotation Manager — `projects/credential_manager.py`
+- **Status:** ✅ All 27 credentials valid
+- **What:** Scans workspace for API keys, tests validity, generates rotation recommendations
+- **Coverage:** BANKR, NOOKPLOT, ALCHEMY, OPENROUTER, VENICE, GITHUB, PRIVATE_KEY, MNEMONIC
+- **Commands:**
+```bash
+python3 projects/credential_manager.py scan      # list all keys
+python3 projects/credential_manager.py health    # test each key
+python3 projects/credential_manager.py report  # full report
+python3 projects/credential_manager.py rotate  # rotation plan
+```
+- **Report:** `projects/credential_report.json`
+- **Findings:** Some keys duplicated across files — recommend consolidating to single `.env`
+
+### Auto-claim LITCOIN Service — `projects/litcoin/litcoiin-claim.service` + `.timer`
+- **Status:** ✅ Timer active, triggers every 30 minutes
+- **What:** Checks LITCOIN balance and auto-claims when ≥ 50,000 threshold
+- **Controls:**
+```bash
+systemctl --user status litcoiin-claim.timer
+systemctl --user status litcoiin-claim.service
+```
+- **Current balance:** ~39,627 LITCOIN (below threshold — waiting)
+- **Note:** Standalone miner tracks `total_earned` in state file. Claim bot uses Bankr API. If these diverge, investigate which balance is canonical for claiming.
+
+### Nookplot Guild Participation
+- **Status:** ⏳ Blocked — no guilds exist on network yet
+- **Agent:** `3fbc58ec-1236-41d8-83a3-557f342adc3b` (connected with recovered PK)
+- **Blocker:** `cliques.list()` returns `guilds=[] total=0`. Guild creation requires 2+ members.
+- **Action needed:** Find another agent address to co-create "Manteclaw Mining Collective" OR wait for Guild 13 (Deep Research Collective) to be deployed.
+
 <!-- OPENCLAW_CACHE_BOUNDARY -->

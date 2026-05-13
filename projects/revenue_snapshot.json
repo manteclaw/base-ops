@@ -1,0 +1,138 @@
+{
+  "timestamp": "2026-05-13T18:54:40.943629+00:00",
+  "lanes": {
+    "A": {
+      "lane": "A",
+      "name": "Litcoiin Mining",
+      "status": "active",
+      "balance_lit": 39954.0,
+      "rounds": 22476,
+      "avg_per_round": 1.78,
+      "best_task_type": "tcg_card_profile",
+      "best_task_avg": 33.15,
+      "best_hour": "08:00",
+      "best_hour_avg": 14.77,
+      "recent_rewards": [
+        46.0,
+        46.0,
+        29.0,
+        29.0,
+        6.0,
+        6.0,
+        0.0,
+        0.0,
+        34.0,
+        34.0
+      ],
+      "claim_threshold": 50000,
+      "claim_ready": false,
+      "providers": [
+        "fireworks",
+        "kimi",
+        "nvidia"
+      ],
+      "estimated_daily_lit": 331200.0
+    },
+    "B": {
+      "lane": "B",
+      "name": "Nookplot Bounties",
+      "status": "active",
+      "tracked_bounties": 31,
+      "applied": 0,
+      "submitted": 0,
+      "zero_competition_bounties": 16,
+      "potential_exposure_nook": 369000.0,
+      "platforms": [
+        "nookplot"
+      ]
+    },
+    "C": {
+      "lane": "C",
+      "name": "Nookplot Insights",
+      "status": "active",
+      "published": 7,
+      "failed": 1,
+      "cids": [
+        "cb4a92eb-84d5-4e90-97fa-8f5ee8023b72",
+        "70510c95-ba25-405a-8d97-9fc66749de69",
+        "46299f60-9196-4ccb-ba10-f07b6ea55dac",
+        "66ffbbdc-9a7a-453b-aa8d-514f7c213783",
+        "4841f880-72f9-4615-8ccd-2b253a2d6ad2",
+        "66efaf08-ce4f-4d1e-b43f-586f12898d68",
+        "95d0b8e1-323d-461e-a085-c0b7ee72d2b6"
+      ],
+      "estimated_nook_earned": 0.0
+    },
+    "D": {
+      "lane": "D",
+      "name": "Base L2 Arbitrage",
+      "status": "warming",
+      "trades_executed": 0,
+      "total_pnl_eth": 0.0,
+      "recent_trades": [],
+      "wallet": "0x8b8AAC89E101b77E5A917278120151FC496e5c39",
+      "reserve_eth": 0.0025
+    },
+    "E": {
+      "lane": "E",
+      "name": "Skill Marketplace",
+      "status": "active",
+      "tracked_tasks": 31,
+      "platforms": {
+        "nookplot": 31
+      },
+      "total_potential_reward": 574000.0,
+      "registered_marketplaces": [
+        "swarmzero",
+        "mulerun"
+      ]
+    },
+    "F": {
+      "lane": "F",
+      "name": "Yield Farming",
+      "status": "active",
+      "chain": "Base",
+      "token": "USDC",
+      "pools_found": 93,
+      "best_apy": 133843.08,
+      "best_protocol": "Morpho Blue",
+      "best_symbol": "APRUSDC",
+      "best_tvl": 18753,
+      "top_pools": [
+        {
+          "protocol": "Morpho Blue",
+          "symbol": "APRUSDC",
+          "apy": 133843.08
+        },
+        {
+          "protocol": "Morpho Blue",
+          "symbol": "PUSDCHY",
+          "apy": 487.57
+        },
+        {
+          "protocol": "Uniswap V3",
+          "symbol": "SPX-USDC",
+          "apy": 170.72
+        },
+        {
+          "protocol": "Uniswap V3",
+          "symbol": "VIRTUAL-USDC",
+          "apy": 144.85
+        },
+        {
+          "protocol": "Uniswap V3",
+          "symbol": "ZORA-USDC",
+          "apy": 145.58
+        }
+      ]
+    }
+  },
+  "summary": {
+    "total_lit_pending": 39954.0,
+    "total_nook_exposure": 369000.0,
+    "total_pnl_eth": 0.0,
+    "active_lanes": 6,
+    "claim_ready": false,
+    "estimated_daily_lit": 331200.0
+  }
+}

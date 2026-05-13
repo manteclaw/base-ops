@@ -1,0 +1,10 @@
+[Unit]
+Description=Manteclaw Litcoiin Auto-Claim Bot Timer
+Requires=litcoiin-claim.service
+
+[Timer]
+OnCalendar=*:0/30
+Persistent=true
+
+[Install]
+WantedBy=timers.target

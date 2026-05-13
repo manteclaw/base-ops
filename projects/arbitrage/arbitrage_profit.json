@@ -1,0 +1,27 @@
+{
+  "total_trades": 1,
+  "successful_trades": 1,
+  "failed_trades": 0,
+  "total_gross_profit_usd": 1.0,
+  "total_net_profit_usd": 0.965,
+  "total_gas_cost_usd": 0.035,
+  "trades": [
+    {
+      "timestamp": "2024-05-14T02:00:00Z",
+      "block_number": 12345,
+      "token_a": "WETH",
+      "token_b": "USDC",
+      "buy_dex": "uniswap_v3",
+      "sell_dex": "aerodrome",
+      "amount_in_eth": 0.005,
+      "expected_profit_usd": 1.0,
+      "gas_cost_eth": 1e-05,
+      "gas_cost_usd": 0.035,
+      "net_profit_usd": 0.965,
+      "tx_hash_buy": "0xabc",
+      "tx_hash_sell": "0xdef",
+      "status": "success",
+      "notes": ""
+    }
+  ]
+}

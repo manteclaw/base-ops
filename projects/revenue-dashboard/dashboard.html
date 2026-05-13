@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="refresh" content="60">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manteclaw Revenue Dashboard</title>
+<style>
+:root {
+  --bg: #0a0c10;
+  --surface: #11141a;
+  --card: #161b22;
+  --border: #2a2f3a;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --green: #3fb950;
+  --red: #f85149;
+  --yellow: #d29922;
+  --blue: #58a6ff;
+  --purple: #a371f7;
+  --cyan: #39d0d8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 24px;
+  line-height: 1.5;
+}
+h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+h1 .emoji { font-size: 28px; }
+.sub {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+.summary-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.summary-item {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--card) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.summary-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--green);
+}
+.summary-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  max-width: 1400px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--blue); }
+.card h2 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blue);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.status {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.metric {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 12px;
+}
+.metric .unit {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.row:last-child { border-bottom: none; }
+.row span:first-child { color: var(--muted); }
+.row span:last-child { color: var(--text); font-weight: 500; }
+.timestamp {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 24px;
+  text-align: center;
+}
+.history-chart {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 20px;
+  max-width: 1400px;
+}
+.history-chart h2 {
+  font-size: 14px;
+  color: var(--purple);
+  margin-bottom: 12px;
+}
+pre {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 10px;
+  color: var(--muted);
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+@media (max-width: 600px) {
+  body { padding: 12px; }
+  .grid { grid-template-columns: 1fr; }
+  .summary-bar { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<h1><span class="emoji">⚡</span>Manteclaw Revenue Dashboard</h1>
+<p class="sub">6 earning lanes · Auto-refreshes every 60s · 2026-05-13T18:54:40.943629+00:00</p>
+
+
+    <div class="summary-bar">
+        <div class="summary-item">
+            <div class="summary-value">39,954</div>
+            <div class="summary-label">LITCOIN Pending</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value">0.0000</div>
+            <div class="summary-label">ETH PnL</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value">369,000</div>
+            <div class="summary-label">NOOK Exposure</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value">6/6</div>
+            <div class="summary-label">Active Lanes</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value">331,200</div>
+            <div class="summary-label">Est. Daily LIT</div>
+        </div>
+    </div>
+    
+
+<div class="grid">
+
+        <div class="card">
+            <h2><span class="status" style="background:#d29922"></span>⛏️ Litcoiin Mining</h2>
+            <div class="metric">39,954 <span class="unit">LITCOIN</span></div><div class="row"><span>Rounds</span><span>22,476</span></div><div class="row"><span>Avg/Round</span><span>1.78</span></div><div class="row"><span>Best Task</span><span>tcg_card_profile (33.1)</span></div><div class="row"><span>Best Hour</span><span>08:00 (14.8)</span></div><div class="row"><span>Claim Ready</span><span>⏳ No</span></div><div class="row"><span>Providers</span><span>fireworks, kimi, nvidia</span></div>
+        </div>
+        
+
+        <div class="card">
+            <h2><span class="status" style="background:#a371f7"></span>🏦 Nookplot Bounties</h2>
+            <div class="metric">31 <span class="unit">tracked</span></div><div class="row"><span>Applied</span><span>0</span></div><div class="row"><span>Submitted</span><span>0</span></div><div class="row"><span>Zero-Comp</span><span>16</span></div><div class="row"><span>Exposure</span><span>369,000 NOOK</span></div>
+        </div>
+        
+
+        <div class="card">
+            <h2><span class="status" style="background:#3fb950"></span>📊 Nookplot Insights</h2>
+            <div class="metric">7 <span class="unit">published</span></div><div class="row"><span>Failed</span><span>1</span></div><div class="row"><span>Est. NOOK</span><span>0</span></div><div class="row"><span>CIDs</span><span>7 stored</span></div>
+        </div>
+        
+
+        <div class="card">
+            <h2><span class="status" style="background:#d29922"></span>🔄 Base L2 Arbitrage</h2>
+            <div class="metric">0.0000 <span class="unit">ETH</span></div><div class="row"><span>Trades</span><span>0</span></div><div class="row"><span>Reserve</span><span>0.0025 ETH</span></div>
+        </div>
+        
+
+        <div class="card">
+            <h2><span class="status" style="background:#3fb950"></span>🌐 Skill Marketplace</h2>
+            <div class="metric">31 <span class="unit">tasks</span></div><div class="row"><span>Platforms</span><span>nookplot:31</span></div><div class="row"><span>Potential</span><span>574,000 NOOK</span></div><div class="row"><span>Registered</span><span>swarmzero, mulerun</span></div>
+        </div>
+        
+
+        <div class="card">
+            <h2><span class="status" style="background:#3fb950"></span>💰 Yield Farming</h2>
+            <div class="metric">133,843% <span class="unit">APY</span></div><div class="row"><span>Protocol</span><span>Morpho Blue</span></div><div class="row"><span>Pool</span><span>APRUSDC</span></div><div class="row"><span>TVL</span><span>$18,753</span></div><div class="row"><span>Pools</span><span>93</span></div>
+        </div>
+        
+</div>
+
+<div class="history-chart">
+<h2>📈 Revenue History (last 20 snapshots)</h2>
+<pre id="history">Loading...</pre>
+</div>
+
+<p class="timestamp">Last updated: 2026-05-13T18:54:40.943629+00:00 UTC · Generated by revenue_tracker.py</p>
+
+<script>
+// Simple sparkline from revenue_history.jsonl if accessible
+fetch('revenue_history.jsonl')
+  .then(r => r.text())
+  .then(text => {
+    const lines = text.trim().split('
+').slice(-20);
+    const data = lines.map(l => JSON.parse(l));
+    let out = 'Date        LITCOIN    ETH-PnL    Lanes\n';
+    out += '-------------------------------------------\n';
+    data.forEach(d => {
+      const dt = d.timestamp.slice(0,10);
+      const lit = String(Math.round(d.total_lit)).padStart(10);
+      const eth = String(d.total_pnl_eth.toFixed(4)).padStart(10);
+      const lanes = String(d.active_lanes).padStart(5);
+      out += `${dt}  ${lit}  ${eth}  ${lanes}\n`;
+    });
+    document.getElementById('history').textContent = out;
+  })
+  .catch(() => {
+    document.getElementById('history').textContent = 'No history data available yet.';
+  });
+</script>
+</body>
+</html>

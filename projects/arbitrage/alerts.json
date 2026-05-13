@@ -1,0 +1,66 @@
+[
+  {
+    "timestamp": "2026-05-13T18:52:56.319891",
+    "level": "opportunity",
+    "message": "Test alert: WETH/USDC opportunity found",
+    "data": {
+      "profit": 2.5
+    }
+  },
+  {
+    "timestamp": "2026-05-13T18:52:56.326115",
+    "level": "profitable",
+    "message": "Test alert: $3.20 profit on WETH/DAI",
+    "data": {
+      "profit": 3.2
+    }
+  },
+  {
+    "timestamp": "2026-05-13T18:52:56.327158",
+    "level": "high_profit",
+    "message": "Test alert: $7.50 profit on USDC/DAI",
+    "data": {
+      "profit": 7.5
+    }
+  },
+  {
+    "timestamp": "2026-05-13T18:52:56.333556",
+    "level": "low_balance",
+    "message": "Test alert: Balance 0.001 ETH, need 0.0025",
+    "data": {
+      "balance": 0.001
+    }
+  },
+  {
+    "timestamp": "2026-05-13T18:58:40.816050+00:00",
+    "level": "opportunity",
+    "message": "Test alert: WETH/USDC opportunity found",
+    "data": {
+      "profit": 2.5
+    }
+  },
+  {
+    "timestamp": "2026-05-13T18:58:40.817207+00:00",
+    "level": "profitable",
+    "message": "Test alert: $3.20 profit on WETH/DAI",
+    "data": {
+      "profit": 3.2
+    }
+  },
+  {
+    "timestamp": "2026-05-13T18:58:40.818326+00:00",
+    "level": "high_profit",
+    "message": "Test alert: $7.50 profit on USDC/DAI",
+    "data": {
+      "profit": 7.5
+    }
+  },
+  {
+    "timestamp": "2026-05-13T18:58:40.819377+00:00",
+    "level": "low_balance",
+    "message": "Test alert: Balance 0.001 ETH, need 0.0025",
+    "data": {
+      "balance": 0.001
+    }
+  }
+]
