@@ -3,7 +3,7 @@ const { ZyfaiSDK, getSupportedChainIds } = require("@zyfai/sdk");
 async function main() {
   const apiKey = process.env.ZYFAI_API_KEY || "zyfai_your_api_key_here";
   const privateKey = process.env.PRIVATE_KEY || "0x" + require("crypto").randomBytes(32).toString("hex");
-  const userAddress = process.env.USER_ADDRESS || "0xC4Cf88b691D9b820040d861954d32e0C5f4538b7";
+  const userAddress = process.env.USER_ADDRESS || "0x8b8AAC89E101b77E5A917278120151FC496e5c39";
   const chainId = 8453; // Base
 
   const sdk = new ZyfaiSDK(apiKey);

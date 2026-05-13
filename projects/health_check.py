@@ -32,11 +32,8 @@ def get_service_status(name):
             status = "✅ RUNNING"
         elif "Active: active (waiting)" in output:
             status = "⏳ WAITING"
-<<<<<<< HEAD
         elif "Active: activating" in output:
             status = "🔄 RESTARTING"
-=======
->>>>>>> 724b2ebdce6fe51be44f9aad9f5eef93ef172a08
         elif "Active: inactive" in output:
             status = "❌ INACTIVE"
         elif "Active: failed" in output:
@@ -50,12 +47,9 @@ def get_service_status(name):
             if "Active: active" in line and "since" in line:
                 uptime = line.split("since")[-1].strip()
                 break
-<<<<<<< HEAD
             if "Active: activating" in line and "since" in line:
                 uptime = line.split("since")[-1].strip()
                 break
-=======
->>>>>>> 724b2ebdce6fe51be44f9aad9f5eef93ef172a08
             if "Trigger:" in line:
                 uptime = line.strip()
                 break
@@ -87,12 +81,9 @@ def main():
     # Check unified target
     target_info = get_service_status("manteclaw-services.target")
     target_status = target_info['status']
-<<<<<<< HEAD
     # Targets don't stay "active" — they just group units. Check if enabled.
     if "Loaded:" in target_info['raw'] and "enabled" in target_info['raw']:
         target_status = "✅ ENABLED"
-=======
->>>>>>> 724b2ebdce6fe51be44f9aad9f5eef93ef172a08
     print(f"{'Unified Target':<25} {target_status}")
     
     if target_status.startswith("❌") or target_status.startswith("⚠️"):

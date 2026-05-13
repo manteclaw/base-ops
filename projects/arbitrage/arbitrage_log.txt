@@ -504,3 +504,27 @@ Traceback (most recent call last):
 json.decoder.JSONDecodeError: Extra data: line 45 column 4 (char 1613)
 =======
 >>>>>>> 724b2ebdce6fe51be44f9aad9f5eef93ef172a08
+✅ Connected to Base mainnet (block: 45955351)
+============================================================
+🤖 BASE L2 ARBITRAGE BOT — REACTIVE MODE
+============================================================
+Mode: LIVE EXECUTION
+Wallet: 0x8b8AAC89E101b77E5A917278120151FC496e5c39
+Reserve: 0.0025 ETH (~$5)
+Max trade: 0.005 ETH
+Slippage: 1.5% (medium risk)
+WebSocket: wss://base-mainnet.g.alchemy.com/v2/xNTF...
+⚡ MEV Protection Status:
+  • Flashbots Protect: Not yet on Base (monitor: docs.flashbots.net)
+  • Using 60-second tx deadlines as primary defense
+  • Alternative: CowSwap / MEV Blocker (Base support TBD)
+  • Base L2 has lower MEV than mainnet — sandwich risk reduced but not zero
+  • Future: Integrate Flashbots Protect Base RPC when available
+============================================================
+💰 Wallet balance: 0.010716 ETH
+   Reserve: 0.0025 ETH | Tradeable: 0.008216 ETH
+🔧 Executor health: wallet=✅ | nonce=1 | gas=0.0060 gwei
+
+🔌 Connecting WebSocket for block subscription...
+✅ WebSocket connected. Listening for new blocks...
+

@@ -5,7 +5,7 @@ const { privateKeyToAccount } = require("viem/accounts");
 
 const API_KEY = process.env.ZYFAI_API_KEY || "";
 const MNEMONIC = "state insane tooth rain scan march liberty man sick category noble divorce";
-const USER_ADDRESS = "0xC4Cf88b691D9b820040d861954d32e0C5f4538b7";
+const USER_ADDRESS = "0x8b8AAC89E101b77E5A917278120151FC496e5c39";
 const CHAIN_ID = 8453;
 
 async function setup() {

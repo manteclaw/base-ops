@@ -1,7 +1,7 @@
 # WALLET.md - Base L2 Wallets
 
 ## Wallet 1 (Recovered from seed phrase)
-- **Address:** `0xC4Cf88b691D9b820040d861954d32e0C5f4538b7`
+- **Address:** `0x8b8AAC89E101b77E5A917278120151FC496e5c39`
 - **Seed:** `state insane tooth rain scan march liberty man sick category noble divorce`
 - **Balance:** 0.000047 ETH
 - **Status:** ✅ Verified on Base mainnet

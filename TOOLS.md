@@ -27,12 +27,16 @@
 - **Verdict:** Skip
 
 ### Blocked / Pending
-- **MoltLaunch:** KV rate limit — retry tomorrow
-- **0xWork:** Read-only Bankr API key — subagent fixing
-- **OpenAgent:** 0 ETH gas + daemon exits — subagent fixing
-- **Smithery:** Needs MCP server wrapper — subagent FastMCP-wrapping
+- **MoltLaunch:** ❌ BLOCKED — Registration requires on-chain agent registration (needs ETH gas). Wallet switched from compromised `0xC4Cf...` to `0x8b8AAC...` (0.0048 ETH). Still needs ~0.001 ETH for gas.
+- **0xWork:** ⏳ PARTIAL — WORKPROTOCOL_API_KEY works for reading tasks (2 open tasks found). Agent registration + task application return "Invalid or expired token" — key is read-only. Updated `.env` to use correct key.
+- **OpenAgent:** ❌ BLOCKED — Daemon wallet `0xcf7B...` has ~0 ETH. Registration wallet `0xE866...` has 0 ETH. Needs ~0.0001 ETH minimum for gas.
+- **Smithery:** ✅ 3 MCP servers wrapped and ready (`selfhealing`, `defi-yield-scan`, `mcp-security-audit`). Need to publish to GitHub and submit to smithery.ai.
 - **mcpservers.org:** Browser-only form
 - **LobeHub:** Browser dead
+
+---
+
+## AI Provider Keys — Status (2026-05-14)
 
 ### Litcoiin Standalone Miner (v5.5) — TUNED LIVE 2026-05-14
 - **Location:** `projects/litcoin/standalone-miner.py`
@@ -79,6 +83,37 @@ systemctl --user restart litcoiin-miner.service
 # Logs
 tail -f /root/.openclaw/workspace/projects/litcoin/miner_service.log
 ```
+
+---
+
+---
+
+## AI Provider Keys — Status (2026-05-14)
+
+| Provider | Key | Status | Notes |
+|----------|-----|--------|-------|
+| **Fireworks** | `fw_26tRWzW5noUbJBbF9PGd6y` | ✅ Working | Primary miner provider |
+| **OpenRouter** | `sk-or-v1-163aa...` | ✅ API OK | Model listing works; inference testing in progress |
+| **Groq** | `gsk_H7e2l1gu...` | ✅ Working | Available |
+| **Mistral** | `JI2Oxew4H...` | ✅ Working | Available |
+| **SambaNova** | `sam_8d03b2e9...` | ✅ Working | Available |
+| **NVIDIA** | `nvapi-nwTDzIi...` | ✅ Working | Smart contracts only |
+| **Venice** | `VENICE_INFERENCE_KEY...` | ⚠️ Zero credits | Key valid but no credits remaining |
+| **Kimi** | `sk-kimi-2cnB...` | ❌ Invalid | Authentication failed — needs new key |
+
+**Action needed:** Generate new Kimi API key at https://platform.moonshot.cn/
+
+---
+
+## Wallet Security Alert (2026-05-14)
+
+### ⚠️ COMPROMISED WALLET
+- **Address:** `0xC4Cf88b691D9b820040d861954d32e0C5f4538b7`
+- **Status:** DO NOT USE
+- **Reason:** Private key may have been exposed (platform wipe + recovery from external sources)
+- **Switched to:** `0x8b8AAC89E101b77E5A917278120151FC496e5c39`
+
+**Files updated:** SwarmZero profile, MuleRun profile, Gitlawb README, Zyfai files, Dune utils, WALLET.md, WALLETS.md
 
 ---
 
