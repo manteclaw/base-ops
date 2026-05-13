@@ -58,6 +58,13 @@ MODEL_DEEPSEEK_BACKUP = "deepseek-coder"
 CEREBRAS_URL = "https://api.cerebras.ai/v1"
 MODEL_CEREBRAS_PRIMARY = "llama3.1-8b"
 MODEL_CEREBRAS_BACKUP = "qwen-3-235b-a22b-instruct-2507"
+SAMBANOVA_URL = "https://api.sambanova.ai/v1"
+MODEL_SAMBANOVA_PRIMARY = "Meta-Llama-3.3-70B-Instruct"
+MODEL_SAMBANOVA_BACKUP = "DeepSeek-V3.1"
+MISTRAL_URL = "https://api.mistral.ai/v1"
+MODEL_MISTRAL_PRIMARY = "mistral-large-latest"
+MODEL_MISTRAL_CODE = "codestral-latest"
+MODEL_MISTRAL_BACKUP = "mistral-medium-latest"
 
 # Circuit-breaker constants
 CB_TRIGGER_FAILURES = 3      # consecutive failures before flipping provider
@@ -152,7 +159,7 @@ class LitcoiinResearchMiner:
     ]
 
     # ── Task-type → best available provider mapping (from 22K+ rounds of data) ──
-    # With OpenRouter dead, only Kimi/Fireworks/NVIDIA are viable
+    # v5.6: Added SambaNova + Mistral with task-type specialization
     TASK_TYPE_TO_PROVIDER = {
         # Fireworks 70B dominates these (>15 avg)
         "runescape_ta": "fireworks",
@@ -168,6 +175,27 @@ class LitcoiinResearchMiner:
         "tcg_card_profile": "fireworks",  # 5.6 vs NVIDIA 0.9
         # NVIDIA 8B actually wins here (6.7 vs Fireworks 2.8)
         "smart_contracts": "nvidia",
+        # NEW: Mistral for code-heavy tasks
+        "software_engineering": "mistral_code",  # Codestral optimized for code
+        "compiler": "mistral_code",
+        "compression": "mistral_code",
+        # NEW: Mistral Large for general reasoning
+        "mathematics": "mistral",
+        "pattern_recognition": "mistral",
+        "exploit_forensics": "mistral",
+        # NEW: SambaNova as cheap fallback for general tasks
+        "general": "sambanova",
+    }
+    # ── Provider fallback chain (auto-switch on failure) ──
+    PROVIDER_FALLBACK_CHAIN = {
+        "fireworks": ["sambanova", "mistral", "groq", "openrouter"],
+        "nvidia": ["fireworks", "sambanova", "mistral"],
+        "mistral": ["sambanova", "fireworks", "groq"],
+        "mistral_code": ["mistral", "sambanova", "groq"],
+        "sambanova": ["fireworks", "mistral", "groq"],
+        "groq": ["sambanova", "mistral", "fireworks"],
+        "openrouter": ["fireworks", "sambanova", "mistral"],
+        "cerebras": ["fireworks", "sambanova", "mistral"],
     }
     # Task rotation: don't repeat same type for N rounds
     TASK_ROTATION_MEMORY = 5  # remember last 5 task types
@@ -180,7 +208,7 @@ class LitcoiinResearchMiner:
     # Max cache entries before LRU eviction
     CACHE_MAX_ENTRIES = 200
 
-    def __init__(self, account, openrouter_key, fireworks_key=None, kimi_key=None, nvidia_key=None, groq_key=None, deepseek_key=None, cerebras_key=None):
+    def __init__(self, account, openrouter_key, fireworks_key=None, kimi_key=None, nvidia_key=None, groq_key=None, deepseek_key=None, cerebras_key=None, sambanova_key=None, mistral_key=None):
         self.account = account
         self.openrouter_key = openrouter_key
         self.fireworks_key = fireworks_key
@@ -189,12 +217,17 @@ class LitcoiinResearchMiner:
         self.groq_key = groq_key
         self.deepseek_key = deepseek_key
         self.cerebras_key = cerebras_key
+        self.sambanova_key = sambanova_key
+        self.mistral_key = mistral_key
         self.session = requests.Session()
         self.session.headers["Content-Type"] = "application/json"
-        self.session.headers["X-Litcoin-SDK"] = "standalone-research-5.5.0"
+        self.session.headers["X-Litcoin-SDK"] = "standalone-research-5.6.0"
         self.auth_token = None
         self.auth_expiry = 0
         self.last_model_used = MODEL_PRIMARY
+        # track current provider for fallback
+        self.current_provider = "fireworks"  # default primary
+        self.fallback_idx = 0  # index in fallback chain
 
         # ── Enhancement state ──
         self.state = load_state()
@@ -206,6 +239,8 @@ class LitcoiinResearchMiner:
         self.groq_fails = 0               # consecutive Groq failures
         self.deepseek_fails = 0           # consecutive DeepSeek failures
         self.cerebras_fails = 0           # consecutive Cerebras failures
+        self.sambanova_fails = 0          # consecutive SambaNova failures
+        self.mistral_fails = 0            # consecutive Mistral failures
         self.cb_lockout_remaining = 0     # rounds left on forced-alt provider
         self.cb_forced_provider = None    # "openrouter" | "fireworks" | "kimi" | None
         # backoff
@@ -654,11 +689,17 @@ class LitcoiinResearchMiner:
             return bool(self.deepseek_key)
         if name == "cerebras":
             return bool(self.cerebras_key)
+        if name == "sambanova":
+            return bool(self.sambanova_key)
+        if name == "mistral":
+            return bool(self.mistral_key)
+        if name == "mistral_code":
+            return bool(self.mistral_key)
         return False
 
     def _select_provider(self, task_type):
-        """Pick provider using task-type mapping first, then UCB1, then fallback.
-        NVIDIA is NO LONGER absolute priority — it's only for smart_contracts.
+        """Pick provider using task-type mapping first, then fallback chain on failure.
+        v5.6: Auto-fallback chain when mapped provider fails.
         """
         # 1. Circuit-breaker lockout overrides everything
         if self.cb_lockout_remaining > 0 and self.cb_forced_provider:
@@ -674,8 +715,15 @@ class LitcoiinResearchMiner:
             if self._provider_available(mapped) and fails < CB_TRIGGER_FAILURES:
                 log.info(f"[MAP] {task_type} → {mapped} (task-type mapping)")
                 return mapped
-            # Mapped provider dead — fall through to smart selection
-            log.info(f"[MAP] {mapped} dead for {task_type}, falling back to smart selection")
+            # Mapped provider dead — use fallback chain
+            log.info(f"[MAP] {mapped} dead for {task_type}, using fallback chain")
+            chain = self.PROVIDER_FALLBACK_CHAIN.get(mapped, [])
+            for fallback in chain:
+                fallback_key = fallback + "_fails"
+                fallback_fails = getattr(self, fallback_key, 0)
+                if self._provider_available(fallback) and fallback_fails < CB_TRIGGER_FAILURES:
+                    log.info(f"[FALLBACK] {task_type} → {mapped} (dead) → {fallback}")
+                    return fallback
 
         # 3. Smart model preference (UCB1) — only if sufficient data
         smart = self._pick_smart_model(task_type)
@@ -692,19 +740,15 @@ class LitcoiinResearchMiner:
             if self._provider_available("openrouter") and self.or_fails < CB_TRIGGER_FAILURES:
                 return "openrouter"
 
-        # 4. Default priority: Fireworks > Kimi > NVIDIA > OpenRouter
-        # Fireworks 70B is the best generalist for most task types
-        if self._provider_available("fireworks") and self.fw_fails < CB_TRIGGER_FAILURES:
-            return "fireworks"
-        if self._provider_available("kimi") and self.kimi_fails < CB_TRIGGER_FAILURES:
-            return "kimi"
-        if self._provider_available("nvidia") and self.nvidia_fails < CB_TRIGGER_FAILURES:
-            return "nvidia"
-        if self._provider_available("openrouter") and self.or_fails < CB_TRIGGER_FAILURES:
-            return "openrouter"
+        # 4. Default priority: Fireworks > SambaNova > Mistral > Groq > Kimi > NVIDIA > OpenRouter
+        for p in ["fireworks", "sambanova", "mistral", "groq", "kimi", "nvidia", "openrouter", "cerebras", "deepseek"]:
+            if self._provider_available(p):
+                fails = getattr(self, p + "_fails", 0)
+                if fails < CB_TRIGGER_FAILURES:
+                    return p
 
         # 5. Fallback to whoever is available regardless of failures
-        for p in ["fireworks", "kimi", "nvidia", "openrouter", "groq", "cerebras", "deepseek"]:
+        for p in ["fireworks", "sambanova", "mistral", "groq", "kimi", "nvidia", "openrouter", "cerebras", "deepseek"]:
             if self._provider_available(p):
                 return p
         return None
@@ -806,6 +850,32 @@ class LitcoiinResearchMiner:
                     for fallback in ["groq", "cerebras", "nvidia", "kimi", "fireworks"]:
                         if self._provider_available(fallback):
                             log.warning(f"[CB] DeepSeek failed {self.deepseek_fails}x → locking to {fallback} for {CB_LOCKOUT_ROUNDS} rounds")
+                            self.cb_forced_provider = fallback
+                            self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                            break
+
+        elif provider == "sambanova":
+            if success:
+                self.sambanova_fails = 0
+            else:
+                self.sambanova_fails += 1
+                if self.sambanova_fails >= CB_TRIGGER_FAILURES:
+                    for fallback in self.PROVIDER_FALLBACK_CHAIN.get("sambanova", ["fireworks", "mistral", "groq"]):
+                        if self._provider_available(fallback):
+                            log.warning(f"[CB] SambaNova failed {self.sambanova_fails}x → locking to {fallback} for {CB_LOCKOUT_ROUNDS} rounds")
+                            self.cb_forced_provider = fallback
+                            self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
+                            break
+
+        elif provider in ("mistral", "mistral_code"):
+            if success:
+                self.mistral_fails = 0
+            else:
+                self.mistral_fails += 1
+                if self.mistral_fails >= CB_TRIGGER_FAILURES:
+                    for fallback in self.PROVIDER_FALLBACK_CHAIN.get("mistral", ["sambanova", "fireworks", "groq"]):
+                        if self._provider_available(fallback):
+                            log.warning(f"[CB] Mistral failed {self.mistral_fails}x → locking to {fallback} for {CB_LOCKOUT_ROUNDS} rounds")
                             self.cb_forced_provider = fallback
                             self.cb_lockout_remaining = CB_LOCKOUT_ROUNDS
                             break
@@ -1029,19 +1099,23 @@ class LitcoiinResearchMiner:
 
         # Helper: try all remaining providers in priority order
         def try_providers(primary):
-            # New priority: Fireworks > Kimi > NVIDIA > OpenRouter > others
+            # New priority: Fireworks > SambaNova > Mistral > Kimi > NVIDIA > OpenRouter > others
             # (matches task-type mapping data: Fireworks wins most task types)
             order = []
             if primary == "fireworks":
-                order = ["fireworks", "kimi", "nvidia", "openrouter"]
+                order = ["fireworks", "sambanova", "mistral", "kimi", "nvidia", "openrouter"]
+            elif primary == "sambanova":
+                order = ["sambanova", "fireworks", "mistral", "kimi", "nvidia", "openrouter"]
+            elif primary == "mistral":
+                order = ["mistral", "fireworks", "sambanova", "kimi", "nvidia", "openrouter"]
             elif primary == "kimi":
-                order = ["kimi", "fireworks", "nvidia", "openrouter"]
+                order = ["kimi", "fireworks", "sambanova", "mistral", "nvidia", "openrouter"]
             elif primary == "nvidia":
-                order = ["nvidia", "fireworks", "kimi", "openrouter"]
+                order = ["nvidia", "fireworks", "sambanova", "mistral", "kimi", "openrouter"]
             elif primary == "openrouter":
-                order = ["openrouter", "fireworks", "kimi", "nvidia"]
+                order = ["openrouter", "fireworks", "sambanova", "mistral", "kimi", "nvidia"]
             else:
-                order = ["fireworks", "kimi", "nvidia", "openrouter"]
+                order = ["fireworks", "sambanova", "mistral", "kimi", "nvidia", "openrouter"]
             for p in order:
                 if not self._provider_available(p):
                     continue
@@ -1059,6 +1133,10 @@ class LitcoiinResearchMiner:
                     code, model = self._call_kimi(task_type, prompt, entry, temperature=temperature)
                 elif p == "fireworks":
                     code, model = self._call_fireworks(task_type, prompt, entry, temperature=temperature)
+                elif p == "sambanova":
+                    code, model = self._call_sambanova(task_type, prompt, temperature=temperature)
+                elif p == "mistral" or p == "mistral_code":
+                    code, model = self._call_mistral(task_type, prompt, entry, temperature=temperature)
                 else:
                     code, model = self._call_openrouter(task_type, prompt, entry, temperature=temperature)
                 success = code is not None
@@ -1080,7 +1158,7 @@ class LitcoiinResearchMiner:
         solutions = []
         
         # Try all available providers
-        for p in ["groq", "cerebras", "deepseek", "nvidia", "kimi", "openrouter", "fireworks"]:
+        for p in ["groq", "cerebras", "deepseek", "nvidia", "kimi", "openrouter", "fireworks", "sambanova", "mistral"]:
             if not self._provider_available(p):
                 continue
             if p == "groq":
@@ -1095,6 +1173,10 @@ class LitcoiinResearchMiner:
                 code, model = self._call_kimi(task_type, prompt, entry, temperature=0.15)
             elif p == "openrouter":
                 code, model = self._call_openrouter(task_type, prompt, entry, temperature=0.15)
+            elif p == "sambanova":
+                code, model = self._call_sambanova(task_type, prompt, temperature=0.15)
+            elif p == "mistral":
+                code, model = self._call_mistral(task_type, prompt, entry, temperature=0.15)
             else:
                 code, model = self._call_fireworks(task_type, prompt, entry, temperature=0.15)
             if code:
@@ -1438,6 +1520,108 @@ class LitcoiinResearchMiner:
                 log.error(f"Cerebras call failed for {model}: {e}")
                 continue
         log.error("All Cerebras models exhausted")
+        return None, None
+
+    # ── SambaNova API ──
+    def _call_sambanova(self, task_type, prompt, temperature=0.1):
+        """Call SambaNova API with model rotation."""
+        log.info(f"Solving {task_type} task with SambaNova (temp={temperature})...")
+        system_msg = self._build_system_msg(task_type, None)
+        headers = {
+            "Authorization": f"Bearer {self.sambanova_key}",
+            "Content-Type": "application/json"
+        }
+        models_to_try = [MODEL_SAMBANOVA_PRIMARY, MODEL_SAMBANOVA_BACKUP]
+        
+        for model in models_to_try:
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": 2048,
+                "temperature": temperature
+            }
+            try:
+                start = time.time()
+                r = requests.post(f"{SAMBANOVA_URL}/chat/completions",
+                                 headers=headers, json=payload, timeout=60)
+                elapsed = (time.time() - start) * 1000
+                self._record_latency("sambanova", elapsed)
+                if r.status_code == 429:
+                    log.warning(f"SambaNova rate limited on {model}, trying next...")
+                    continue
+                if r.status_code != 200:
+                    log.error(f"SambaNova error: {r.status_code} {r.text[:200]}")
+                    continue
+                result = r.json()
+                raw_code = result["choices"][0]["message"]["content"]
+                actual_model = result.get("model", model)
+                code = self._extract_code(raw_code)
+                return code, actual_model
+            except Exception as e:
+                log.error(f"SambaNova call failed for {model}: {e}")
+                continue
+        log.error("All SambaNova models exhausted")
+        return None, None
+
+    # ── Mistral API ──
+    def _call_mistral(self, task_type, prompt, entry, temperature=0.1):
+        """Call Mistral API with model rotation. Uses Codestral for code tasks, Large for general."""
+        # Auto-select model based on task type
+        if task_type in ["software_engineering", "compiler", "compression", "code_optimization"]:
+            model = MODEL_MISTRAL_CODE
+            log.info(f"Solving {task_type} task with Mistral Codestral (code-optimized)...")
+        else:
+            model = MODEL_MISTRAL_PRIMARY
+            log.info(f"Solving {task_type} task with Mistral Large (temp={temperature})...")
+        
+        system_msg = self._build_system_msg(task_type, entry)
+        headers = {
+            "Authorization": f"Bearer {self.mistral_key}",
+            "Content-Type": "application/json"
+        }
+        models_to_try = [model, MODEL_MISTRAL_BACKUP]
+        
+        for m in models_to_try:
+            payload = {
+                "model": m,
+                "messages": [
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": 2048,
+                "temperature": temperature
+            }
+            try:
+                start = time.time()
+                r = requests.post(f"{MISTRAL_URL}/chat/completions",
+                                 headers=headers, json=payload, timeout=60)
+                elapsed = (time.time() - start) * 1000
+                self._record_latency("mistral", elapsed)
+                if r.status_code == 429:
+                    log.warning(f"Mistral rate limited on {m}, trying next...")
+                    continue
+                if r.status_code != 200:
+                    log.error(f"Mistral error: {r.status_code} {r.text[:200]}")
+                    continue
+                result = r.json()
+                if not result.get("choices"):
+                    log.error(f"Mistral empty response: {result}")
+                    continue
+                message = result["choices"][0].get("message", {})
+                raw_code = message.get("content", "")
+                if not raw_code:
+                    log.error("Mistral returned empty content")
+                    continue
+                actual_model = result.get("model", m)
+                code = self._extract_code(raw_code)
+                return code, actual_model
+            except Exception as e:
+                log.error(f"Mistral call failed for {m}: {e}")
+                continue
+        log.error("All Mistral models exhausted")
         return None, None
 
     def _build_system_msg(self, task_type, entry):
@@ -1881,15 +2065,17 @@ if __name__ == "__main__":
     groq_key = os.environ.get("GROQ_API_KEY", "")
     deepseek_key = os.environ.get("DEEPSEEK_API_KEY", "")
     cerebras_key = os.environ.get("CEREBRAS_API_KEY", "")
-    if not openrouter_key and not fireworks_key and not kimi_key and not nvidia_key and not groq_key and not deepseek_key and not cerebras_key:
-        log.error("Set at least one API key: OPENROUTER, FIREWORKS, KIMI, NVIDIA, GROQ, DEEPSEEK, or CEREBRAS")
+    sambanova_key = os.environ.get("SAMBANOVA_API_KEY", "")
+    mistral_key = os.environ.get("MISTRAL_API_KEY", "")
+    if not any([openrouter_key, fireworks_key, kimi_key, nvidia_key, groq_key, deepseek_key, cerebras_key, sambanova_key, mistral_key]):
+        log.error("Set at least one API key: OPENROUTER, FIREWORKS, KIMI, NVIDIA, GROQ, DEEPSEEK, CEREBRAS, SAMBANOVA, or MISTRAL")
         sys.exit(1)
     try:
         account = get_wallet()
     except Exception as e:
         log.error(f"Wallet load failed: {e}")
         sys.exit(1)
-    miner = LitcoiinResearchMiner(account, openrouter_key, fireworks_key, kimi_key, nvidia_key, groq_key, deepseek_key, cerebras_key)
+    miner = LitcoiinResearchMiner(account, openrouter_key, fireworks_key, kimi_key, nvidia_key, groq_key, deepseek_key, cerebras_key, sambanova_key, mistral_key)
     if len(sys.argv) > 1 and sys.argv[1] == "--test":
         result = miner.mine_once()
         print(json.dumps(result, indent=2) if result else "Failed")
