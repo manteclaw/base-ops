@@ -77,7 +77,21 @@ def solve_captcha(challenge):
                                         text = f"{l1}\n{l2}\n{l3}\n{l4}"
                                         if ascii_sum(text) == target:
                                             return text
-    return None
+    elif line_count == 5:
+        for s1 in sums:
+            for s2 in sums:
+                for s3 in sums:
+                    for s4 in sums:
+                        s5 = content_target - s1 - s2 - s3 - s4
+                        if s5 in sum_to_lines and s5 > 0:
+                            for l1 in sum_to_lines[s1][:3]:
+                                for l2 in sum_to_lines[s2][:3]:
+                                    for l3 in sum_to_lines[s3][:3]:
+                                        for l4 in sum_to_lines[s4][:3]:
+                                            for l5 in sum_to_lines[s5][:3]:
+                                                text = f"{l1}\n{l2}\n{l3}\n{l4}\n{l5}"
+                                                if ascii_sum(text) == target:
+                                                    return text
 
 def request_nonce():
     url = f"{API_BASE}/faucet/nonce"
@@ -157,6 +171,7 @@ def run_once():
         if not solution:
             return False, "Captcha solve failed"
         print(f"[Captcha] Solved: {repr(solution)}, sum={ascii_sum(solution)}")
+        time.sleep(3)  # Avoid rate limit between nonce request and captcha submit
         
         nonce_data, status = submit_captcha_solution(challenge_token, solution)
         print(f"[Captcha] HTTP {status}: {str(nonce_data)[:200]}")

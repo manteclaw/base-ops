@@ -1,7 +1,7 @@
 {
-  "round_count": 22862,
-  "total_earned": 40448.0,
-  "last_task_type": "bioinformatics",
+  "round_count": 22864,
+  "total_earned": 40455.0,
+  "last_task_type": "runescape_insight",
   "best_model_overall": "inclusionai/ling-2.6-1t-20260423:free",
   "model_tracker": {
     "exploit_forensics": {
@@ -200,9 +200,9 @@
     },
     "runescape_ta": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 369.0,
-        "count": 76,
-        "avg": 4.855263157894737
+        "total": 376.0,
+        "count": 77,
+        "avg": 4.883116883116883
       },
       "inclusionai/ling-2.6-1t:free": {
         "total": 6.0,
@@ -247,25 +247,17 @@
   "initial_balance": 0,
   "provider_latency": {
     "fireworks": [
-      1364.4695281982422,
-      3564.7408962249756,
-      2337.311029434204,
-      2634.6991062164307,
-      3193.3507919311523,
-      6235.221862792969,
-      2264.6305561065674,
-      3079.4169902801514,
-      1966.737985610962
+      9003.163576126099
     ]
   },
   "exact_cache_hits": 296,
   "fuzzy_cache_hits": 88,
   "recent_task_types": [
-    "runescape_insight",
-    "algorithm",
     "ai_safety",
     "adversarial_robustness",
-    "bioinformatics"
+    "bioinformatics",
+    "runescape_ta",
+    "runescape_insight"
   ],
   "hourly_stats": {
     "08": {
@@ -361,8 +353,8 @@
       "total": 424.0
     },
     "07": {
-      "count": 373,
-      "total": 391
+      "count": 374,
+      "total": 398.0
     }
   },
   "quality_scores": {}

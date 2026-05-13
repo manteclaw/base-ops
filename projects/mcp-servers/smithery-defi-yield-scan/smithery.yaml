@@ -1,0 +1,41 @@
+name: mcp-defi-yield-scan
+display_name: DeFi Yield Scanner
+description: >
+  Scan Base L2 DeFi protocols for highest APY opportunities.
+  Supports Aave V3, Morpho Blue, Uniswap V3, Aerodrome, and BaseSwap.
+version: 1.0.0
+author: manteclaw
+license: MIT
+repository: https://github.com/manteclaw/smithery-defi-yield-scan
+homepage: https://github.com/manteclaw/smithery-defi-yield-scan#readme
+categories:
+  - defi
+  - finance
+  - base
+  - blockchain
+  - yield
+tags:
+  - defi
+  - yield
+  - base
+  - l2
+  - aave
+  - uniswap
+  - aerodrome
+  - apy
+  - finance
+runtime: node
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties: {}
+  commandFunction: |-
+    (config) => ({ command: 'node', args: ['index.js'] })
+tools:
+  - name: scan_yields
+    description: Scan for highest APY opportunities filtered by asset, TVL, and risk level.
+  - name: get_protocol_details
+    description: Get metadata about a specific protocol.
+  - name: compare_pools
+    description: Compare yield pools across protocols for a specific asset.

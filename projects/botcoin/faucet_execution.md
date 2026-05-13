@@ -58,4 +58,15 @@ For `agentmoney.net`, following the JavaScript endpoints.
 **Hypothesis:** The nonce expired (issued 22:50:15, expired 22:55:15, we're past that). Need to restart flow with fresh nonce.
 
 ## Step 7: Restart Flow with Fresh Nonce
-Getting new captcha challenge + solving + signing + verifying + claiming in one pass.
+**Retry script with 5-line captcha support + rate limit delays:**
+- Attempt 1: Solved 4-line captcha (target 340) → 429 rate limit on submit
+- Attempt 2: Solved 5-line captcha (target 366) → 429 rate limit on submit
+- Attempt 3: Solved 4-line captcha (target 442) → 429 rate limit on submit
+- Attempt 4: Solved 4-line captcha (target 359) → ✅ **Nonce issued!** `jZzbq8eQ09H5u_Ls`
+  - Verify endpoint: 503 "Service temporarily unavailable" ❌
+- Attempt 5: 503 on nonce request
+
+**Server is extremely unstable.** The captcha solving is 100% working. The nonce issuance is working ~50% of the time. The verify endpoint is the main bottleneck.
+
+## Step 8: Aggressive Verify Retry with Valid Nonce
+Retrying just the verify + claim steps using the valid nonce we already have.
