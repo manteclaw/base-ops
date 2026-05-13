@@ -1,5 +1,5 @@
 {
-  "round_count": 21871,
+  "round_count": 22045,
   "total_earned": 38693.0,
   "last_task_type": "agentic_trace",
   "best_model_overall": "accounts/fireworks/models/llama-v3p3-70b-instruct",
@@ -87,8 +87,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 1865.0,
-        "count": 524,
-        "avg": 3.5591603053435112
+        "count": 529,
+        "avg": 3.5255198487712667
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 52.0,
@@ -109,8 +109,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 4491.0,
-        "count": 658,
-        "avg": 6.825227963525836
+        "count": 669,
+        "avg": 6.713004484304933
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 48.0,
@@ -169,8 +169,8 @@
       },
       "meta/llama-3.1-8b-instruct": {
         "total": 313.0,
-        "count": 564,
-        "avg": 0.5549645390070922
+        "count": 574,
+        "avg": 0.5452961672473867
       },
       "meta/llama-3.1-70b-instruct": {
         "total": 0.0,
@@ -255,7 +255,7 @@
       109.36236381530762
     ]
   },
-  "cache_hits": 7574,
+  "cache_hits": 7652,
   "recent_task_types": [
     "adversarial_robustness",
     "smart_contracts",
@@ -313,11 +313,11 @@
       "total": 205
     },
     "20": {
-      "count": 432,
+      "count": 471,
       "total": 145
     },
     "21": {
-      "count": 371,
+      "count": 410,
       "total": 5355
     },
     "22": {
