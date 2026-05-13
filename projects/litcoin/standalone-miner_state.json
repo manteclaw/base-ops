@@ -1,7 +1,7 @@
 {
-  "round_count": 22444,
-  "total_earned": 39383.0,
-  "last_task_type": "runescape_insight",
+  "round_count": 22521,
+  "total_earned": 40170.0,
+  "last_task_type": "runescape_ta",
   "best_model_overall": "inclusionai/ling-2.6-1t-20260423:free",
   "model_tracker": {
     "exploit_forensics": {
@@ -13,9 +13,9 @@
     },
     "adversarial_robustness": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 5863.0,
-        "count": 186,
-        "avg": 31.521505376344088
+        "total": 6189.0,
+        "count": 198,
+        "avg": 31.257575757575758
       },
       "inclusionai/ling-2.6-1t-20260423:free": {
         "total": 161,
@@ -31,6 +31,11 @@
         "total": 0.0,
         "count": 5,
         "avg": 0.0
+      },
+      "inclusionai/ling-2.6-1t:free": {
+        "total": 10.0,
+        "count": 1,
+        "avg": 10.0
       }
     },
     "agentic_trace": {
@@ -120,23 +125,33 @@
     },
     "algorithm": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 869.0,
-        "count": 27,
-        "avg": 32.18518518518518
+        "total": 894.0,
+        "count": 39,
+        "avg": 22.923076923076923
+      },
+      "inclusionai/ling-2.6-1t:free": {
+        "total": 0,
+        "count": 1,
+        "avg": 0.0
       }
     },
     "runescape_insight": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 223.0,
-        "count": 9,
-        "avg": 24.77777777777778
+        "total": 315.0,
+        "count": 19,
+        "avg": 16.57894736842105
+      },
+      "inclusionai/ling-2.6-1t:free": {
+        "total": 12.0,
+        "count": 2,
+        "avg": 6.0
       }
     },
     "bioinformatics": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 1517.0,
-        "count": 57,
-        "avg": 26.614035087719298
+        "total": 1594.0,
+        "count": 69,
+        "avg": 23.10144927536232
       },
       "inclusionai/ling-2.6-1t-20260423:free": {
         "total": 0,
@@ -146,6 +161,11 @@
       "meta/llama-3.1-8b-instruct": {
         "total": 0.0,
         "count": 36,
+        "avg": 0.0
+      },
+      "inclusionai/ling-2.6-1t:free": {
+        "total": 0.0,
+        "count": 1,
         "avg": 0.0
       }
     },
@@ -180,9 +200,14 @@
     },
     "runescape_ta": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 258.0,
-        "count": 9,
-        "avg": 28.666666666666668
+        "total": 365.0,
+        "count": 20,
+        "avg": 18.25
+      },
+      "inclusionai/ling-2.6-1t:free": {
+        "total": 6.0,
+        "count": 2,
+        "avg": 3.0
       }
     },
     "mathematics": {
@@ -208,36 +233,34 @@
     },
     "ai_safety": {
       "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-        "total": 95.0,
-        "count": 4,
-        "avg": 23.75
+        "total": 227.0,
+        "count": 16,
+        "avg": 14.1875
+      },
+      "inclusionai/ling-2.6-1t:free": {
+        "total": 0.0,
+        "count": 1,
+        "avg": 0.0
       }
     }
   },
   "initial_balance": 0,
   "provider_latency": {
     "fireworks": [
-      4009.2124938964844,
-      4136.66844367981,
-      6249.302864074707,
-      4367.450952529907,
-      2788.273334503174,
-      4104.935884475708,
-      3449.2743015289307,
-      2423.152208328247,
-      7265.3648853302,
-      4365.71478843689,
-      5752.490282058716
+      1364.4695281982422,
+      3564.7408962249756,
+      2337.311029434204,
+      2634.6991062164307
     ]
   },
-  "exact_cache_hits": 0,
-  "fuzzy_cache_hits": 4,
+  "exact_cache_hits": 43,
+  "fuzzy_cache_hits": 23,
   "recent_task_types": [
+    "algorithm",
     "ai_safety",
     "adversarial_robustness",
     "bioinformatics",
-    "runescape_ta",
-    "runescape_insight"
+    "runescape_ta"
   ],
   "hourly_stats": {
     "08": {
@@ -313,12 +336,12 @@
       "total": 1856
     },
     "02": {
-      "count": 398,
-      "total": 3880.0
+      "count": 444,
+      "total": 4479.0
     },
     "03": {
-      "count": 378,
-      "total": 4047
+      "count": 409,
+      "total": 4235.0
     },
     "04": {
       "count": 346,

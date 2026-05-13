@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-06T21:48:08.333Z",
+  "updatedAt": "2026-05-13T19:03:35.424Z",
   "entries": {
     "memory:memory/2026-05-05.md:63:84": {
       "key": "memory:memory/2026-05-05.md:63:84",
@@ -103,19 +103,21 @@
       "endLine": 64,
       "source": "memory",
       "snippet": "- SDK test: ✅ WORKS! Agent created, +14 LITCOIN earned - But wallet is `0x6a5fcc...` — NOT the recovered `0xC4Cf...` - Old key `bk_usr_PKTbKztw_...` was discarded (user said \"use this one instead\") ### Action Items In Progress 1. **GitHub push** — Skill repo ready at `projects/litcoin/standalone-miner/` with SKILL.md, README, miner 2. **Guild join** — Guild 13 (Deep Research Collective) selected. Blocker: need Nookplot agent private key for meta-tx signing. Spawned subagent to find key via `nookplot register` CLI flow. 3. **Miner** — SDK miner running with new Bankr key. Standalone also available. ### Nookplot Agent Wallet Discovery - Agent `Mante` address: `0xEA0aaD6DFa33D6EA4aec842C24D20",
-      "recallCount": 2,
+      "recallCount": 3,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.7435753881931304,
-      "maxScore": 0.3719515413045883,
+      "totalScore": 1.1318354636430739,
+      "maxScore": 0.3882600754499435,
       "firstRecalledAt": "2026-05-06T21:47:40.623Z",
-      "lastRecalledAt": "2026-05-06T21:48:08.333Z",
+      "lastRecalledAt": "2026-05-13T19:03:35.424Z",
       "queryHashes": [
         "cfbcae80b48f",
-        "4084a12ea8ef"
+        "4084a12ea8ef",
+        "d9d90f345112"
       ],
       "recallDays": [
-        "2026-05-07"
+        "2026-05-07",
+        "2026-05-14"
       ],
       "conceptTags": [
         "bk-usr-pktbkztw",
