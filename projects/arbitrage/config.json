@@ -49,11 +49,11 @@
     ["USDC", "DAI"],
     ["WETH", "CBETH"]
   ],
-  "wallet": "0xFC56950105883F46a3bB96ac9517A110724F2F27",
+  "wallet": "0x8b8AAC89E101b77E5A917278120151FC496e5c39",
   "funding": {
     "status": "pending",
-    "expected_eth": 0.005,
-    "expected_usd": 10,
-    "note": "User sending $10 ETH tomorrow morning. Keeping $5 (0.0025 ETH) as reserve."
+    "expected_eth": 0.01,
+    "expected_usd": 15,
+    "note": "Send ETH to this wallet for both Litcoiin mining and arbitrage bot. 0.01 ETH covers gas for both."
   }
 }
