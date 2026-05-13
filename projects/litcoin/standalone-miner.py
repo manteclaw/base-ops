@@ -204,7 +204,7 @@ class LitcoiinResearchMiner:
     # Max parallel workers for batch flush
     BATCH_MAX_WORKERS = 5
     # Fuzzy similarity threshold (0.0–1.0)
-    FUZZY_THRESHOLD = 0.90
+    FUZZY_THRESHOLD = 0.97
     # Max cache entries before LRU eviction
     CACHE_MAX_ENTRIES = 200
 
@@ -294,7 +294,9 @@ class LitcoiinResearchMiner:
         save_state(payload)
 
     def _update_model_tracker(self, task_type, model, reward):
-        """Record reward for a task_type + model combo."""
+        """Record reward for a task_type + model combo. Skip cached rounds."""
+        if not model or model == "cached":
+            return
         if not model:
             return
         tracker = self.model_tracker.setdefault(task_type, {})
@@ -623,8 +625,11 @@ class LitcoiinResearchMiner:
 
         return None
 
-    def _cache_solution(self, task, solution, model="unknown", score=50):
-        """Cache a successful solution to memory and disk."""
+    def _cache_solution(self, task, solution, model="unknown", score=50, reward=0):
+        """Cache a successful solution to memory and disk. Only cache if reward > 0."""
+        if reward <= 0:
+            log.info("💸 Not caching — solution earned 0 LITCOIN")
+            return
         task_hash = self._hash_task(task)
         normalized = self._normalize_prompt(task.get("prompt", task.get("description", "")))
         self.solution_cache[task_hash] = {
@@ -1765,6 +1770,7 @@ class LitcoiinResearchMiner:
         if cached:
             solution = cached
             actual_model = "cached"
+            self.last_model_used = "cached"
             log.info(f"💾 Using cached solution ({len(solution)} chars)")
         else:
             solution, actual_model = self.solve_with_llm(task)
@@ -1837,7 +1843,7 @@ class LitcoiinResearchMiner:
                         reward = self._extract_reward(r)
                         self._record_hourly(reward)
                         if actual_model != "cached":
-                            self._cache_solution(task, solution, actual_model, quality)
+                            self._cache_solution(task, solution, actual_model, quality, reward)
                     else:
                         self.consec_global_fails += 1
                 self._persist()
@@ -1854,7 +1860,7 @@ class LitcoiinResearchMiner:
                     reward = self._extract_reward(result)
                     self._record_hourly(reward)
                     if actual_model != "cached":
-                        self._cache_solution(task, solution, actual_model, quality)
+                        self._cache_solution(task, solution, actual_model, quality, reward)
                         log.info(f"💾 Cached solution for future use")
                 else:
                     self.consec_global_fails += 1
