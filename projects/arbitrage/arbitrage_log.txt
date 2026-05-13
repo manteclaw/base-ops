@@ -15,3 +15,489 @@ WebSocket: wss://base-mainnet.g.alchemy.com/v2/xNTF...
 🔌 Connecting WebSocket for block subscription...
 ✅ WebSocket connected. Listening for new blocks...
 
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 188, in <module>
+    block_num = w3.eth.block_number
+^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 184, in main
+    opportunities_found = 0
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 134, in reactive_loop
+    if not dry_run:
+                    
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 61, in scan_block
+    # Keep legacy log for backwards compat
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 54, in check_wallet_balance
+    f"[{ts}] Block #{block_num} | ARBITRAGE: {opp['token_a']}/{opp['token_b']} | "
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/eth/eth.py", line 442, in get_balance
+    return self._get_balance(account, block_identifier)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/module.py", line 112, in caller
+    result = w3.manager.request_blocking(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/manager.py", line 232, in request_blocking
+    response = self._make_request(method, params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/manager.py", line 163, in _make_request
+    return request_func(method, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/middleware/base.py", line 56, in middleware
+    return self.response_processor(method, make_request(method, params))
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/middleware/base.py", line 56, in middleware
+    return self.response_processor(method, make_request(method, params))
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/middleware/base.py", line 56, in middleware
+    return self.response_processor(method, make_request(method, params))
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [Previous line repeated 2 more times]
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/_utils/caching/caching_utils.py", line 261, in wrapper
+    return func(provider, method, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/providers/rpc/rpc.py", line 166, in make_request
+    raw_response = self._make_request(method, request_data)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/providers/rpc/rpc.py", line 153, in _make_request
+    raise e
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/providers/rpc/rpc.py", line 143, in _make_request
+    return self._request_session_manager.make_post_request(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/_utils/http_session_manager.py", line 155, in make_post_request
+    response.raise_for_status()
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/requests/models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 429 Client Error: Too Many Requests for url: https://base-mainnet.g.alchemy.com/v2/xNTFtJJ77R2E7eqSyY3Gs
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 18, in <module>
+    from price_monitor import (
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 26, in <module>
+    raise ConnectionError(f"Cannot connect to Alchemy RPC: {RPC_URL[:40]}...")
+ConnectionError: Cannot connect to Alchemy RPC: https://base-mainnet.g.alchemy.com/v2/xN...
+✅ Connected to Base mainnet (block: 45955076)
+============================================================
+🤖 BASE L2 ARBITRAGE BOT — REACTIVE MODE
+============================================================
+Mode: LIVE EXECUTION
+Wallet: 0x8b8AAC89E101b77E5A917278120151FC496e5c39
+Reserve: 0.0025 ETH (~$5)
+Max trade: 0.005 ETH
+Slippage: 1.5% (medium risk)
+WebSocket: wss://base-mainnet.g.alchemy.com/v2/xNTF...
+⚡ MEV Protection Status:
+  • Flashbots Protect: Not yet on Base (monitor: docs.flashbots.net)
+  • Using 60-second tx deadlines as primary defense
+  • Alternative: CowSwap / MEV Blocker (Base support TBD)
+  • Base L2 has lower MEV than mainnet — sandwich risk reduced but not zero
+  • Future: Integrate Flashbots Protect Base RPC when available
+============================================================
+💰 Wallet balance: 0.004836 ETH
+   Reserve: 0.0025 ETH | Tradeable: 0.002336 ETH
+🔧 Executor health: wallet=✅ | nonce=1 | gas=0.0060 gwei
+
+🔌 Connecting WebSocket for block subscription...
+✅ WebSocket connected. Listening for new blocks...
+
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 223, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 219, in main
+    await reactive_loop(ws_url, dry_run)
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 169, in reactive_loop
+    count = await scan_block(w3_http, block_num, dry_run)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 79, in scan_block
+    balance_eth = await check_wallet_balance(w3)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 72, in check_wallet_balance
+    balance_wei = w3.eth.get_balance(Web3.to_checksum_address(WALLET_ADDRESS))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/eth/eth.py", line 442, in get_balance
+    return self._get_balance(account, block_identifier)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/module.py", line 112, in caller
+    result = w3.manager.request_blocking(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/manager.py", line 232, in request_blocking
+    response = self._make_request(method, params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/manager.py", line 163, in _make_request
+    return request_func(method, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/middleware/base.py", line 56, in middleware
+    return self.response_processor(method, make_request(method, params))
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/middleware/base.py", line 56, in middleware
+    return self.response_processor(method, make_request(method, params))
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/middleware/base.py", line 56, in middleware
+    return self.response_processor(method, make_request(method, params))
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [Previous line repeated 2 more times]
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/_utils/caching/caching_utils.py", line 261, in wrapper
+    return func(provider, method, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/providers/rpc/rpc.py", line 166, in make_request
+    raw_response = self._make_request(method, request_data)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/providers/rpc/rpc.py", line 153, in _make_request
+    raise e
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/providers/rpc/rpc.py", line 143, in _make_request
+    return self._request_session_manager.make_post_request(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/_utils/http_session_manager.py", line 155, in make_post_request
+    response.raise_for_status()
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/requests/models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 429 Client Error: Too Many Requests for url: https://base-mainnet.g.alchemy.com/v2/xNTFtJJ77R2E7eqSyY3Gs
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 18, in <module>
+    from price_monitor import (
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 26, in <module>
+    raise ConnectionError(f"Cannot connect to Alchemy RPC: {RPC_URL[:40]}...")
+ConnectionError: Cannot connect to Alchemy RPC: https://base-mainnet.g.alchemy.com/v2/xN...
+✅ Connected to Base mainnet (block: 45955156)
+============================================================
+🤖 BASE L2 ARBITRAGE BOT — REACTIVE MODE
+============================================================
+Mode: LIVE EXECUTION
+Wallet: 0x8b8AAC89E101b77E5A917278120151FC496e5c39
+Reserve: 0.0025 ETH (~$5)
+Max trade: 0.005 ETH
+Slippage: 1.5% (medium risk)
+WebSocket: wss://base-mainnet.g.alchemy.com/v2/xNTF...
+⚡ MEV Protection Status:
+  • Flashbots Protect: Not yet on Base (monitor: docs.flashbots.net)
+  • Using 60-second tx deadlines as primary defense
+  • Alternative: CowSwap / MEV Blocker (Base support TBD)
+  • Base L2 has lower MEV than mainnet — sandwich risk reduced but not zero
+  • Future: Integrate Flashbots Protect Base RPC when available
+============================================================
+💰 Wallet balance: 0.004836 ETH
+   Reserve: 0.0025 ETH | Tradeable: 0.002336 ETH
+🔧 Executor health: wallet=✅ | nonce=1 | gas=0.0060 gwei
+
+🔌 Connecting WebSocket for block subscription...
+✅ WebSocket connected. Listening for new blocks...
+
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 223, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 219, in main
+    await reactive_loop(ws_url, dry_run)
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 169, in reactive_loop
+    count = await scan_block(w3_http, block_num, dry_run)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 79, in scan_block
+    balance_eth = await check_wallet_balance(w3)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 72, in check_wallet_balance
+    balance_wei = w3.eth.get_balance(Web3.to_checksum_address(WALLET_ADDRESS))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/eth/eth.py", line 442, in get_balance
+    return self._get_balance(account, block_identifier)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/module.py", line 112, in caller
+    result = w3.manager.request_blocking(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/manager.py", line 232, in request_blocking
+    response = self._make_request(method, params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/manager.py", line 163, in _make_request
+    return request_func(method, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/middleware/base.py", line 56, in middleware
+    return self.response_processor(method, make_request(method, params))
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/middleware/base.py", line 56, in middleware
+    return self.response_processor(method, make_request(method, params))
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/middleware/base.py", line 56, in middleware
+    return self.response_processor(method, make_request(method, params))
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [Previous line repeated 2 more times]
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/_utils/caching/caching_utils.py", line 261, in wrapper
+    return func(provider, method, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/providers/rpc/rpc.py", line 166, in make_request
+    raw_response = self._make_request(method, request_data)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/providers/rpc/rpc.py", line 153, in _make_request
+    raise e
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/providers/rpc/rpc.py", line 143, in _make_request
+    return self._request_session_manager.make_post_request(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/web3/_utils/http_session_manager.py", line 155, in make_post_request
+    response.raise_for_status()
+  File "/root/.openclaw/workspace/projects/arbitrage/venv/lib/python3.12/site-packages/requests/models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 429 Client Error: Too Many Requests for url: https://base-mainnet.g.alchemy.com/v2/xNTFtJJ77R2E7eqSyY3Gs
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 18, in <module>
+    from price_monitor import (
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 16, in <module>
+    CONFIG = json.load(f)
+             ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 20 column 3 (char 645)
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 18, in <module>
+    from price_monitor import (
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 16, in <module>
+    CONFIG = json.load(f)
+             ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 20 column 3 (char 645)
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 18, in <module>
+    from price_monitor import (
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 16, in <module>
+    CONFIG = json.load(f)
+             ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 20 column 3 (char 645)
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 18, in <module>
+    from price_monitor import (
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 16, in <module>
+    CONFIG = json.load(f)
+             ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 20 column 3 (char 645)
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 18, in <module>
+    from price_monitor import (
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 16, in <module>
+    CONFIG = json.load(f)
+             ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 20 column 3 (char 645)
+✅ Connected to Base mainnet (block: 45955252)
+============================================================
+🤖 BASE L2 ARBITRAGE BOT — REACTIVE MODE
+============================================================
+Mode: LIVE EXECUTION
+Wallet: 0x8b8AAC89E101b77E5A917278120151FC496e5c39
+Reserve: 0.0025 ETH (~$5)
+Max trade: 0.005 ETH
+Slippage: 1.5% (medium risk)
+WebSocket: wss://base-mainnet.g.alchemy.com/v2/xNTF...
+⚡ MEV Protection Status:
+  • Flashbots Protect: Not yet on Base (monitor: docs.flashbots.net)
+  • Using 60-second tx deadlines as primary defense
+  • Alternative: CowSwap / MEV Blocker (Base support TBD)
+  • Base L2 has lower MEV than mainnet — sandwich risk reduced but not zero
+  • Future: Integrate Flashbots Protect Base RPC when available
+============================================================
+💰 Wallet balance: 0.010716 ETH
+   Reserve: 0.0025 ETH | Tradeable: 0.008216 ETH
+🔧 Executor health: wallet=✅ | nonce=1 | gas=0.0060 gwei
+
+🔌 Connecting WebSocket for block subscription...
+✅ WebSocket connected. Listening for new blocks...
+
+✅ Connected to Base mainnet (block: 45955254)
+============================================================
+🤖 BASE L2 ARBITRAGE BOT — REACTIVE MODE
+============================================================
+Mode: LIVE EXECUTION
+Wallet: 0x8b8AAC89E101b77E5A917278120151FC496e5c39
+Reserve: 0.0025 ETH (~$5)
+Max trade: 0.005 ETH
+Slippage: 1.5% (medium risk)
+WebSocket: wss://base-mainnet.g.alchemy.com/v2/xNTF...
+⚡ MEV Protection Status:
+  • Flashbots Protect: Not yet on Base (monitor: docs.flashbots.net)
+  • Using 60-second tx deadlines as primary defense
+  • Alternative: CowSwap / MEV Blocker (Base support TBD)
+  • Base L2 has lower MEV than mainnet — sandwich risk reduced but not zero
+  • Future: Integrate Flashbots Protect Base RPC when available
+============================================================
+💰 Wallet balance: 0.010716 ETH
+   Reserve: 0.0025 ETH | Tradeable: 0.008216 ETH
+🔧 Executor health: wallet=✅ | nonce=1 | gas=0.0060 gwei
+
+🔌 Connecting WebSocket for block subscription...
+✅ WebSocket connected. Listening for new blocks...
+
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 223, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 219, in main
+    await reactive_loop(ws_url, dry_run)
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 169, in reactive_loop
+    count = await scan_block(w3_http, block_num, dry_run)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 89, in scan_block
+    opp = find_arbitrage(token_a, token_b, max_trade)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 232, in find_arbitrage
+    prices = get_all_prices(token_a, token_b)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 213, in get_all_prices
+    uni = get_uniswap_v3_price(token_a, token_b)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 111, in get_uniswap_v3_price
+    token1_addr = Web3.to_checksum_address(CONFIG["tokens"][token_b])
+                                           ~~~~~~~~~~~~~~~~^^^^^^^^^
+KeyError: 'CBETH'
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 18, in <module>
+    from price_monitor import (
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 16, in <module>
+    CONFIG = json.load(f)
+             ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting ',' delimiter: line 20 column 3 (char 645)
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 18, in <module>
+    from price_monitor import (
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 16, in <module>
+    CONFIG = json.load(f)
+             ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting ',' delimiter: line 20 column 3 (char 645)
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 18, in <module>
+    from price_monitor import (
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 16, in <module>
+    CONFIG = json.load(f)
+             ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 340, in decode
+    raise JSONDecodeError("Extra data", s, end)
+json.decoder.JSONDecodeError: Extra data: line 45 column 4 (char 1613)
+Traceback (most recent call last):
+  File "/root/.openclaw/workspace/projects/arbitrage/arbitrage_bot.py", line 18, in <module>
+    from price_monitor import (
+  File "/root/.openclaw/workspace/projects/arbitrage/price_monitor.py", line 16, in <module>
+    CONFIG = json.load(f)
+             ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 340, in decode
+    raise JSONDecodeError("Extra data", s, end)
+json.decoder.JSONDecodeError: Extra data: line 45 column 4 (char 1613)

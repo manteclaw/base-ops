@@ -1,0 +1,28 @@
+# Manteclaw log rotation config
+# Place at: /etc/logrotate.d/manteclaw
+# Rotates daily, keeps 7 days, compresses old logs
+
+/root/.openclaw/workspace/projects/litcoin/miner_service.log
+/root/.openclaw/workspace/projects/litcoin/claim_bot.log
+/root/.openclaw/workspace/projects/litcoin/claim-bot.log
+/root/.openclaw/workspace/projects/litcoin/*.log
+/root/.openclaw/workspace/projects/arbitrage/arbitrage_log.txt
+/root/.openclaw/workspace/projects/arbitrage/alerts.txt
+/root/.openclaw/workspace/projects/nookplot/*.log
+/root/.openclaw/workspace/projects/workprotocol/*.log
+{
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0644 root root
+    dateext
+    dateformat -%Y%m%d
+    sharedscripts
+    postrotate
+        # Signal services to reopen logs if they support it
+        systemctl --user try-restart litcoiin-miner.service 2>/dev/null || true
+    endscript
+}

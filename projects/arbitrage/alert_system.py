@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """
 Arbitrage Alert System for Manteclaw
-Enhances arbitrage_bot.py with alert notifications.
+Enhances arbitrage_bot.py with alert notifications + webhook output.
 
-Alerts are written to projects/arbitrage/alerts.txt and can be
-extended to send Discord/Slack/telegram notifications.
+Supports:
+  - Local file logging (alerts.txt, alerts.json)
+  - Discord webhook (DISCORD_WEBHOOK_URL env)
+  - Telegram bot (TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID env)
+  - Generic HTTP POST (WEBHOOK_URL env)
 
 Usage:
-    # Alerts are auto-triggered by arbitrage_bot.py when opportunities are found
+    # Alerts are auto-triggered by arbitrage_bot.py
     # Or run standalone to test:
     python3 projects/arbitrage/alert_system.py test
 """
@@ -15,12 +18,19 @@ Usage:
 import json
 import os
 import sys
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
 ALERTS_FILE = Path("/root/.openclaw/workspace/projects/arbitrage/alerts.txt")
 ALERTS_JSON = Path("/root/.openclaw/workspace/projects/arbitrage/alerts.json")
 MAX_ALERTS = 1000  # Rotate after this many
+
+# Webhook env vars
+DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "").strip()
 
 # Alert severity levels
 SEVERITY = {
@@ -32,6 +42,9 @@ SEVERITY = {
     "low_balance": "⚠️",      # Wallet balance low
     "error": "🔥",            # System error
 }
+
+# Levels that trigger webhooks (exclude low-noise opportunity)
+WEBHOOK_LEVELS = {"profitable", "high_profit", "executed", "failed", "low_balance", "error"}
 
 
 def rotate_logs():
@@ -46,8 +59,102 @@ def rotate_logs():
         ALERTS_JSON.rename(backup)
 
 
+def _send_discord(message: str, data: dict = None):
+    """Send alert to Discord webhook."""
+    if not DISCORD_WEBHOOK_URL:
+        return False
+    payload = {"content": message}
+    if data:
+        embeds = [{
+            "title": f"Alert: {data.get('level', 'info')}",
+            "description": json.dumps(data, default=str, indent=2)[:2000],
+            "color": 0x00ff00 if data.get("level") == "executed" else 0xff0000,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }]
+        payload["embeds"] = embeds
+    try:
+        req = urllib.request.Request(
+            DISCORD_WEBHOOK_URL,
+            data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=10)
+        return True
+    except Exception as e:
+        print(f"[webhook] Discord failed: {e}")
+        return False
+
+
+def _send_telegram(message: str, data: dict = None):
+    """Send alert to Telegram bot."""
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        return False
+    text = message
+    if data:
+        text += f"\n\n```\n{json.dumps(data, default=str, indent=2)[:1000]}\n```"
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": text,
+        "parse_mode": "Markdown",
+    }
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=10)
+        return True
+    except Exception as e:
+        print(f"[webhook] Telegram failed: {e}")
+        return False
+
+
+def _send_generic_webhook(message: str, data: dict = None):
+    """Send alert to generic HTTP POST endpoint."""
+    if not WEBHOOK_URL:
+        return False
+    payload = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "message": message,
+        "level": data.get("level") if data else "info",
+        "data": data or {},
+        "source": "manteclaw-arbitrage",
+    }
+    try:
+        req = urllib.request.Request(
+            WEBHOOK_URL,
+            data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=10)
+        return True
+    except Exception as e:
+        print(f"[webhook] Generic POST failed: {e}")
+        return False
+
+
+def _dispatch_webhooks(level: str, message: str, data: dict = None):
+    """Dispatch to all configured webhooks if level is significant."""
+    if level not in WEBHOOK_LEVELS:
+        return
+    results = {}
+    if DISCORD_WEBHOOK_URL:
+        results["discord"] = _send_discord(message, data)
+    if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
+        results["telegram"] = _send_telegram(message, data)
+    if WEBHOOK_URL:
+        results["generic"] = _send_generic_webhook(message, data)
+    if results:
+        print(f"[webhook] dispatched: {results}")
+
+
 def send_alert(level: str, message: str, data: dict = None):
-    """Send an alert. Writes to alerts.txt and alerts.json."""
+    """Send an alert. Writes to alerts.txt and alerts.json, plus webhooks."""
     rotate_logs()
     
     ts = datetime.now(timezone.utc).isoformat()
@@ -77,12 +184,14 @@ def send_alert(level: str, message: str, data: dict = None):
             alerts = []
     
     alerts.append(entry)
-    # Trim if too large
     if len(alerts) > MAX_ALERTS:
         alerts = alerts[-MAX_ALERTS:]
     
     with open(ALERTS_JSON, "w") as f:
         json.dump(alerts, f, indent=2, default=str)
+    
+    # Webhooks
+    _dispatch_webhooks(level, message, {**(data or {}), "level": level, "timestamp": ts})
     
     # Also print to stdout
     print(line)
@@ -187,13 +296,13 @@ def print_summary():
         ts = a["timestamp"].split("T")[1][:8] if "T" in a["timestamp"] else a["timestamp"][11:19]
         icon = SEVERITY.get(a["level"], "📢")
         print(f"  [{ts}] {icon} {a['message'][:80]}")
+    
+    # Webhook status
+    print("\nWebhook config:")
+    print(f"  Discord:    {'✅' if DISCORD_WEBHOOK_URL else '❌'} {DISCORD_WEBHOOK_URL[:40] + '...' if len(DISCORD_WEBHOOK_URL) > 40 else DISCORD_WEBHOOK_URL}")
+    print(f"  Telegram:   {'✅' if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID else '❌'}")
+    print(f"  Generic:    {'✅' if WEBHOOK_URL else '❌'} {WEBHOOK_URL[:40] + '...' if len(WEBHOOK_URL) > 40 else WEBHOOK_URL}")
 
-
-# ── Integration with arbitrage_bot.py ──
-# To use in arbitrage_bot.py, replace log_opportunity() calls with:
-#   from alert_system import alert_opportunity
-#   alert_opportunity(opp, block_num)
-# And add alert_low_balance(), alert_error(), alert_executed() calls as needed.
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "test":

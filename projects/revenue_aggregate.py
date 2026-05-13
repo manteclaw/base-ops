@@ -2,12 +2,13 @@
 """
 Manteclaw Revenue Aggregator — CLI wrapper around revenue_tracker.py.
 Generates unified reports, triggers dashboard rebuild, and optionally
-serves the dashboard over HTTP.
+serves the dashboard over HTTP with Server-Sent Events (SSE) for real-time updates.
 
 Usage:
     python3 revenue_aggregate.py           # Single aggregation + dashboard
-    python3 revenue_aggregate.py --serve  # Start local HTTP server on :8080
-    python3 revenue_aggregate.py --cron    # Append-only mode for cron jobs
+    python3 revenue_aggregate.py --serve    # Start local HTTP server on :8080 with SSE
+    python3 revenue_aggregate.py --cron     # Append-only mode for cron jobs
+    python3 revenue_aggregate.py --serve --watch  # Serve + auto-refresh every 60s
 """
 
 import argparse
@@ -17,6 +18,8 @@ import os
 import socketserver
 import subprocess
 import sys
+import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -26,6 +29,8 @@ DASHBOARD_DIR = WORKSPACE / "projects" / "revenue-dashboard"
 DASHBOARD_FILE = DASHBOARD_DIR / "dashboard.html"
 SNAP_FILE = WORKSPACE / "projects" / "revenue_snapshot.json"
 REPORT_FILE = WORKSPACE / "projects" / "revenue_reports"
+
+SSE_CLIENTS = []
 
 
 def run_tracker():
@@ -101,12 +106,24 @@ def save_report(report_text):
     return str(path)
 
 
+def broadcast_sse(data: dict):
+    """Broadcast an SSE event to all connected clients."""
+    msg = f'data: {json.dumps(data)}\n\n'
+    dead = []
+    for client in SSE_CLIENTS:
+        try:
+            client.wfile.write(msg.encode())
+            client.wfile.flush()
+        except (BrokenPipeError, ConnectionResetError):
+            dead.append(client)
+    for client in dead:
+        if client in SSE_CLIENTS:
+            SSE_CLIENTS.remove(client)
+
+
 class DashboardHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(DASHBOARD_DIR), **kwargs)
-    
-    # SSE clients
-    self.sse_clients = []
 
     def do_GET(self):
         if self.path == '/events':
@@ -120,50 +137,49 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(b'data: {"type":"connected"}\n\n')
             self.wfile.flush()
             # Register client
-            if self not in self.sse_clients:
-                self.sse_clients.append(self)
-            # Keep connection alive
+            if self not in SSE_CLIENTS:
+                SSE_CLIENTS.append(self)
+            # Keep connection alive with heartbeats
             try:
                 while True:
                     self.wfile.write(b':heartbeat\n\n')
                     self.wfile.flush()
-                    import time
                     time.sleep(15)
             except (BrokenPipeError, ConnectionResetError):
                 pass
             finally:
-                if self in self.sse_clients:
-                    self.sse_clients.remove(self)
+                if self in SSE_CLIENTS:
+                    SSE_CLIENTS.remove(self)
             return
         super().do_GET()
-
-    @classmethod
-    def broadcast(cls, data: dict):
-        """Broadcast an SSE event to all connected clients."""
-        msg = f'data: {json.dumps(data)}\n\n'
-        dead = []
-        for client in cls.sse_clients:
-            try:
-                client.wfile.write(msg.encode())
-                client.wfile.flush()
-            except (BrokenPipeError, ConnectionResetError):
-                dead.append(client)
-        for client in dead:
-            if client in cls.sse_clients:
-                cls.sse_clients.remove(client)
 
     def log_message(self, format, *args):
         # Suppress default logging
         pass
 
 
-def serve_dashboard(port=8080):
+def serve_dashboard(port=8080, watch_interval=0):
     """Serve dashboard.html on specified port."""
     os.chdir(str(DASHBOARD_DIR))
     handler = DashboardHandler
     with socketserver.TCPServer(("", port), handler) as httpd:
         print(f"🌐 Serving dashboard at http://0.0.0.0:{port}/dashboard.html")
+        print(f"   SSE endpoint: http://0.0.0.0:{port}/events")
+        if watch_interval > 0:
+            print(f"   Auto-refresh every {watch_interval}s via SSE")
         print("   Press Ctrl+C to stop")
+        
+        # Background thread for periodic tracker runs
+        if watch_interval > 0:
+            def watcher():
+                while True:
+                    time.sleep(watch_interval)
+                    stdout, stderr, rc = run_tracker()
+                    if rc == 0:
+                        broadcast_sse({"type": "refresh", "timestamp": datetime.now(timezone.utc).isoformat()})
+            t = threading.Thread(target=watcher, daemon=True)
+            t.start()
+        
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
@@ -174,6 +190,7 @@ def main():
     parser = argparse.ArgumentParser(description="Manteclaw Revenue Aggregator")
     parser.add_argument("--serve", action="store_true", help="Serve dashboard on :8080")
     parser.add_argument("--port", type=int, default=8080, help="HTTP port (default 8080)")
+    parser.add_argument("--watch", type=int, default=0, help="Auto-run tracker every N seconds and push SSE")
     parser.add_argument("--cron", action="store_true", help="Cron mode: quiet, append-only")
     parser.add_argument("--report", action="store_true", help="Save text report to file")
     args = parser.parse_args()
@@ -186,7 +203,7 @@ def main():
             if rc != 0:
                 print(f"Tracker failed: {stderr}")
                 sys.exit(1)
-        serve_dashboard(args.port)
+        serve_dashboard(args.port, watch_interval=args.watch)
         return
     
     # Run tracker
