@@ -13,7 +13,7 @@ import sys
 from datetime import datetime
 
 from web3 import Web3
-from web3.middleware import geth_poa_middleware
+from web3.middleware.proof_of_authority import ExtraDataToPOAMiddleware
 
 from price_monitor import (
     CONFIG,
@@ -111,7 +111,7 @@ async def reactive_loop(ws_url: str, dry_run: bool = True):
 
     print("\n🔌 Connecting WebSocket for block subscription...")
 
-    w3_ws = Web3(Web3.WebsocketProvider(ws_url))
+    w3_ws = Web3(Web3.LegacyWebSocketProvider(ws_url))
     if not w3_ws.is_connected():
         print("❌ WebSocket connection failed. Falling back to HTTP polling...")
         await poll_loop(w3_http, dry_run)

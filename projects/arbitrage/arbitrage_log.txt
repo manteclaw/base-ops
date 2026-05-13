@@ -1,0 +1,17 @@
+✅ Connected to Base mainnet (block: 45954158)
+============================================================
+🤖 BASE L2 ARBITRAGE BOT — REACTIVE MODE
+============================================================
+Mode: LIVE EXECUTION
+Wallet: 0x8b8AAC89E101b77E5A917278120151FC496e5c39
+Reserve: 0.0025 ETH (~$5)
+Max trade: 0.005 ETH
+Slippage: 1.5% (medium risk)
+WebSocket: wss://base-mainnet.g.alchemy.com/v2/xNTF...
+============================================================
+💰 Wallet balance: 0.004836 ETH
+   Reserve: 0.0025 ETH | Tradeable: 0.002336 ETH
+
+🔌 Connecting WebSocket for block subscription...
+✅ WebSocket connected. Listening for new blocks...
+
