@@ -6,7 +6,8 @@ After=network.target litcoiin-miner.service
 Type=oneshot
 WorkingDirectory=/root/.openclaw/workspace/projects/litcoin
 # In .keys/.env or service EnvironmentFile
-# BANKR_API_KEY=bk_usr_...
+# BANKR_API_KEY loaded from /root/.openclaw/workspace/.keys/.env
+EnvironmentFile=/root/.openclaw/workspace/.keys/.env
 Environment="PYTHONUNBUFFERED=1"
 ExecStart=/root/.openclaw/workspace/projects/litcoin/venv/bin/python3 /root/.openclaw/workspace/projects/litcoin/claim-bot.py
 
