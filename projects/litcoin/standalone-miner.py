@@ -40,7 +40,7 @@ log = logging.getLogger("standalone-miner")
 COORDINATOR_URL = "https://api.litcoin.app"
 OPENROUTER_URL = "https://openrouter.ai/api/v1"
 FIREWORKS_URL = "https://api.fireworks.ai/inference/v1"
-WALLET_ADDRESS = "0x35b6Ad2e434c67eE4822F6830ceAB0316aaE3696"
+WALLET_ADDRESS = "0x8b8AAC89E101b77E5A917278120151FC496e5c39"
 MODEL_PRIMARY = "inclusionai/ling-2.6-1t:free"
 MODEL_FALLBACK = "accounts/fireworks/models/llama-v3p3-70b-instruct"
 NVIDIA_URL = "https://integrate.api.nvidia.com/v1"
@@ -172,7 +172,7 @@ class LitcoiinResearchMiner:
     # Task rotation: don't repeat same type for N rounds
     TASK_ROTATION_MEMORY = 5  # remember last 5 task types
     # Batch submit: queue N solutions then flush in parallel
-    BATCH_SIZE = 3
+    BATCH_SIZE = 1
     # Max parallel workers for batch flush
     BATCH_MAX_WORKERS = 5
     # Fuzzy similarity threshold (0.0–1.0)
@@ -250,7 +250,8 @@ class LitcoiinResearchMiner:
             "model_tracker": self.model_tracker,
             "initial_balance": self.initial_balance,
             "provider_latency": self.provider_latency,
-            "cache_hits": self.cache_hits,
+            "exact_cache_hits": self.exact_cache_hits,
+            "fuzzy_cache_hits": self.fuzzy_cache_hits,
             "recent_task_types": self.recent_task_types,
             "hourly_stats": self.hourly_stats,
             "quality_scores": self.quality_scores,
@@ -369,36 +370,89 @@ class LitcoiinResearchMiner:
         rounds = self.round_count
         total = self.total_earned
         avg = total / max(rounds, 1)
+        cache_total = self.exact_cache_hits + self.fuzzy_cache_hits
+        cache_attempts = max(1, cache_total + len(self.solution_cache))
+        hit_rate = cache_total / cache_attempts * 100
         log.info(f"📈 Total: {total:.0f} LITCOIN | {rounds} rounds | {avg:.1f} avg/round")
-        log.info(f"💾 Cache hits: {self.cache_hits}")
+        log.info(f"💾 Cache: {len(self.solution_cache)} entries | Exact hits: {self.exact_cache_hits} | Fuzzy hits: {self.fuzzy_cache_hits} | Hit rate: {hit_rate:.1f}%")
         log.info("=" * 60)
 
-    def _add_to_batch(self, task_id, solution, model):
+    def _add_to_batch(self, task_id, solution, model, score=50):
         """Queue solution for batch submission."""
-        self.batch_queue.append({"task_id": task_id, "solution": solution, "model": model})
-        log.info(f"📦 Batch queue: {len(self.batch_queue)}/{self.BATCH_SIZE} (will flush when full)")
-        # EMERGENCY FLUSH: if batch has been waiting for too long, flush anyway
-        # (prevents stuck queue when tasks are skipped between queued items)
+        if not self.batch_queue:
+            self.batch_last_added = time.time()
+        self.batch_queue.append({"task_id": task_id, "solution": solution, "model": model, "score": score})
+        log.info(f"📦 Batch queue: {len(self.batch_queue)}/{self.BATCH_SIZE}")
         if len(self.batch_queue) >= self.BATCH_SIZE:
             return self._flush_batch()
         return None
 
-    def _flush_batch(self):
-        """Submit all queued solutions — each item isolated, don't let one failure kill the batch."""
+    def _maybe_flush_stale_batch(self, max_age_seconds=45):
+        """Emergency flush if queued items have been sitting too long."""
         if not self.batch_queue:
             return []
-        results = []
-        log.info(f"🚀 Submitting batch of {len(self.batch_queue)} solutions...")
-        for item in self.batch_queue:
-            try:
-                result = self.submit_solution(item["task_id"], item["solution"], item["model"])
-                results.append(result)
-            except Exception as e:
-                log.error(f"Batch item failed: {e}")
-                results.append(None)
-                # Continue with next item — don't let one failure kill the batch
-                continue
+        age = time.time() - self.batch_last_added
+        if age > max_age_seconds:
+            log.info(f"⏰ Stale batch detected ({age:.0f}s old) — emergency flushing {len(self.batch_queue)} items")
+            return self._flush_batch()
+        return []
+
+    def _submit_one(self, item, token):
+        """Submit a single solution — thread-safe helper for parallel batching."""
+        try:
+            payload = {
+                "taskId": item["task_id"],
+                "miner": self.account.address,
+                "code": item["solution"],
+                "model": item["model"] or self.last_model_used or MODEL_PRIMARY,
+                "signature": "standalone-miner"
+            }
+            # Use a fresh session per thread to avoid thread-safety issues
+            sess = requests.Session()
+            sess.headers["Content-Type"] = "application/json"
+            sess.headers["X-Litcoin-SDK"] = "standalone-research-5.5.0"
+            url = f"{COORDINATOR_URL}/v1/research/submit"
+            r = sess.post(url, json=payload,
+                          headers={"Authorization": f"Bearer {token}"},
+                          timeout=30)
+            if r.status_code != 200:
+                log.error(f"Batch submit failed for {item['task_id']}: {r.status_code} {r.text[:200]}")
+                return None
+            result = r.json()
+            reward = self._extract_reward(result)
+            status = result.get('status', 'unknown')
+            log.info(f"📨 Submitted {item['task_id']}! Status: {status}, Reward: {reward}")
+            return result
+        except Exception as e:
+            log.error(f"Batch item {item['task_id']} failed: {e}")
+            return None
+
+    def _flush_batch(self):
+        """Submit all queued solutions in parallel using thread pool."""
+        if not self.batch_queue:
+            return []
+        n = len(self.batch_queue)
+        log.info(f"🚀 Flushing batch of {n} solutions in parallel (max_workers={self.BATCH_MAX_WORKERS})...")
+
+        # Single auth for the whole batch
+        token = self.authenticate()
+
+        results = [None] * n
+        with ThreadPoolExecutor(max_workers=min(n, self.BATCH_MAX_WORKERS)) as ex:
+            futures = {ex.submit(self._submit_one, item, token): i for i, item in enumerate(self.batch_queue)}
+            for fut in as_completed(futures):
+                idx = futures[fut]
+                try:
+                    results[idx] = fut.result()
+                except Exception as e:
+                    log.error(f"Parallel submit exception: {e}")
+                    results[idx] = None
+
+        # Clear queue and update stats
         self.batch_queue = []
+        self.batch_last_added = 0
+        successes = sum(1 for r in results if r is not None)
+        log.info(f"✅ Batch complete: {successes}/{n} succeeded")
         return results
 
     def _record_latency(self, provider, elapsed_ms):
@@ -418,13 +472,49 @@ class LitcoiinResearchMiner:
             return None
         return min(avgs, key=avgs.get)
 
+    def _load_cache(self):
+        """Load persistent solution cache from disk."""
+        path = Path(CACHE_FILE)
+        if path.exists():
+            try:
+                with open(path, "r") as f:
+                    data = json.load(f)
+                # Validate entries
+                clean = {}
+                for k, v in data.items():
+                    if isinstance(v, dict) and "solution" in v:
+                        clean[k] = v
+                return clean
+            except Exception as e:
+                log.warning(f"Failed to load cache: {e}")
+        return {}
+
+    def _save_cache(self):
+        """Write solution cache to disk atomically."""
+        try:
+            path = Path(CACHE_FILE)
+            tmp = path.with_suffix(".tmp")
+            with open(tmp, "w") as f:
+                json.dump(self.solution_cache, f, indent=2)
+            tmp.replace(path)
+            self.cache_saves += 1
+        except Exception as e:
+            log.warning(f"Failed to save cache: {e}")
+
+    def _normalize_prompt(self, prompt):
+        """Normalize prompt for fuzzy matching."""
+        # Lowercase, collapse whitespace, strip non-alphanumeric
+        normalized = re.sub(r'\s+', ' ', prompt.lower().strip())
+        # Strip common filler words / punctuation that don't affect meaning
+        normalized = re.sub(r'[^a-z0-9\s]', '', normalized)
+        return normalized
+
     def _hash_task(self, task):
-        """Create a fuzzy hash for task caching — catches reworded prompts."""
+        """Create an exact hash for task caching."""
         import hashlib
         prompt = task.get("prompt", task.get("description", ""))
         task_type = task.get("type", "unknown")
-        # Normalize: lowercase, collapse whitespace, take first 200 chars
-        normalized = re.sub(r'\s+', ' ', prompt.lower().strip())[:200]
+        normalized = self._normalize_prompt(prompt)[:300]
         return hashlib.md5(f"{task_type}:{normalized}".encode()).hexdigest()
 
     def _predict_difficulty(self, task):
@@ -462,23 +552,64 @@ class LitcoiinResearchMiner:
         return max(0, min(100, predicted))
 
     def _get_cached_solution(self, task):
-        """Check if we have a cached solution for this task."""
+        """Check cache: exact hash first, then fuzzy match on normalized prompt."""
         task_hash = self._hash_task(task)
+        task_type = task.get("type", "unknown")
+
+        # 1) Exact match
         if task_hash in self.solution_cache:
-            self.cache_hits += 1
-            log.info(f"💾 Cache hit! (hits: {self.cache_hits})")
-            return self.solution_cache[task_hash]
+            self.exact_cache_hits += 1
+            entry = self.solution_cache[task_hash]
+            log.info(f"💾 Exact cache hit! (exact={self.exact_cache_hits}, fuzzy={self.fuzzy_cache_hits})")
+            return entry["solution"]
+
+        # 2) Fuzzy match
+        normalized = self._normalize_prompt(task.get("prompt", task.get("description", "")))
+        if not normalized:
+            return None
+
+        best_match = None
+        best_ratio = 0.0
+        for entry in self.solution_cache.values():
+            if entry.get("task_type") != task_type:
+                continue
+            cached_norm = entry.get("normalized_prompt", "")
+            if not cached_norm:
+                continue
+            ratio = difflib.SequenceMatcher(None, normalized, cached_norm).ratio()
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_match = entry
+
+        if best_match and best_ratio >= self.FUZZY_THRESHOLD:
+            self.fuzzy_cache_hits += 1
+            log.info(f"🔮 Fuzzy cache hit! (ratio={best_ratio:.2%}, exact={self.exact_cache_hits}, fuzzy={self.fuzzy_cache_hits})")
+            return best_match["solution"]
+
         return None
 
-    def _cache_solution(self, task, solution):
-        """Cache a successful solution."""
+    def _cache_solution(self, task, solution, model="unknown", score=50):
+        """Cache a successful solution to memory and disk."""
         task_hash = self._hash_task(task)
-        self.solution_cache[task_hash] = solution
-        # Keep cache under 100 entries
-        if len(self.solution_cache) > 100:
-            # Remove oldest (first inserted)
-            oldest = next(iter(self.solution_cache))
-            del self.solution_cache[oldest]
+        normalized = self._normalize_prompt(task.get("prompt", task.get("description", "")))
+        self.solution_cache[task_hash] = {
+            "solution": solution,
+            "model": model,
+            "score": score,
+            "timestamp": time.time(),
+            "task_type": task.get("type", "unknown"),
+            "normalized_prompt": normalized,
+        }
+        # LRU eviction if over limit
+        if len(self.solution_cache) > self.CACHE_MAX_ENTRIES:
+            # Sort by timestamp, evict oldest
+            sorted_items = sorted(self.solution_cache.items(), key=lambda x: x[1].get("timestamp", 0))
+            to_evict = len(self.solution_cache) - self.CACHE_MAX_ENTRIES
+            for key, _ in sorted_items[:to_evict]:
+                del self.solution_cache[key]
+            log.info(f"🗑️ Cache LRU eviction: removed {to_evict} oldest entries")
+        self._save_cache()
+        log.info(f"💾 Cached solution ({len(solution)} chars, score={score})")
 
     def _pick_smart_model(self, task_type):
         """UCB1 bandit with minimum sample requirement.
@@ -1480,21 +1611,22 @@ class LitcoiinResearchMiner:
         
         # ── Batch or immediate submit ──
         if self.BATCH_SIZE > 1:
-            result = self._add_to_batch(task_id, solution, actual_model)
+            result = self._add_to_batch(task_id, solution, actual_model, quality)
             # Batch returns results only when full
             if result is not None:
                 for r in result:
                     if r:
                         self.consec_global_fails = 0
                         reward = self._extract_reward(r)
-                        # BUG FIX: was r.get("reward", 0) — missed nested fields
                         self._record_hourly(reward)
                         if actual_model != "cached":
-                            self._cache_solution(task, solution)
+                            self._cache_solution(task, solution, actual_model, quality)
                     else:
                         self.consec_global_fails += 1
                 self._persist()
                 return result[0] if result else None
+            # Not full yet — check for stale items before returning
+            self._maybe_flush_stale_batch()
             return None  # queued, not submitted yet
         else:
             # Immediate submission (default)
@@ -1503,10 +1635,9 @@ class LitcoiinResearchMiner:
                 if result:
                     self.consec_global_fails = 0
                     reward = self._extract_reward(result)
-                    # BUG FIX: was result.get("reward", 0) — missed nested fields
                     self._record_hourly(reward)
                     if actual_model != "cached":
-                        self._cache_solution(task, solution)
+                        self._cache_solution(task, solution, actual_model, quality)
                         log.info(f"💾 Cached solution for future use")
                 else:
                     self.consec_global_fails += 1
@@ -1595,6 +1726,9 @@ class LitcoiinResearchMiner:
         while True:
             if rounds != float('inf') and i >= rounds:
                 break
+            # ── Flush stale batch items before starting next round ──
+            self._maybe_flush_stale_batch()
+
             # ── Kill switch check ──
             if self._check_kill_switch():
                 log.error("Miner stopped by kill switch. Check logs above.")
@@ -1685,7 +1819,9 @@ class LitcoiinResearchMiner:
             i += 1
 
         log.info("═" * 50)
-        log.info(f"Mining complete. Total earned: {self.total_earned} LITCOIN across {self.round_count} rounds")
+        log.info("Mining complete. Flushing any remaining batch items...")
+        self._flush_batch()
+        log.info(f"Total earned: {self.total_earned} LITCOIN across {self.round_count} rounds")
         self._persist()
         return self.total_earned
 
