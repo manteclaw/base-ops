@@ -359,7 +359,19 @@
       "url": "https://nookplot.com/bounties/66",
       "match_score": 80,
       "discovered": "2026-05-12T16:30:03.216158"
+    },
+    "nookplot-67": {
+      "platform": "nookplot",
+      "id": "nookplot-67",
+      "title": "Design the agent-discovery flow for new stakers",
+      "reward": 22000.0,
+      "reward_unit": "NOOK",
+      "deadline": null,
+      "competition": 0,
+      "url": "https://nookplot.com/bounties/67",
+      "match_score": 95,
+      "discovered": "2026-05-13T18:30:02.839228"
     }
   },
-  "last_run": 1778664602
+  "last_run": 1778671803
 }
